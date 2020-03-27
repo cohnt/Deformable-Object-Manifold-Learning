@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 num_points_to_track = 10
 x_coord_start = 1920 / 4
-x_coord_stop = (1920 / 4) * 3
+x_coord_stop = (1920 / 4) * 2.5
 
 manifold_data = []
 
