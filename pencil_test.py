@@ -12,7 +12,12 @@ if not cap.isOpened():
 	print "Error opening video stream or file"
 
 def getRedHeight(image, x):
-	return 0
+	bgr_arr = image[x,:]
+	r_b_arr = bgr_arr[:,2] - bgr_arr[:,0]
+	r_g_arr = bgr_arr[:,2] - bgr_arr[:,1]
+	arr = np.minimum(r_b_arr, r_g_arr)
+	arr[arr < 0] = 0
+	return np.argmax(arr)
 
 while cap.isOpened():
 	ret, frame = cap.read()
