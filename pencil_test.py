@@ -12,6 +12,7 @@ if not cap.isOpened():
 	print "Error opening video stream or file"
 
 def getRedHeight(image, x):
+	image = np.swapaxes(image, 0, 1)
 	bgr_arr = image[x,:]
 	r_b_arr = bgr_arr[:,2] - bgr_arr[:,0]
 	r_g_arr = bgr_arr[:,2] - bgr_arr[:,1]
