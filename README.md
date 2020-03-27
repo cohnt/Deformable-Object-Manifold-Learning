@@ -1,0 +1,1 @@
+Using manifold learning to find a low dimensional representation of the state space of a deformable object.
