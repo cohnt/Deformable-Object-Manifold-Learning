@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import matplotlib.pyplot as plt
 
 num_points_to_track = 10
 x_coord_start = 1920 / 4
@@ -26,6 +27,11 @@ while cap.isOpened():
 		x_coords = np.linspace(x_coord_start, x_coord_stop, num=num_points_to_track, endpoint=True, dtype=int)
 		y_coords = np.array([getRedHeight(frame, x) for x in x_coords])
 		manifold_data.append(y_coords)
+
+		fig, axes = plt.subplots(1, 2)
+		axes[0].imshow(frame)
+		axes[1].scatter(x_coords, y_coords)
+		plt.show()
 	else:
 		break
 
