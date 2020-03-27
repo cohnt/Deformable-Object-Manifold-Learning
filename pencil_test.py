@@ -27,14 +27,17 @@ while cap.isOpened():
 	ret, frame = cap.read()
 	if ret:
 		frame_num = frame_num + 1
-		if (frame_num - 1) % 10 == 0:
-			x_coords = np.linspace(x_coord_start, x_coord_stop, num=num_points_to_track, endpoint=True, dtype=int)
-			y_coords = np.array([getRedHeight(frame, x) for x in x_coords])
-			manifold_data.append(y_coords)
+		
+		x_coords = np.linspace(x_coord_start, x_coord_stop, num=num_points_to_track, endpoint=True, dtype=int)
+		y_coords = np.array([getRedHeight(frame, x) for x in x_coords])
+		manifold_data.append(y_coords)
 
+		if (frame_num - 1) % 10 == 0:
 			fig, axes = plt.subplots(1, 2)
 			axes[0].imshow(frame)
 			axes[1].scatter(x_coords, y_coords)
+			axes[1].set_xlim((0, 1920))
+			axes[1].set_ylim((0, 1080))
 			plt.show()
 	else:
 		break
