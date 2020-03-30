@@ -6,6 +6,7 @@ num_points_to_track = 10
 x_coord_start = 1920 / 4
 x_coord_stop = (1920 / 4) * 2.5
 
+frame_list = []
 manifold_data = []
 
 cap = cv2.VideoCapture("data/colored_pencil.mp4")
@@ -25,6 +26,7 @@ frame_num = 0
 
 while cap.isOpened():
 	ret, frame = cap.read()
+	frame_list.append(frame)
 	if ret:
 		frame_num = frame_num + 1
 		
@@ -53,6 +55,17 @@ embedding = Isomap(n_neighbors=8, n_components=1).fit_transform(manifold_data)
 print len(manifold_data)
 print len(embedding)
 
-fig, ax = plt.subplots()
-ax.scatter(range(len(embedding)), embedding)
+fig, axes = plt.subplots(1, 2)
+points = axes[0].scatter(range(len(embedding)), embedding)
+
+def hover(event):
+	if points.contains(event)[0]:
+		idx, = points.contains(event)[1]["ind"]
+		frame = frame_list[idx]
+		frame_color_corrected = np.copy(frame)
+		frame_color_corrected[:,:,[0,1,2]] = frame[:,:,[2,1,0]]
+		axes[1].imshow(frame_color_corrected)
+		fig.canvas.draw_idle()
+
+fig.canvas.mpl_connect('motion_notify_event', hover)
 plt.show()
