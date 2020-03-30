@@ -40,6 +40,7 @@ while cap.isOpened():
 			axes[1].scatter(x_coords, 1080-y_coords)
 			axes[1].set_xlim((0, 1920))
 			axes[1].set_ylim((0, 1080))
+			axes[1].set_aspect("equal")
 			plt.show()
 	else:
 		break
