@@ -33,7 +33,7 @@ while cap.isOpened():
 		manifold_data.append(y_coords)
 
 		if (frame_num - 1) % 10 == 0:
-			fig, axes = plt.subplots(1, 2)
+			fig, axes = plt.subplots(2, 1)
 			frame_color_corrected = np.copy(frame)
 			frame_color_corrected[:,:,[0,1,2]] = frame[:,:,[2,1,0]]
 			axes[0].imshow(frame_color_corrected)
