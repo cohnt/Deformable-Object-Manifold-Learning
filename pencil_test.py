@@ -35,7 +35,7 @@ while cap.isOpened():
 		if (frame_num - 1) % 10 == 0:
 			fig, axes = plt.subplots(1, 2)
 			axes[0].imshow(frame)
-			axes[1].scatter(x_coords, y_coords)
+			axes[1].scatter(x_coords, 1080-y_coords)
 			axes[1].set_xlim((0, 1920))
 			axes[1].set_ylim((0, 1080))
 			plt.show()
