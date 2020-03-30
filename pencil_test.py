@@ -56,7 +56,7 @@ print len(manifold_data)
 print len(embedding)
 
 fig, axes = plt.subplots(1, 2)
-points = axes[0].scatter(range(len(embedding)), embedding)
+points = axes[0].scatter(range(len(embedding)), embedding, c=np.array(range(len(embedding)), dtype=float)/float(len(embedding)))
 
 def hover(event):
 	if points.contains(event)[0]:
