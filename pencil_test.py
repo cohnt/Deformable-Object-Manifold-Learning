@@ -46,3 +46,13 @@ while cap.isOpened():
 		break
 
 cap.release()
+
+from sklearn.manifold import Isomap
+
+embedding = Isomap(n_neighbors=8, n_components=1).fit_transform(manifold_data)
+print len(manifold_data)
+print len(embedding)
+
+fig, ax = plt.subplots()
+ax.scatter(range(len(embedding)), embedding)
+plt.show()
