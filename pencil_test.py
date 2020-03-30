@@ -34,7 +34,9 @@ while cap.isOpened():
 
 		if (frame_num - 1) % 10 == 0:
 			fig, axes = plt.subplots(1, 2)
-			axes[0].imshow(frame)
+			frame_color_corrected = np.copy(frame)
+			frame_color_corrected[:,:,[0,1,2]] = frame[:,:,[2,1,0]]
+			axes[0].imshow(frame_color_corrected)
 			axes[1].scatter(x_coords, 1080-y_coords)
 			axes[1].set_xlim((0, 1920))
 			axes[1].set_ylim((0, 1080))
