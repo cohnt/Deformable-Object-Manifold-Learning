@@ -70,4 +70,6 @@ def hover(event):
 		fig.canvas.draw_idle()
 
 fig.canvas.mpl_connect('motion_notify_event', hover)
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
 plt.show()
