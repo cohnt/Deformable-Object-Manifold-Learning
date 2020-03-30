@@ -60,7 +60,9 @@ points = axes[0].scatter(range(len(embedding)), embedding, c=np.array(range(len(
 
 def hover(event):
 	if points.contains(event)[0]:
-		idx, = points.contains(event)[1]["ind"]
+		# print points.contains(event)[1]["ind"]
+		idx_list = points.contains(event)[1]["ind"]
+		idx = idx_list[0]
 		frame = frame_list[idx]
 		frame_color_corrected = np.copy(frame)
 		frame_color_corrected[:,:,[0,1,2]] = frame[:,:,[2,1,0]]
