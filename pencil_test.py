@@ -58,7 +58,7 @@ embedding = Isomap(n_neighbors=8, n_components=1).fit_transform(manifold_data)
 colors = np.array(range(len(embedding)), dtype=float)/float(len(embedding))
 
 fig, axes = plt.subplots(1, 2)
-points = axes[0].scatter(range(len(embedding)), embedding, c=colors)
+points = axes[0].scatter(range(len(embedding)), embedding, c=colors, s=10**2)
 
 def hover(event):
 	if points.contains(event)[0]:
