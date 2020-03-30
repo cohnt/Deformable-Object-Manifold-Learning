@@ -9,6 +9,8 @@ x_coord_stop = (1920 / 4) * 2.5
 frame_list = []
 manifold_data = []
 
+show_video_images = False
+
 cap = cv2.VideoCapture("data/colored_pencil.mp4")
 if not cap.isOpened():
 	print "Error opening video stream or file"
@@ -34,7 +36,7 @@ while cap.isOpened():
 		y_coords = np.array([getRedHeight(frame, x) for x in x_coords])
 		manifold_data.append(y_coords)
 
-		if (frame_num - 1) % 10 == 0:
+		if (frame_num - 1) % 10 == 0 and show_video_images:
 			fig, axes = plt.subplots(2, 1)
 			frame_color_corrected = np.copy(frame)
 			frame_color_corrected[:,:,[0,1,2]] = frame[:,:,[2,1,0]]
