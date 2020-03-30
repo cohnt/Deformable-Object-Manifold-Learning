@@ -52,8 +52,6 @@ cap.release()
 from sklearn.manifold import Isomap
 
 embedding = Isomap(n_neighbors=8, n_components=1).fit_transform(manifold_data)
-print len(manifold_data)
-print len(embedding)
 
 fig, axes = plt.subplots(1, 2)
 points = axes[0].scatter(range(len(embedding)), embedding, c=np.array(range(len(embedding)), dtype=float)/float(len(embedding)))
