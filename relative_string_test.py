@@ -10,6 +10,7 @@ frame_list = []
 manifold_data = []
 
 show_video_images = False
+disp_mode = "manifold" # Could also be "image"
 
 cap = cv2.VideoCapture("data/rope_two_hands.mp4")
 if not cap.isOpened():
@@ -68,10 +69,14 @@ def hover(event):
 		# print points.contains(event)[1]["ind"]
 		idx_list = points.contains(event)[1]["ind"]
 		idx = idx_list[0]
-		frame = frame_list[idx]
-		frame_color_corrected = np.copy(frame)
-		frame_color_corrected[:,:,[0,1,2]] = frame[:,:,[2,1,0]]
-		axes[1].imshow(frame_color_corrected)
+		if disp_mode == "image":
+			frame = frame_list[idx]
+			frame_color_corrected = np.copy(frame)
+			frame_color_corrected[:,:,[0,1,2]] = frame[:,:,[2,1,0]]
+			axes[1].imshow(frame_color_corrected)
+		elif disp_mode == "manifold":
+			axes[1].clear()
+			axes[1].plot(manifold_data[idx])
 		fig.canvas.draw_idle()
 
 fig.canvas.mpl_connect('motion_notify_event', hover)
