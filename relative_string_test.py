@@ -28,8 +28,8 @@ frame_num = 0
 
 while cap.isOpened():
 	ret, frame = cap.read()
-	frame_list.append(frame)
 	if ret:
+		frame_list.append(cv2.resize(frame, (640, 360)))
 		frame_num = frame_num + 1
 		print "Frame %d" % frame_num
 
