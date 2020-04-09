@@ -2,9 +2,9 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-num_points_to_track = 100
-x_coord_start = 200
-x_coord_stop = 1500
+num_points_to_track = 200
+x_coord_start = 100
+x_coord_stop = 1820
 
 frame_list = []
 manifold_data = []
