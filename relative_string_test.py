@@ -36,7 +36,8 @@ while cap.isOpened():
 
 		x_coords = np.linspace(x_coord_start, x_coord_stop, num=num_points_to_track, endpoint=True, dtype=int)
 		y_coords = np.array([getRedHeight(frame, x) for x in x_coords])
-		y_coords = y_coords - y_coords[0]
+		offset = y_coords[0]
+		y_coords = y_coords - offset
 		manifold_data.append(y_coords)
 
 		if (frame_num - 1) % 10 == 0 and show_video_images:
@@ -46,7 +47,7 @@ while cap.isOpened():
 			axes[0].imshow(frame_color_corrected)
 			axes[1].scatter(x_coords, 1080-y_coords)
 			axes[1].set_xlim((0, 1920))
-			axes[1].set_ylim((0, 1080))
+			axes[1].set_ylim((0 + offset, 1080 + offset))
 			axes[1].set_aspect("equal")
 			plt.show()
 	else:
