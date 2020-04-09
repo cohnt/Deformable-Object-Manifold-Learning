@@ -11,7 +11,7 @@ manifold_data = []
 
 show_video_images = False
 
-cap = cv2.VideoCapture("data/string.mp4")
+cap = cv2.VideoCapture("data/rope_adjusted.mp4")
 if not cap.isOpened():
 	print "Error opening video stream or file"
 
