@@ -35,6 +35,7 @@ while cap.isOpened():
 
 		x_coords = np.linspace(x_coord_start, x_coord_stop, num=num_points_to_track, endpoint=True, dtype=int)
 		y_coords = np.array([getRedHeight(frame, x) for x in x_coords])
+		y_coords = y_coords - y_coords[0]
 		manifold_data.append(y_coords)
 
 		if (frame_num - 1) % 10 == 0 and show_video_images:
