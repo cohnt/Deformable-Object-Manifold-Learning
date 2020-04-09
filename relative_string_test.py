@@ -63,7 +63,7 @@ colors = np.array(range(len(embedding)), dtype=float)/float(len(embedding))
 
 fig, axes = plt.subplots(1, 2)
 # points = axes[0].scatter(range(len(embedding)), embedding, c=colors, s=10**2)
-points = axes[0].scatter(embedding[:,0], embedding[:,1], c=colors, s=20**2)
+points = axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
 
 mfd_min = np.min(manifold_data)
 mfd_max = np.max(manifold_data)
@@ -73,6 +73,11 @@ def hover(event):
 		# print points.contains(event)[1]["ind"]
 		idx_list = points.contains(event)[1]["ind"]
 		idx = idx_list[0]
+
+		axes[0].clear()
+		axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
+		axes[0].scatter([embedding[idx,0]], [embedding[idx,1]], c="blue", s=20**2)
+		
 		if disp_mode == "image":
 			frame = frame_list[idx]
 			frame_color_corrected = np.copy(frame)
