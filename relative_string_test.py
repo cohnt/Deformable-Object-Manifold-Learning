@@ -64,6 +64,9 @@ fig, axes = plt.subplots(1, 2)
 # points = axes[0].scatter(range(len(embedding)), embedding, c=colors, s=10**2)
 points = axes[0].scatter(embedding[:,0], embedding[:,1], c=colors, s=20**2)
 
+mfd_min = np.min(manifold_data)
+mfd_max = np.max(manifold_data)
+
 def hover(event):
 	if points.contains(event)[0]:
 		# print points.contains(event)[1]["ind"]
@@ -76,6 +79,7 @@ def hover(event):
 			axes[1].imshow(frame_color_corrected)
 		elif disp_mode == "manifold":
 			axes[1].clear()
+			axes[1].set_ylim((mfd_min, mfd_max))
 			axes[1].plot(manifold_data[idx])
 		fig.canvas.draw_idle()
 
