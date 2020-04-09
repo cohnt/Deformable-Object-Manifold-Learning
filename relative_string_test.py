@@ -62,8 +62,9 @@ embedding = Isomap(n_neighbors=12, n_components=2).fit_transform(manifold_data)
 colors = np.array(range(len(embedding)), dtype=float)/float(len(embedding))
 
 fig, axes = plt.subplots(1, 2)
-# points = axes[0].scatter(range(len(embedding)), embedding, c=colors, s=10**2)
 points = axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
+xlim = axes[0].get_xlim()
+ylim = axes[0].get_ylim()
 
 mfd_min = np.min(manifold_data)
 mfd_max = np.max(manifold_data)
@@ -77,6 +78,8 @@ def hover(event):
 		axes[0].clear()
 		axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
 		axes[0].scatter([embedding[idx,0]], [embedding[idx,1]], c="blue", s=20**2)
+		axes[0].set_xlim(xlim)
+		axes[0].set_ylim(ylim)
 		
 		if disp_mode == "image":
 			frame = frame_list[idx]
