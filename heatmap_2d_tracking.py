@@ -272,6 +272,7 @@ while cap.isOpened():
 		# plt.show()
 
 		num_particles = 200
+		exploration_factor = 0.75
 		particles = [Particle() for i in range(num_particles)]
 
 		while True:
@@ -303,18 +304,20 @@ while cap.isOpened():
 			# Resample
 			newParticles = []
 			cs = np.cumsum(normalized_weights)
-			step = 1/float(num_particles+1)
+			step = 1/float((num_particles * (1-exploration_factor))+1)
 			chkVal = step
 			chkIdx = 0
-			for i in range(num_particles):
+			for i in range(int(np.ceil(num_particles * (1-exploration_factor)))):
 				while cs[chkIdx] < chkVal:
 					chkIdx = chkIdx + 1
 				chkVal = chkVal + step
 				newParticles.append(Particle(xy=particles[chkIdx].xy,
 				                             theta=particles[chkIdx].theta,
 				                             deformation=particles[chkIdx].deformation))
+			for i in range(len(newParticles), num_particles):
+				newParticles.append(Particle())
 
-			# TODO: randomize
+			# Add noise
 			particles = newParticles
 			for p in particles:
 				xy_var = 1000
