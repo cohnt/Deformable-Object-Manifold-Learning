@@ -268,16 +268,30 @@ while cap.isOpened():
 		normalized_red_matrix = red_matrix / np.max(red_matrix)
 		# print normalized_red_matrix[200,:]
 
+		fig, ax = plt.subplots()
+		ax.imshow(normalized_red_matrix, cmap="gray")
+		plt.savefig("actual.png")
+		plt.close(fig)
+
+		# SMOOTH IT
+		from scipy.ndimage import gaussian_filter
+		print normalized_red_matrix[200,:]
+		normalized_red_matrix = gaussian_filter(normalized_red_matrix, sigma=50, output=float)
+		print normalized_red_matrix[200,:]
+
 		# fig, ax = plt.subplots()
 		# ax.imshow(normalized_red_matrix, cmap="gray")
 		# plt.show()
 
-		num_particles = 200
-		exploration_factor = 0.75
+		num_particles = 400
+		exploration_factor = 0.25
 		particles = [Particle() for i in range(num_particles)]
-		disp_thresh = 0.75
+		disp_thresh = 0.9
+		iter_num = 0
 
 		while True:
+			iter_num = iter_num + 1
+
 			# Weight particles
 			weights = []
 			for p in particles:
@@ -301,15 +315,18 @@ while cap.isOpened():
 				if p.normalized_weight > 0:
 					axes[0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
 					if p.normalized_weight / max_normalized_weight > disp_thresh:
-						axes[1].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=3)
+						axes[1].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=2)
 
 			axes[0].set_xlim((0,1920))
 			axes[0].set_ylim((1080,0))
 			axes[1].set_xlim((0,1920))
 			axes[1].set_ylim((1080,0))
-			mng = plt.get_current_fig_manager()
-			mng.resize(*mng.window.maxsize())
-			plt.show()
+			# mng = plt.get_current_fig_manager()
+			# mng.resize(*mng.window.maxsize())
+			# plt.show()
+			plt.savefig("iteration_%s.svg" % str(iter_num).zfill(2))
+			plt.close(fig)
+			print "Saved %d" % iter_num
 
 			# Resample
 			newParticles = []
@@ -330,14 +347,14 @@ while cap.isOpened():
 			# Add noise
 			particles = newParticles
 			for p in particles:
-				xy_var = 500
+				xy_var = 200
 				p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
 
-				theta_var = np.pi/12
+				theta_var = np.pi/16
 				p.theta = p.theta + np.random.normal(0, theta_var)
 				p.theta = ((p.theta + np.pi/4.0) % (np.pi/2.0)) - np.pi/4.0
 
-				deformation_var = 1000
+				deformation_var = 200
 				while True:
 					delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
 					if interpolator.find_simplex(p.deformation + delta) != -1:
