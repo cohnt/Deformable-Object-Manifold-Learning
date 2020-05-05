@@ -281,10 +281,11 @@ while cap.isOpened():
 				weights.append(p.compute_raw_weight(normalized_red_matrix))
 			weights = np.asarray(weights)
 			max_weight = np.max(weights)
-			min_weight = np.min(weights[weights > 0])
+			# min_weight = np.min(weights[weights > 0])
 			normalized_weights = []
 			for p in particles:
-				w = (p.raw_weight - min_weight) / (max_weight - min_weight)
+				# w = (p.raw_weight - min_weight) / (max_weight - min_weight)
+				w = p.raw_weight / max_weight
 				p.normalized_weight = w
 				normalized_weights.append(w)
 
