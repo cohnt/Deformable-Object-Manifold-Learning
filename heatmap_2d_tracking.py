@@ -181,39 +181,9 @@ while cap.isOpened():
 		normalized_red_matrix = red_matrix / np.max(red_matrix)
 		# print normalized_red_matrix[200,:]
 
-		fig, ax = plt.subplots()
-		ax.imshow(normalized_red_matrix, cmap="gray")
-		plt.show()
-		exit(0)
-
-
-		# frame_list.append(cv2.resize(frame, (320, 180)))
-		# frame_num = frame_num + 1
-		# if frame_num > 400:
-		# 	break
-		# print "Frame %d" % frame_num
-
-		# x_coords = np.linspace(x_coord_start, x_coord_stop, num=num_points_to_track, endpoint=True, dtype=int)
-		# y_coords = np.array([getRedHeight(frame, x) for x in x_coords])
-		# offset = y_coords[0]
-		# y_coords = y_coords - offset
-
-		# y_max = y_coords[-1]
-		# x_max = x_coord_stop - x_coord_start
-		# slope = float(y_max) / float(x_max)
-		# y_coords = y_coords - (slope * np.linspace(0, x_coord_stop - x_coord_start, num=num_points_to_track, endpoint=True, dtype=int))
-		# manifold_data.append(y_coords)
-
-		# if (frame_num - 1) % 10 == 0 and show_video_images:
-		# 	fig, axes = plt.subplots(2, 1)
-		# 	frame_color_corrected = np.copy(frame)
-		# 	frame_color_corrected[:,:,[0,1,2]] = frame[:,:,[2,1,0]]
-		# 	axes[0].imshow(frame_color_corrected)
-		# 	axes[1].scatter(x_coords, 1080-y_coords)
-		# 	axes[1].set_xlim((0, 1920))
-		# 	axes[1].set_ylim((0 + offset, 1080 + offset))
-		# 	axes[1].set_aspect("equal")
-		# 	plt.show()
+		# fig, ax = plt.subplots()
+		# ax.imshow(normalized_red_matrix, cmap="gray")
+		# plt.show()
 	else:
 		break
 
