@@ -276,8 +276,11 @@ while cap.isOpened():
 		exploration_factor = 0.75
 		particles = [Particle() for i in range(num_particles)]
 		disp_thresh = 0.75
+		iter_num = 0
 
 		while True:
+			iter_num = iter_num + 1
+
 			# Weight particles
 			weights = []
 			for p in particles:
@@ -307,9 +310,12 @@ while cap.isOpened():
 			axes[0].set_ylim((1080,0))
 			axes[1].set_xlim((0,1920))
 			axes[1].set_ylim((1080,0))
-			mng = plt.get_current_fig_manager()
-			mng.resize(*mng.window.maxsize())
-			plt.show()
+			# mng = plt.get_current_fig_manager()
+			# mng.resize(*mng.window.maxsize())
+			# plt.show()
+			plt.savefig("iteration_%s.svg" % str(iter_num).zfill(2))
+			plt.close(fig)
+			print "Saved %d" % iter_num
 
 			# Resample
 			newParticles = []
