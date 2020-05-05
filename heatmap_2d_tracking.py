@@ -188,18 +188,18 @@ if not cap.isOpened():
 
 class Particle():
 	def __init__(self, xy=None, theta=None, deformation=None):
-		if xy == None:
+		if xy is None:
 			self.xy = (np.random.randint(0, 500),
 			           np.random.randint(0, 1080))
 		else:
 			self.xy = xy
 
-		if theta == None:
+		if theta is None:
 			self.theta = np.random.rand() * np.pi - (np.pi/2.0)
 		else:
 			self.theta = theta
 		
-		if deformation == None:
+		if deformation is None:
 			deformation_ind = np.random.randint(0, len(manifold_data))
 			self.deformation = embedding[deformation_ind]
 		else:
@@ -271,6 +271,53 @@ while cap.isOpened():
 		# ax.imshow(normalized_red_matrix, cmap="gray")
 		# plt.show()
 
+		num_particles = 200
+		particles = [Particle() for i in range(num_particles)]
+
+		while True:
+			# Weight particles
+			weights = []
+			for p in particles:
+				weights.append(p.compute_raw_weight(normalized_red_matrix))
+			weights = np.asarray(weights)
+			max_weight = np.max(weights)
+			min_weight = np.min(weights[weights > 0])
+			normalized_weights = []
+			for p in particles:
+				w = (p.raw_weight - min_weight) / (max_weight - min_weight)
+				p.normalized_weight = w
+				normalized_weights.append(w)
+
+			# Display
+			fig, ax = plt.subplots()
+			ax.imshow(normalized_red_matrix, cmap="gray")
+			for p in particles:
+				if p.normalized_weight > 0:
+					print p.normalized_weight
+					ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight), linewidth=3)
+
+			mng = plt.get_current_fig_manager()
+			mng.resize(*mng.window.maxsize())
+			plt.show()
+
+			# Resample
+			newParticles = []
+			cs = np.cumsum(normalized_weights)
+			step = 1/float(num_particles+1)
+			chkVal = step
+			chkIdx = 0
+			for i in range(num_particles):
+				while cs[chkIdx] < chkVal:
+					chkIdx = chkIdx + 1
+				chkVal = chkVal + step
+				newParticles.append(Particle(xy=particles[chkIdx].xy,
+				                             theta=particles[chkIdx].theta,
+				                             deformation=particles[chkIdx].deformation))
+
+			# TODO: randomize
+			particles = newParticles
+
+"""
 		particles = [Particle() for i in range(100)]
 		weights = []
 		for p in particles:
@@ -292,9 +339,9 @@ while cap.isOpened():
 
 		mng = plt.get_current_fig_manager()
 		mng.resize(*mng.window.maxsize())
-		plt.show()
+		plt.show()"""
 
-	else:
-		break
+	# else:
+	# 	break
 
 cap.release()
