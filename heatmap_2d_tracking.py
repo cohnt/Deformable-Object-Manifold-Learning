@@ -200,12 +200,15 @@ class Particle():
 		
 		if deformation = None:
 			deformation_ind = np.random.randint(0, len(manifold_data))
-			self.deformation = manifold_data[deformation_ind]
+			self.deformation = embedding[deformation_ind]
 		else:
 			self.deformation = deformation
 
-		# self.num_points = num_points_to_track
-		# self.points = self.computePoints()
+		self.num_points = num_points_to_track
+		self.points = self.compute_points()
+
+	def compute_points(self, interpolator):
+		self.points = compute_deformation(interpolator, self.deformation)
 
 frame_num = 0
 while cap.isOpened():
