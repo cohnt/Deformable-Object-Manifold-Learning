@@ -218,19 +218,19 @@ class Particle():
 		print raw_points
 		rotated_points = np.matmul(self.rotation_matrix(), raw_points)
 		self.points = rotated_points + np.asarray(self.xy).reshape(-1, 1)
-		print self.points
+		print self.points.T
 
 p = Particle()
 p.theta = 0
 p.compute_points()
 
 fig, axes = plt.subplots(2, 1)
-axes[0].plot(p.points)
+axes[0].plot(p.points.T[:,0], p.points.T[:,1])
 
 p.theta = np.pi/12
 p.compute_points()
 
-axes[1].plot(p.points)
+axes[1].plot(p.points.T[:,0], p.points.T[:,1])
 plt.show()
 exit(0)
 
