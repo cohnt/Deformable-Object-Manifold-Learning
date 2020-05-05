@@ -217,7 +217,8 @@ class Particle():
 		print raw_points.shape
 		print raw_points
 		rotated_points = np.matmul(self.rotation_matrix(), raw_points)
-		self.points = rotated_points + self.xy
+		self.points = rotated_points + np.asarray(self.xy).reshape(-1, 1)
+		print self.points
 
 p = Particle()
 p.theta = 0
