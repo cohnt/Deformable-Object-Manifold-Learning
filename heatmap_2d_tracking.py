@@ -26,12 +26,14 @@ def getRedHeight(image, x):
 
 frame_num = 0
 
+frames_to_train_on = 500
+
 while cap.isOpened():
 	ret, frame = cap.read()
 	if ret:
 		frame_list.append(cv2.resize(frame, (320, 180)))
 		frame_num = frame_num + 1
-		if frame_num > 400:
+		if frame_num > frames_to_train_on:
 			break
 		print "Frame %d" % frame_num
 
@@ -253,7 +255,7 @@ while cap.isOpened():
 	ret, frame = cap.read()
 	if ret:
 		frame_num = frame_num + 1
-		if frame_num <= 400:
+		if frame_num <= frames_to_train_on:
 			continue
 
 		frame_corrected = np.copy(frame)
@@ -328,14 +330,14 @@ while cap.isOpened():
 			# Add noise
 			particles = newParticles
 			for p in particles:
-				xy_var = 1000
+				xy_var = 500
 				p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
 
-				theta_var = np.pi/8
+				theta_var = np.pi/12
 				p.theta = p.theta + np.random.normal(0, theta_var)
 				p.theta = ((p.theta + np.pi/4.0) % (np.pi/2.0)) - np.pi/4.0
 
-				deformation_var = 2000
+				deformation_var = 1000
 				while True:
 					delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
 					if interpolator.find_simplex(p.deformation + delta) != -1:
