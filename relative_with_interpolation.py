@@ -82,27 +82,37 @@ interpolator = Delaunay(embedding, qhull_options="QJ")
 ################
 
 def hover(event):
-	if points.contains(event)[0]:
-		# print points.contains(event)[1]["ind"]
-		idx_list = points.contains(event)[1]["ind"]
-		idx = idx_list[0]
+	# if points.contains(event)[0]:
+	# 	# print points.contains(event)[1]["ind"]
+	# 	idx_list = points.contains(event)[1]["ind"]
+	# 	idx = idx_list[0]
 
-		axes[0].clear()
-		axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
-		axes[0].scatter([embedding[idx,0]], [embedding[idx,1]], c="blue", s=20**2)
-		axes[0].set_xlim(xlim)
-		axes[0].set_ylim(ylim)
+	# 	axes[0].clear()
+	# 	axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
+	# 	axes[0].scatter([embedding[idx,0]], [embedding[idx,1]], c="blue", s=20**2)
+	# 	axes[0].set_xlim(xlim)
+	# 	axes[0].set_ylim(ylim)
 		
-		if disp_mode == "image":
-			frame = frame_list[idx]
-			frame_color_corrected = np.copy(frame)
-			frame_color_corrected[:,:,[0,1,2]] = frame[:,:,[2,1,0]]
-			axes[1].imshow(frame_color_corrected)
-		elif disp_mode == "manifold":
-			axes[1].clear()
-			axes[1].set_ylim((mfd_min, mfd_max))
-			axes[1].plot(manifold_data[idx])
-		fig.canvas.draw_idle()
+	# 	if disp_mode == "image":
+	# 		frame = frame_list[idx]
+	# 		frame_color_corrected = np.copy(frame)
+	# 		frame_color_corrected[:,:,[0,1,2]] = frame[:,:,[2,1,0]]
+	# 		axes[1].imshow(frame_color_corrected)
+	# 	elif disp_mode == "manifold":
+	# 		axes[1].clear()
+	# 		axes[1].set_ylim((mfd_min, mfd_max))
+	# 		axes[1].plot(manifold_data[idx])
+	# 	fig.canvas.draw_idle()
+	xy = np.array([event.xdata, event.ydata])
+
+	# Check if xy is in the convex hull
+	simplex_num = interpolator.find_simplex(xy)
+	print "xy", xy, "\tsimplex_num", simplex_num
+	if simplex_num != -1:
+		simplex_indices = interpolator.simplices[simplex_num]
+		print "simplex_indices", simplex_indices
+		simplex = interpolator.points[simplex_indices]
+		print "simplex", simplex
 
 fig.canvas.mpl_connect('motion_notify_event', hover)
 mng = plt.get_current_fig_manager()
