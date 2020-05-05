@@ -234,8 +234,8 @@ class Particle():
 				self.raw_weight = 0.0
 				return self.raw_weight
 			print red_frame.shape
-			print np.flip(pixel).flatten()
-			running_total += red_frame[np.flip(pixel).flatten()]
+			pixel = np.flip(pixel).flatten()
+			running_total += red_frame[pixel[0], pixel[1]]
 		self.raw_weight = running_total
 		return self.raw_weight
 
