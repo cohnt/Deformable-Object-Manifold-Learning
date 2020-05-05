@@ -297,9 +297,9 @@ while cap.isOpened():
 			axes[1].imshow(normalized_red_matrix, cmap="gray")
 			for p in particles:
 				if p.normalized_weight > 0:
-					axes[0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=2)
+					axes[0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
 					if p.normalized_weight / max_normalized_weight > disp_thresh:
-						axes[1].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=2)
+						axes[1].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=3)
 
 			axes[0].set_xlim((0,1920))
 			axes[0].set_ylim((1080,0))
