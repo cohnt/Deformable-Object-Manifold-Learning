@@ -10,7 +10,6 @@ frame_list = []
 manifold_data = []
 
 show_video_images = False
-disp_mode = "manifold" # Could also be "image"
 
 cap = cv2.VideoCapture("data/rope_two_hands.mp4")
 if not cap.isOpened():
@@ -124,13 +123,24 @@ def hover(event):
 		axes[0].plot(embedding[simplex_indices[[0,2]],0], embedding[simplex_indices[[0,2]],1], c="blue", linewidth=3)
 		axes[0].set_xlim(xlim)
 		axes[0].set_ylim(ylim)
-		fig.canvas.draw_idle()
 
 		# Compute barycentric coordinates
 		A = np.vstack((simplex.T, np.ones((1, 3))))
 		b = np.vstack((xy.reshape(-1, 1), np.ones((1, 1))))
 		b_coords = np.linalg.solve(A, b)
-		print "b_coords", b_coords, np.sum(b_coords)
+		b = np.asarray(b_coords).flatten()
+		print "b_coords", b, np.sum(b_coords)
+
+		# Interpolate the deformation
+		mult_vec = np.zeros(len(manifold_data))
+		mult_vec[simplex_indices] = b
+		curve = np.sum(np.matmul(np.diag(mult_vec), manifold_data), axis=0)
+		# print "curve", curve
+		axes[1].clear()
+		axes[1].set_ylim((mfd_min, mfd_max))
+		axes[1].plot(curve)
+
+		fig.canvas.draw_idle()
 
 fig.canvas.mpl_connect('motion_notify_event', hover)
 mng = plt.get_current_fig_manager()
