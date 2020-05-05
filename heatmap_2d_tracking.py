@@ -208,31 +208,43 @@ class Particle():
 		self.num_points = num_points_to_track
 		self.points = self.compute_points()
 
+		self.raw_weight = None
+		self.normalized_weight = None
+
 	def rotation_matrix(self):
 		return np.matrix([[np.cos(self.theta), -np.sin(self.theta)],
 		                  [np.sin(self.theta),  np.cos(self.theta)]])
 
 	def compute_points(self):
 		raw_points = compute_deformation(interpolator, self.deformation)
-		print raw_points.shape
-		print raw_points
+		# print raw_points.shape
+		# print raw_points
 		rotated_points = np.matmul(self.rotation_matrix(), raw_points)
 		self.points = rotated_points + np.asarray(self.xy).reshape(-1, 1)
-		print self.points.T
+		# print self.points.T
 
-p = Particle()
-p.theta = 0
-p.compute_points()
+	def compute_raw_weight(self, red_frame):
+		running_total = 0.0
+		for point in self.points:
+			pixel = np.asarray(np.floor(points), dtype=int)
+			if pixel[0] < 0 || pixel[0] >= 1920 || pixel[1] < 0 || pixel[1] >= 1080:
+				self.raw_weight = 0.0
+				return
+			running_total += red_frame[pixel]
+		self.raw_weight = running_total
 
-fig, ax = plt.subplots()
-ax.plot(p.points.T[:,0], p.points.T[:,1])
+# p = Particle()
+# p.theta = 0
+# p.compute_points()
 
-p.theta = np.pi/12
-p.compute_points()
+# fig, ax = plt.subplots()
+# ax.plot(p.points.T[:,0], p.points.T[:,1])
 
-ax.plot(p.points.T[:,0], p.points.T[:,1])
-plt.show()
-exit(0)
+# p.theta = np.pi/12
+# p.compute_points()
+
+# ax.plot(p.points.T[:,0], p.points.T[:,1])
+# plt.show()
 
 frame_num = 0
 while cap.isOpened():
