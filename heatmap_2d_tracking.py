@@ -227,13 +227,10 @@ class Particle():
 		running_total = 0.0
 		for i in range(self.num_points):
 			point = self.points[:,i]
-			print point
 			pixel = np.asarray(np.floor(point), dtype=int)
-			print pixel
 			if pixel[0] < 0 or pixel[0] >= 1920 or pixel[1] < 0 or pixel[1] >= 1080:
 				self.raw_weight = 0.0
 				return self.raw_weight
-			print red_frame.shape
 			pixel = np.flip(pixel).flatten()
 			running_total += red_frame[pixel[0], pixel[1]]
 		self.raw_weight = running_total
@@ -274,7 +271,7 @@ while cap.isOpened():
 		# ax.imshow(normalized_red_matrix, cmap="gray")
 		# plt.show()
 
-		particles = [Particle() for i in range(10)]
+		particles = [Particle() for i in range(100)]
 		weights = []
 		for p in particles:
 			weights.append(p.compute_raw_weight(normalized_red_matrix))
@@ -285,7 +282,7 @@ while cap.isOpened():
 		fig, ax = plt.subplots()
 		ax.imshow(normalized_red_matrix, cmap="gray")
 		for p in particles:
-			ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.spectral(p.normalized_weight))
+			ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.coolwarm(p.normalized_weight))
 		plt.show()
 
 	else:
