@@ -285,7 +285,7 @@ while cap.isOpened():
 		fig, ax = plt.subplots()
 		ax.imshow(normalized_red_matrix, cmap="gray")
 		for p in particles:
-			ax.plot(p.points[:,0], p.points[:,1], c=p.normalized_weight, cmap=plt.cm.spectral)
+			ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.spectral(p.normalized_weight))
 		plt.show()
 
 	else:
