@@ -158,6 +158,28 @@ plt.show()
 # NOW WE TRACK... #
 ###################
 
+def compute_deformation(interpolator, deformation_coords):
+	simplex_num = interpolator.find_simplex(deformation_coords)
+	if simplex_num != -1:
+		simplex_indices = interpolator.simplices[simplex_num]
+		simplex = interpolator.points[simplex_indices]
+
+		# Compute barycentric coordinates
+		A = np.vstack((simplex.T, np.ones((1, 3))))
+		b = np.vstack((deformation_coords.reshape(-1, 1), np.ones((1, 1))))
+		b_coords = np.linalg.solve(A, b)
+		b = np.asarray(b_coords).flatten()
+
+		# Interpolate the deformation
+		mult_vec = np.zeros(len(manifold_data))
+		mult_vec[simplex_indices] = b
+		curve = np.sum(np.matmul(np.diag(mult_vec), manifold_data), axis=0)
+
+		return curve
+	else:
+		print "Error: outside of convex hull!"
+		raise ValueError
+
 red_map_list = []
 cap = cv2.VideoCapture("data/rope_two_hands.mp4")
 if not cap.isOpened():
@@ -178,9 +200,12 @@ class Particle():
 		
 		if deformation = None:
 			deformation_ind = np.random.randint(0, len(manifold_data))
-			self.deformation = manifold_data[]
+			self.deformation = manifold_data[deformation_ind]
 		else:
 			self.deformation = deformation
+
+		# self.num_points = num_points_to_track
+		# self.points = self.computePoints()
 
 frame_num = 0
 while cap.isOpened():
