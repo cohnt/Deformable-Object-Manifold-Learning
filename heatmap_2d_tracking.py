@@ -319,9 +319,18 @@ while cap.isOpened():
 			for p in particles:
 				xy_var = 1000
 				p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
+
 				theta_var = np.pi/8
 				p.theta = p.theta + np.random.normal(0, theta_var)
 				p.theta = ((p.theta + np.pi/2.0) % np.pi) - np.pi/2.0
+
+				deformation_var = 500
+				while True:
+					delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
+					if interpolator.find_simplex(p.deformation + delta) != -1:
+						p.deformation = p.deformation + delta
+						break
+
 				p.compute_points()
 
 """
