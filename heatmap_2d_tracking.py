@@ -284,6 +284,9 @@ while cap.isOpened():
 		for p in particles:
 			if p.normalized_weight > 0:
 				ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.coolwarm(p.normalized_weight))
+
+		mng = plt.get_current_fig_manager()
+		mng.resize(*mng.window.maxsize())
 		plt.show()
 
 	else:
