@@ -268,6 +268,12 @@ while cap.isOpened():
 		normalized_red_matrix = red_matrix / np.max(red_matrix)
 		# print normalized_red_matrix[200,:]
 
+		# SMOOTH IT
+		from scipy.ndimage import gaussian_filter
+		print normalized_red_matrix[200,:]
+		normalized_red_matrix = gaussian_filter(normalized_red_matrix, sigma=50, output=float)
+		print normalized_red_matrix[200,:]
+
 		# fig, ax = plt.subplots()
 		# ax.imshow(normalized_red_matrix, cmap="gray")
 		# plt.show()
