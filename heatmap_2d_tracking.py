@@ -224,13 +224,13 @@ p = Particle()
 p.theta = 0
 p.compute_points()
 
-fig, axes = plt.subplots(2, 1)
-axes[0].plot(p.points.T[:,0], p.points.T[:,1])
+fig, ax = plt.subplots()
+ax.plot(p.points.T[:,0], p.points.T[:,1])
 
 p.theta = np.pi/12
 p.compute_points()
 
-axes[1].plot(p.points.T[:,0], p.points.T[:,1])
+ax.plot(p.points.T[:,0], p.points.T[:,1])
 plt.show()
 exit(0)
 
