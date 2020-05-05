@@ -296,6 +296,8 @@ while cap.isOpened():
 				if p.normalized_weight > 0:
 					ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight), linewidth=2)
 
+			ax.set_xlim((0,1920))
+			ax.set_ylim((0,1080))
 			mng = plt.get_current_fig_manager()
 			mng.resize(*mng.window.maxsize())
 			plt.show()
