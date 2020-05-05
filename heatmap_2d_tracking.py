@@ -188,7 +188,7 @@ if not cap.isOpened():
 class Particle():
 	def __init__(self, xy=None, theta=None, deformation=None):
 		if xy == None:
-			self.xy = (np.random.randint(x_coord_start, x_coord_stop),
+			self.xy = (np.random.randint(0, 500),
 			           np.random.randint(0, 1080))
 		else:
 			self.xy = xy
@@ -207,8 +207,14 @@ class Particle():
 		self.num_points = num_points_to_track
 		self.points = self.compute_points()
 
+	def rotation_matrix(self):
+		return np.matrix([[np.cos(self.theta), -np.sin(self.theta)],
+		                  [np.sin(self.theta),  np.cos(self.theta)]])
+
 	def compute_points(self, interpolator):
-		self.points = compute_deformation(interpolator, self.deformation)
+		raw_points = compute_deformation(interpolator, self.deformation)
+		rotated_points = np.matmul(raw_points, self.rotation_matrix().T)
+		self.points = rotated_points + self.xy
 
 frame_num = 0
 while cap.isOpened():
