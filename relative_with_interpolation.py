@@ -118,7 +118,10 @@ def hover(event):
 		# Display the simplex vertices
 		axes[0].clear()
 		axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
-		axes[0].scatter([embedding[simplex_indices,0]], [embedding[simplex_indices,1]], c="blue", s=20**2)
+		axes[0].scatter(embedding[simplex_indices,0], embedding[simplex_indices,1], c="blue", s=20**2)
+		axes[0].plot(embedding[simplex_indices[[0,1]],0], embedding[simplex_indices[[0,1]],1], c="blue", linewidth=3)
+		axes[0].plot(embedding[simplex_indices[[1,2]],0], embedding[simplex_indices[[1,2]],1], c="blue", linewidth=3)
+		axes[0].plot(embedding[simplex_indices[[0,2]],0], embedding[simplex_indices[[0,2]],1], c="blue", linewidth=3)
 		axes[0].set_xlim(xlim)
 		axes[0].set_ylim(ylim)
 		fig.canvas.draw_idle()
