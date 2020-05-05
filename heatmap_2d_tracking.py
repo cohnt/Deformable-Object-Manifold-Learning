@@ -175,7 +175,8 @@ def compute_deformation(interpolator, deformation_coords):
 		mult_vec[simplex_indices] = b
 		curve = np.sum(np.matmul(np.diag(mult_vec), manifold_data), axis=0)
 
-		return curve
+		points = np.vstack((np.linspace(0, x_coord_stop - x_coord_start, num=num_points_to_track, endpoint=True), curve))
+		return points
 	else:
 		print "Error: outside of convex hull!"
 		raise ValueError
@@ -213,7 +214,9 @@ class Particle():
 
 	def compute_points(self):
 		raw_points = compute_deformation(interpolator, self.deformation)
-		rotated_points = np.matmul(raw_points, self.rotation_matrix().T)
+		print raw_points.shape
+		print raw_points
+		rotated_points = np.matmul(self.rotation_matrix(), raw_points)
 		self.points = rotated_points + self.xy
 
 p = Particle()
