@@ -163,6 +163,25 @@ cap = cv2.VideoCapture("data/rope_two_hands.mp4")
 if not cap.isOpened():
 	print "Error opening video stream or file"
 
+class Particle():
+	def __init__(self, xy=None, theta=None, deformation=None):
+		if xy == None:
+			self.xy = (np.random.randint(x_coord_start, x_coord_stop),
+			           np.random.randint(0, 1080))
+		else:
+			self.xy = xy
+
+		if theta == None:
+			self.theta = np.random.rand() * np.pi - (np.pi/2.0)
+		else:
+			self.theta = theta
+		
+		if deformation = None:
+			deformation_ind = np.random.randint(0, len(manifold_data))
+			self.deformation = manifold_data[]
+		else:
+			self.deformation = deformation
+
 frame_num = 0
 while cap.isOpened():
 	ret, frame = cap.read()
