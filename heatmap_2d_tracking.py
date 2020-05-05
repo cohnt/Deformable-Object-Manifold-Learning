@@ -268,6 +268,11 @@ while cap.isOpened():
 		normalized_red_matrix = red_matrix / np.max(red_matrix)
 		# print normalized_red_matrix[200,:]
 
+		fig, ax = plt.subplots()
+		ax.imshow(normalized_red_matrix, cmap="gray")
+		plt.savefig("actual.png")
+		plt.close(fig)
+
 		# SMOOTH IT
 		from scipy.ndimage import gaussian_filter
 		print normalized_red_matrix[200,:]
@@ -278,10 +283,10 @@ while cap.isOpened():
 		# ax.imshow(normalized_red_matrix, cmap="gray")
 		# plt.show()
 
-		num_particles = 200
-		exploration_factor = 0.75
+		num_particles = 400
+		exploration_factor = 0.25
 		particles = [Particle() for i in range(num_particles)]
-		disp_thresh = 0.75
+		disp_thresh = 0.9
 		iter_num = 0
 
 		while True:
@@ -310,7 +315,7 @@ while cap.isOpened():
 				if p.normalized_weight > 0:
 					axes[0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
 					if p.normalized_weight / max_normalized_weight > disp_thresh:
-						axes[1].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=3)
+						axes[1].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=2)
 
 			axes[0].set_xlim((0,1920))
 			axes[0].set_ylim((1080,0))
