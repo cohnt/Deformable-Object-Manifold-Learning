@@ -195,7 +195,7 @@ class Particle():
 			self.xy = xy
 
 		if theta is None:
-			self.theta = np.random.rand() * np.pi - (np.pi/2.0)
+			self.theta = np.random.rand() * (np.pi/2.0) - (np.pi/4.0)
 		else:
 			self.theta = theta
 		
@@ -324,7 +324,7 @@ while cap.isOpened():
 
 				theta_var = np.pi/8
 				p.theta = p.theta + np.random.normal(0, theta_var)
-				p.theta = ((p.theta + np.pi/2.0) % np.pi) - np.pi/2.0
+				p.theta = ((p.theta + np.pi/4.0) % (np.pi/2.0)) - np.pi/4.0
 
 				deformation_var = 2000
 				while True:
