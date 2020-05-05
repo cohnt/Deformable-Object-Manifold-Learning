@@ -198,7 +198,7 @@ class Particle():
 		else:
 			self.theta = theta
 		
-		if deformation = None:
+		if deformation == None:
 			deformation_ind = np.random.randint(0, len(manifold_data))
 			self.deformation = embedding[deformation_ind]
 		else:
@@ -211,10 +211,24 @@ class Particle():
 		return np.matrix([[np.cos(self.theta), -np.sin(self.theta)],
 		                  [np.sin(self.theta),  np.cos(self.theta)]])
 
-	def compute_points(self, interpolator):
+	def compute_points(self):
 		raw_points = compute_deformation(interpolator, self.deformation)
 		rotated_points = np.matmul(raw_points, self.rotation_matrix().T)
 		self.points = rotated_points + self.xy
+
+p = Particle()
+p.theta = 0
+p.compute_points()
+
+fig, axes = plt.subplots(2, 1)
+axes[0].plot(p.points)
+
+p.theta = np.pi/12
+p.compute_points()
+
+axes[1].plot(p.points)
+plt.show()
+exit(0)
 
 frame_num = 0
 while cap.isOpened():
