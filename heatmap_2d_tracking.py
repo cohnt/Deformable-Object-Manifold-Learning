@@ -177,9 +177,13 @@ while cap.isOpened():
 		red_matrix = np.asarray(frame_corrected[:,:,0] - np.maximum(frame_corrected[:,:,1], frame_corrected[:,:,2]), dtype=float)
 		red_matrix[red_matrix < 0] = 0
 		np.set_printoptions(threshold=np.inf)
-		print red_matrix[200,:]
+		# print red_matrix[200,:]
 		normalized_red_matrix = red_matrix / np.max(red_matrix)
-		print normalized_red_matrix[200,:]
+		# print normalized_red_matrix[200,:]
+
+		fig, ax = plt.subplots()
+		ax.imshow(normalized_red_matrix, cmap="gray")
+		plt.show()
 		exit(0)
 
 
