@@ -69,6 +69,18 @@ ylim = axes[0].get_ylim()
 mfd_min = np.min(manifold_data)
 mfd_max = np.max(manifold_data)
 
+########################
+# Set up interpolation #
+########################
+
+from scipy.spatial import Delaunay
+
+interpolator = Delaunay(embedding, qhull_options="QJ")
+
+################
+# Display Plot #
+################
+
 def hover(event):
 	if points.contains(event)[0]:
 		# print points.contains(event)[1]["ind"]
