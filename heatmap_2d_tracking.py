@@ -282,7 +282,8 @@ while cap.isOpened():
 		fig, ax = plt.subplots()
 		ax.imshow(normalized_red_matrix, cmap="gray")
 		for p in particles:
-			ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.coolwarm(p.normalized_weight))
+			if p.normalized_weight > 0:
+				ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.coolwarm(p.normalized_weight))
 		plt.show()
 
 	else:
