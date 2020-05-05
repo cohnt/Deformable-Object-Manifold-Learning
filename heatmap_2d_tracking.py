@@ -294,7 +294,6 @@ while cap.isOpened():
 			ax.imshow(normalized_red_matrix, cmap="gray")
 			for p in particles:
 				if p.normalized_weight > 0:
-					print p.normalized_weight
 					ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight), linewidth=3)
 
 			mng = plt.get_current_fig_manager()
@@ -317,6 +316,10 @@ while cap.isOpened():
 
 			# TODO: randomize
 			particles = newParticles
+			for p in particles:
+				var = 50
+				p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[var, 0], [0, var]]))
+				p.compute_points()
 
 """
 		particles = [Particle() for i in range(100)]
