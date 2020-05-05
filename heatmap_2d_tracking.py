@@ -229,8 +229,7 @@ class Particle():
 			point = self.points[:,i]
 			pixel = np.asarray(np.floor(point), dtype=int)
 			if pixel[0] < 0 or pixel[0] >= 1920 or pixel[1] < 0 or pixel[1] >= 1080:
-				self.raw_weight = 0.0
-				return self.raw_weight
+				continue
 			pixel = np.flip(pixel).flatten()
 			running_total += red_frame[pixel[0], pixel[1]]
 		self.raw_weight = running_total
