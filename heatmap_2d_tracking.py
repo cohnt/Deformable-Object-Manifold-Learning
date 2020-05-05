@@ -206,7 +206,7 @@ class Particle():
 			self.deformation = deformation
 
 		self.num_points = num_points_to_track
-		self.points = self.compute_points()
+		self.compute_points()
 
 		self.raw_weight = None
 		self.normalized_weight = None
@@ -227,11 +227,12 @@ class Particle():
 		running_total = 0.0
 		for point in self.points:
 			pixel = np.asarray(np.floor(points), dtype=int)
-			if pixel[0] < 0 || pixel[0] >= 1920 || pixel[1] < 0 || pixel[1] >= 1080:
+			if pixel[0] < 0 or pixel[0] >= 1920 or pixel[1] < 0 or pixel[1] >= 1080:
 				self.raw_weight = 0.0
-				return
+				return self.raw_weight
 			running_total += red_frame[pixel]
 		self.raw_weight = running_total
+		return self.raw_weight
 
 # p = Particle()
 # p.theta = 0
@@ -267,6 +268,21 @@ while cap.isOpened():
 		# fig, ax = plt.subplots()
 		# ax.imshow(normalized_red_matrix, cmap="gray")
 		# plt.show()
+
+		particles = [Particle() for i in range(10)]
+		weights = []
+		for p in particles:
+			weights.append(p.compute_raw_weight(normalized_red_matrix))
+		max_weight = np.max(weights)
+		for p in particles:
+			p.normalized_weight = p.raw_weight / max_weight
+
+		fig, ax = plt.subplots()
+		ax.imshow(normalized_red_matrix, cmap="gray")
+		for p in particles:
+			ax.plot(p.points[:,0], p.points[:,1], c=p.normalized_weight, cmap=plt.cm.spectral)
+		plt.show()
+
 	else:
 		break
 
