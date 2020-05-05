@@ -225,8 +225,9 @@ class Particle():
 
 	def compute_raw_weight(self, red_frame):
 		running_total = 0.0
-		for point in self.points:
-			pixel = np.asarray(np.floor(self.points), dtype=int)
+		for i in range(self.num_points):
+			point = self.points[:,i]
+			pixel = np.asarray(np.floor(point), dtype=int)
 			if pixel[0] < 0 or pixel[0] >= 1920 or pixel[1] < 0 or pixel[1] >= 1080:
 				self.raw_weight = 0.0
 				return self.raw_weight
