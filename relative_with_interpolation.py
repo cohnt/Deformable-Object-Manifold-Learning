@@ -107,12 +107,21 @@ def hover(event):
 
 	# Check if xy is in the convex hull
 	simplex_num = interpolator.find_simplex(xy)
-	print "xy", xy, "\tsimplex_num", simplex_num
+	# print "xy", xy, "\tsimplex_num", simplex_num
 	if simplex_num != -1:
+		# Get the simplex
 		simplex_indices = interpolator.simplices[simplex_num]
-		print "simplex_indices", simplex_indices
+		# print "simplex_indices", simplex_indices
 		simplex = interpolator.points[simplex_indices]
-		print "simplex", simplex
+		# print "simplex", simplex
+
+		# Display the simplex vertices
+		axes[0].clear()
+		axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
+		axes[0].scatter([embedding[simplex_indices,0]], [embedding[simplex_indices,1]], c="blue", s=20**2)
+		axes[0].set_xlim(xlim)
+		axes[0].set_ylim(ylim)
+		fig.canvas.draw_idle()
 
 fig.canvas.mpl_connect('motion_notify_event', hover)
 mng = plt.get_current_fig_manager()
