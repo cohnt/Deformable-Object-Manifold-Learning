@@ -327,7 +327,7 @@ while cap.isOpened():
 				p.theta = p.theta + np.random.normal(0, theta_var)
 				p.theta = ((p.theta + np.pi/2.0) % np.pi) - np.pi/2.0
 
-				deformation_var = 500
+				deformation_var = 2000
 				while True:
 					delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
 					if interpolator.find_simplex(p.deformation + delta) != -1:
