@@ -283,7 +283,7 @@ while cap.isOpened():
 		ax.imshow(normalized_red_matrix, cmap="gray")
 		for p in particles:
 			if p.normalized_weight > 0:
-				ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.coolwarm(p.normalized_weight), linewidth=3)
+				ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight), linewidth=3)
 
 		mng = plt.get_current_fig_manager()
 		mng.resize(*mng.window.maxsize())
