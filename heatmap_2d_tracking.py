@@ -275,14 +275,19 @@ while cap.isOpened():
 		weights = []
 		for p in particles:
 			weights.append(p.compute_raw_weight(normalized_red_matrix))
+		# print weights
+		weights = np.asarray(weights)
 		max_weight = np.max(weights)
+		min_weight = np.min(weights[weights > 0])
 		for p in particles:
-			p.normalized_weight = p.raw_weight / max_weight
+			p.normalized_weight = (p.raw_weight - min_weight) / (max_weight - min_weight)
 
+		print "\n\n\n"
 		fig, ax = plt.subplots()
 		ax.imshow(normalized_red_matrix, cmap="gray")
 		for p in particles:
 			if p.normalized_weight > 0:
+				print p.normalized_weight
 				ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight), linewidth=3)
 
 		mng = plt.get_current_fig_manager()
