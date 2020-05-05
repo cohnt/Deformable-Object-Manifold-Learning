@@ -273,6 +273,7 @@ while cap.isOpened():
 		num_particles = 200
 		exploration_factor = 0.75
 		particles = [Particle() for i in range(num_particles)]
+		disp_thresh = 0.25
 
 		while True:
 			# Weight particles
@@ -290,14 +291,19 @@ while cap.isOpened():
 				normalized_weights.append(w)
 
 			# Display
-			fig, ax = plt.subplots()
-			ax.imshow(normalized_red_matrix, cmap="gray")
+			fig, axes = plt.subplots(2, 1)
+			axes[0].imshow(normalized_red_matrix, cmap="gray")
+			axes[1].imshow(normalized_red_matrix, cmap="gray")
 			for p in particles:
 				if p.normalized_weight > 0:
-					ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight), linewidth=2)
+					axes[0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight), linewidth=2)
+					if p.normalized_weight > disp_thresh:
+						axes[1].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight), linewidth=2)
 
-			ax.set_xlim((0,1920))
-			ax.set_ylim((1080,0))
+			axes[0].set_xlim((0,1920))
+			axes[0].set_ylim((1080,0))
+			axes[1].set_xlim((0,1920))
+			axes[1].set_ylim((1080,0))
 			mng = plt.get_current_fig_manager()
 			mng.resize(*mng.window.maxsize())
 			plt.show()
@@ -336,32 +342,5 @@ while cap.isOpened():
 						break
 
 				p.compute_points()
-
-"""
-		particles = [Particle() for i in range(100)]
-		weights = []
-		for p in particles:
-			weights.append(p.compute_raw_weight(normalized_red_matrix))
-		# print weights
-		weights = np.asarray(weights)
-		max_weight = np.max(weights)
-		min_weight = np.min(weights[weights > 0])
-		for p in particles:
-			p.normalized_weight = (p.raw_weight - min_weight) / (max_weight - min_weight)
-
-		print "\n\n\n"
-		fig, ax = plt.subplots()
-		ax.imshow(normalized_red_matrix, cmap="gray")
-		for p in particles:
-			if p.normalized_weight > 0:
-				print p.normalized_weight
-				ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight), linewidth=3)
-
-		mng = plt.get_current_fig_manager()
-		mng.resize(*mng.window.maxsize())
-		plt.show()"""
-
-	# else:
-	# 	break
 
 cap.release()
