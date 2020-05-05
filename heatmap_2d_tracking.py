@@ -317,7 +317,7 @@ while cap.isOpened():
 			# TODO: randomize
 			particles = newParticles
 			for p in particles:
-				var = 50
+				var = 1000
 				p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[var, 0], [0, var]]))
 				p.compute_points()
 
