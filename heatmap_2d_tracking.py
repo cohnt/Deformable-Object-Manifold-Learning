@@ -273,7 +273,7 @@ while cap.isOpened():
 		num_particles = 200
 		exploration_factor = 0.75
 		particles = [Particle() for i in range(num_particles)]
-		disp_thresh = 0.05
+		disp_thresh = 0.75
 
 		while True:
 			# Weight particles
@@ -298,7 +298,7 @@ while cap.isOpened():
 			for p in particles:
 				if p.normalized_weight > 0:
 					axes[0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=2)
-					if p.normalized_weight > disp_thresh:
+					if p.normalized_weight / max_normalized_weight > disp_thresh:
 						axes[1].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=2)
 
 			axes[0].set_xlim((0,1920))
