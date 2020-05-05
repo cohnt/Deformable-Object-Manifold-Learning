@@ -126,10 +126,11 @@ def hover(event):
 		axes[0].set_ylim(ylim)
 		fig.canvas.draw_idle()
 
-		# Compute the barycentric coordinates
-		temp_coords = np.matmul(interpolator.transform[simplex_num,:2,:2], np.asmatrix(xy - interpolator.transform[simplex_num,2,:]).T)
-		c_coords = np.vstack((temp_coords, 1-np.sum(temp_coords)))
-		print "c_coords", c_coords, np.sum(c_coords)
+		# Compute barycentric coordinates
+		A = np.vstack((simplex.T, np.ones((1, 3))))
+		b = np.vstack((xy.reshape(-1, 1), np.ones((1, 1))))
+		b_coords = np.linalg.solve(A, b)
+		print "b_coords", b_coords, np.sum(b_coords)
 
 fig.canvas.mpl_connect('motion_notify_event', hover)
 mng = plt.get_current_fig_manager()
