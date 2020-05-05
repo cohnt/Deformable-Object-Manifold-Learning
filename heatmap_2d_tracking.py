@@ -297,7 +297,7 @@ while cap.isOpened():
 					ax.plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight), linewidth=2)
 
 			ax.set_xlim((0,1920))
-			ax.set_ylim((0,1080))
+			ax.set_ylim((1080,0))
 			mng = plt.get_current_fig_manager()
 			mng.resize(*mng.window.maxsize())
 			plt.show()
