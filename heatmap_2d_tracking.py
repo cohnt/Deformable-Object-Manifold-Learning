@@ -317,8 +317,11 @@ while cap.isOpened():
 			# TODO: randomize
 			particles = newParticles
 			for p in particles:
-				var = 1000
-				p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[var, 0], [0, var]]))
+				xy_var = 1000
+				p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
+				theta_var = np.pi/8
+				p.theta = p.theta + np.random.normal(0, theta_var)
+				p.theta = ((p.theta + np.pi/2.0) % np.pi) - np.pi/2.0
 				p.compute_points()
 
 """
