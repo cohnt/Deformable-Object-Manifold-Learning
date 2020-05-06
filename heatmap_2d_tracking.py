@@ -276,7 +276,7 @@ while cap.isOpened():
 		# SMOOTH IT
 		from scipy.ndimage import gaussian_filter
 		print normalized_red_matrix[200,:]
-		normalized_red_matrix = gaussian_filter(normalized_red_matrix, sigma=50, output=float)
+		normalized_red_matrix = gaussian_filter(normalized_red_matrix, sigma=25, output=float)
 		print normalized_red_matrix[200,:]
 
 		# fig, ax = plt.subplots()
