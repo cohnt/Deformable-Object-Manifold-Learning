@@ -283,7 +283,7 @@ while cap.isOpened():
 		# ax.imshow(normalized_red_matrix, cmap="gray")
 		# plt.show()
 
-		num_particles = 400
+		num_particles = 50
 		exploration_factor = 0.25
 		particles = [Particle() for i in range(num_particles)]
 		disp_thresh = 0.9
@@ -347,14 +347,14 @@ while cap.isOpened():
 			# Add noise
 			particles = newParticles
 			for p in particles:
-				xy_var = 200
+				xy_var = 100
 				p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
 
-				theta_var = np.pi/16
+				theta_var = np.pi/32
 				p.theta = p.theta + np.random.normal(0, theta_var)
 				p.theta = ((p.theta + np.pi/4.0) % (np.pi/2.0)) - np.pi/4.0
 
-				deformation_var = 200
+				deformation_var = 250
 				while True:
 					delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
 					if interpolator.find_simplex(p.deformation + delta) != -1:
