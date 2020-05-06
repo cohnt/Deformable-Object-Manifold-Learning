@@ -275,15 +275,15 @@ while cap.isOpened():
 
 		# SMOOTH IT
 		from scipy.ndimage import gaussian_filter
-		print normalized_red_matrix[200,:]
+		# print normalized_red_matrix[200,:]
 		normalized_red_matrix = gaussian_filter(normalized_red_matrix, sigma=25, output=float)
-		print normalized_red_matrix[200,:]
+		# print normalized_red_matrix[200,:]
 
 		# fig, ax = plt.subplots()
 		# ax.imshow(normalized_red_matrix, cmap="gray")
 		# plt.show()
 
-		num_particles = 50
+		num_particles = 200
 		exploration_factor = 0.25
 		particles = [Particle() for i in range(num_particles)]
 		disp_thresh = 0.9
