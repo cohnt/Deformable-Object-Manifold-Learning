@@ -277,10 +277,10 @@ while cap.isOpened():
 		normalized_red_matrix = red_matrix / np.max(red_matrix)
 		# print normalized_red_matrix[200,:]
 
-		fig, ax = plt.subplots()
-		ax.imshow(normalized_red_matrix, cmap="gray")
-		plt.savefig("actual_%s.png" % str(iter_num).zfill(2))
-		plt.close(fig)
+		# fig, ax = plt.subplots()
+		# ax.imshow(normalized_red_matrix, cmap="gray")
+		# plt.savefig("actual_%s.png" % str(iter_num).zfill(2))
+		# plt.close(fig)
 
 		# SMOOTH IT
 		from scipy.ndimage import gaussian_filter
