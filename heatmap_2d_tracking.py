@@ -251,10 +251,10 @@ class Particle():
 # plt.show()
 
 
-num_particles = 200
-exploration_factor = 0.25
+num_particles = 100
+exploration_factor = 0.1
 particles = [Particle() for i in range(num_particles)]
-disp_thresh = 0.9
+disp_thresh = 0.8
 iter_num = 0
 keep_mle = True
 frame_num = 0
@@ -285,7 +285,7 @@ while cap.isOpened():
 		# SMOOTH IT
 		from scipy.ndimage import gaussian_filter
 		# print normalized_red_matrix[200,:]
-		normalized_red_matrix = gaussian_filter(normalized_red_matrix, sigma=25, output=float)
+		normalized_red_matrix = gaussian_filter(normalized_red_matrix, sigma=50, output=float)
 		# print normalized_red_matrix[200,:]
 
 		# fig, ax = plt.subplots()
@@ -374,14 +374,14 @@ while cap.isOpened():
 		# Add noise
 		particles = newParticles
 		for p in particles:
-			xy_var = 100
+			xy_var = 200
 			p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
 
-			theta_var = np.pi/32
+			theta_var = np.pi/16
 			p.theta = p.theta + np.random.normal(0, theta_var)
 			p.theta = ((p.theta + np.pi/4.0) % (np.pi/2.0)) - np.pi/4.0
 
-			deformation_var = 250
+			deformation_var = 500
 			while True:
 				delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
 				if interpolator.find_simplex(p.deformation + delta) != -1:
