@@ -26,7 +26,7 @@ def getRedHeight(image, x):
 
 frame_num = 0
 
-frames_to_train_on = 500
+frames_to_train_on = 450
 
 while cap.isOpened():
 	ret, frame = cap.read()
@@ -250,6 +250,12 @@ class Particle():
 # ax.plot(p.points.T[:,0], p.points.T[:,1])
 # plt.show()
 
+
+num_particles = 200
+exploration_factor = 0.25
+particles = [Particle() for i in range(num_particles)]
+disp_thresh = 0.9
+iter_num = 0
 frame_num = 0
 while cap.isOpened():
 	ret, frame = cap.read()
@@ -282,12 +288,6 @@ while cap.isOpened():
 		# fig, ax = plt.subplots()
 		# ax.imshow(normalized_red_matrix, cmap="gray")
 		# plt.show()
-
-		num_particles = 200
-		exploration_factor = 0.25
-		particles = [Particle() for i in range(num_particles)]
-		disp_thresh = 0.9
-		iter_num = 0
 
 		while True:
 			iter_num = iter_num + 1
@@ -386,5 +386,7 @@ while cap.isOpened():
 						break
 
 				p.compute_points()
+
+			break
 
 cap.release()
