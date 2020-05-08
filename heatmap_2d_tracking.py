@@ -385,5 +385,7 @@ while cap.isOpened():
 					break
 
 			p.compute_points()
+	else:
+		break
 
 cap.release()
