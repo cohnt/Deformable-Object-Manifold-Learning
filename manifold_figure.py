@@ -46,10 +46,9 @@ ax = fig.add_subplot(111)
 patches = []
 for simplex in tri.simplices:
 	points = Y[simplex]
-	polygon = Polygon(points, True)
-	patches.append(polygon)
-p = PatchCollection(patches)
-ax.add_collection(p)
+	c = np.mean(plt.cm.Spectral(color[simplex]), axis=0)
+	polygon = Polygon(points, closed=True, color=c, edgecolor=c, facecolor=c)
+	ax.add_patch(polygon)
 
 ax.scatter(Y[:,0], Y[:,1], c=color, cmap=plt.cm.Spectral, s=p_rad_2d**2, zorder=10)
 plt.show()
