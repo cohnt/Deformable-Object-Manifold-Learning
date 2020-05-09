@@ -40,22 +40,25 @@ tri = Delaunay(Y, qhull_options="QJ")
 
 # Triangles in the embedding plot
 
+thresh = 1.5
+
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
 patches = []
 for simplex in tri.simplices:
 	points = Y[simplex]
-	c = np.mean(plt.cm.Spectral(color[simplex]), axis=0)
-	polygon = Polygon(points, closed=True, color=c, edgecolor=c, facecolor=c)
-	ax.add_patch(polygon)
+	if np.linalg.norm(points[0]-points[1]) < thresh:
+		if np.linalg.norm(points[0]-points[2]) < thresh:
+			if np.linalg.norm(points[1]-points[2]) < thresh:
+				c = np.mean(plt.cm.Spectral(color[simplex]), axis=0)
+				polygon = Polygon(points, closed=True, color=c, edgecolor=c, facecolor=c)
+				ax.add_patch(polygon)
 
 ax.scatter(Y[:,0], Y[:,1], c=color, cmap=plt.cm.Spectral, s=p_rad_2d**2, zorder=10)
 plt.show()
 
 # Triangles in the 3D plot
-
-thresh = 1
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
