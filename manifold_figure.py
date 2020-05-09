@@ -53,6 +53,8 @@ plt.show()
 
 # Triangles in the 3D plot
 
+thresh = 1
+
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
 
@@ -61,8 +63,11 @@ for simplex in tri.simplices:
 	x = points[:,0]
 	y = points[:,1]
 	z = points[:,2]
-	verts = [list(zip(x,y,z))]
-	ax.add_collection3d(Poly3DCollection(verts))
+	if np.linalg.norm(points[0]-points[1]) < thresh:
+		if np.linalg.norm(points[0]-points[2]) < thresh:
+			if np.linalg.norm(points[1]-points[2]) < thresh:
+				verts = [list(zip(x,y,z))]
+				ax.add_collection3d(Poly3DCollection(verts))
 
 ax.scatter(X[:,0], X[:,1], X[:,2], c=color, cmap=plt.cm.Spectral, s=p_rad_3d**2)
 ax.view_init(4, -72)
