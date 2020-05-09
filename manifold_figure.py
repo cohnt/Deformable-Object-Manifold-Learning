@@ -10,7 +10,10 @@ from scipy.spatial import Delaunay
 # Dataset 3D plot
 
 n_points = 250
-X, color = datasets.make_s_curve(n_points, random_state=1)
+X, c = datasets.make_s_curve(n_points, random_state=1)
+c_max = np.max(c)
+c_min = np.min(c)
+color = (c - c_min) / (c_max - c_min)
 n_neighbors = 8
 n_components = 2
 
