@@ -20,7 +20,7 @@ p_rad_2d = 10
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
 ax.scatter(X[:,0], X[:,1], X[:,2], c=color, cmap=plt.cm.Spectral, s=p_rad_3d**2)
-ax.view_init(4, -72)
+ax.view_init(15, -72)
 plt.show()
 
 # Embedding plot
@@ -70,5 +70,5 @@ for simplex in tri.simplices:
 				ax.add_collection3d(Poly3DCollection(verts))
 
 ax.scatter(X[:,0], X[:,1], X[:,2], c=color, cmap=plt.cm.Spectral, s=p_rad_3d**2)
-ax.view_init(4, -72)
+ax.view_init(15, -72)
 plt.show()
