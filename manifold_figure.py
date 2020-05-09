@@ -2,6 +2,7 @@ import numpy as np
 from sklearn import datasets, manifold
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from scipy.spatial import Delaunay
 
 # Dataset 3D plot
 
@@ -24,5 +25,23 @@ plt.show()
 Y = manifold.Isomap(n_neighbors, n_components).fit_transform(X)
 fig = plt.figure()
 ax = fig.add_subplot(111)
+ax.scatter(Y[:,0], Y[:,1], c=color, cmap=plt.cm.Spectral, s=p_rad_2d**2)
+plt.show()
+
+# Compute Delaunay
+
+tri = Delaunay(Y, qhull_options="QJ")
+
+# Triangles in the embedding plot
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+
+for simplex in tri.simplices:
+	points = Y[simplex]
+	ax.plot(points[[0,1]][:,0], points[[0,1]][:,1], c="black")
+	ax.plot(points[[0,2]][:,0], points[[0,2]][:,1], c="black")
+	ax.plot(points[[1,2]][:,0], points[[1,2]][:,1], c="black")
+
 ax.scatter(Y[:,0], Y[:,1], c=color, cmap=plt.cm.Spectral, s=p_rad_2d**2)
 plt.show()
