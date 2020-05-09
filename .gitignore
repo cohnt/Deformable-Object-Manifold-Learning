@@ -1,4 +1,4 @@
 *.mp4
-test*/*
+test_history/*
 iteration*
-actual.png
+actual*
