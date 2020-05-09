@@ -2,6 +2,7 @@ import numpy as np
 from sklearn import datasets, manifold
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from scipy.spatial import Delaunay
 
 # Dataset 3D plot
@@ -53,9 +54,11 @@ ax = fig.add_subplot(111, projection="3d")
 
 for simplex in tri.simplices:
 	points = X[simplex]
-	ax.plot(points[[0,1]][:,0], points[[0,1]][:,1], points[[0,1]][:,2], c="black", zorder=1)
-	ax.plot(points[[0,2]][:,0], points[[0,2]][:,1], points[[0,2]][:,2], c="black", zorder=1)
-	ax.plot(points[[1,2]][:,0], points[[1,2]][:,1], points[[1,2]][:,2], c="black", zorder=1)
+	x = points[:,0]
+	y = points[:,1]
+	z = points[:,2]
+	verts = [list(zip(x,y,z))]
+	ax.add_collection3d(Poly3DCollection(verts))
 
 ax.scatter(X[:,0], X[:,1], X[:,2], c=color, cmap=plt.cm.Spectral, s=p_rad_3d**2)
 ax.view_init(4, -72)
