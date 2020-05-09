@@ -15,3 +15,11 @@ ax = fig.add_subplot(111, projection="3d")
 ax.scatter(X[:,0], X[:,1], X[:,2], c=color, cmap=plt.cm.Spectral)
 ax.view_init(4, -72)
 plt.show()
+
+# Embedding plot
+
+Y = manifold.Isomap(n_neighbors, n_components).fit_transform(X)
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.scatter(Y[:,0], Y[:,1], c=color, cmap=plt.cm.Spectral)
+plt.show()
