@@ -22,7 +22,7 @@ p_rad_2d = 10
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
-ax.scatter(X[:,0], X[:,1], X[:,2], c=color, cmap=plt.cm.Spectral, s=p_rad_3d**2)
+ax.scatter(X[:,0], X[:,1], X[:,2], c=color, cmap=plt.cm.Spectral, s=p_rad_3d**2, edgecolors="black")
 ax.view_init(15, -72)
 plt.show()
 
@@ -31,7 +31,7 @@ plt.show()
 Y = manifold.Isomap(n_neighbors, n_components).fit_transform(X)
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.scatter(Y[:,0], Y[:,1], c=color, cmap=plt.cm.Spectral, s=p_rad_2d**2)
+ax.scatter(Y[:,0], Y[:,1], c=color, cmap=plt.cm.Spectral, s=p_rad_2d**2, edgecolors="black")
 plt.show()
 
 # Compute Delaunay
@@ -59,7 +59,7 @@ for simplex in tri.simplices:
 				ax.plot(points[[0,2]][:,0], points[[0,2]][:,1], c="black")
 				ax.plot(points[[1,2]][:,0], points[[1,2]][:,1], c="black")
 
-ax.scatter(Y[:,0], Y[:,1], c=color, cmap=plt.cm.Spectral, s=p_rad_2d**2, zorder=10)
+ax.scatter(Y[:,0], Y[:,1], c=color, cmap=plt.cm.Spectral, s=p_rad_2d**2, zorder=10, edgecolors="black")
 plt.show()
 
 # Triangles in the 3D plot
@@ -80,6 +80,6 @@ for simplex in tri.simplices:
 				c = np.mean(plt.cm.Spectral(color[simplex]), axis=0)
 				ax.plot_trisurf(points[:,0], points[:,1], points[:,2], color=c)
 
-ax.scatter(X[:,0], X[:,1], X[:,2], c=color, cmap=plt.cm.Spectral, s=p_rad_3d**2)
+ax.scatter(X[:,0], X[:,1], X[:,2], c=color, cmap=plt.cm.Spectral, s=p_rad_3d**2, edgecolors="black")
 ax.view_init(15, -72)
 plt.show()
