@@ -80,7 +80,7 @@ for simplex in tri.simplices:
 				# verts = [list(zip(x,y,z))]
 				# ax.add_collection3d(Poly3DCollection(verts))
 				c = np.mean(plt.cm.Spectral(color[simplex]), axis=0)
-				ax.plot_trisurf(points[:,0], points[:,1], points[:,2], color=c)
+				ax.plot_trisurf(points[:,0], points[:,1], points[:,2], color=c, edgecolors="black")
 
 ax.scatter(X[:,0], X[:,1], X[:,2], c=color, cmap=plt.cm.Spectral, s=p_rad_3d**2, edgecolors="black", lw=ew_3d)
 ax.view_init(15, -72)
