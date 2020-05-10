@@ -19,7 +19,7 @@ p_rad_3d = 18
 p_rad_2d = 25
 ew_3d = 3
 ew_2d = 5
-matplotlib.rcParams.update({'font.size': 32})
+matplotlib.rcParams.update({'font.size': 48})
 
 def plt_show_fullsize():
 	mng = plt.get_current_fig_manager()
