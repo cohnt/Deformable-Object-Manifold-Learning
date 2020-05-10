@@ -37,6 +37,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
 ax.scatter(X[:,0], X[:,1], X[:,2], c=color, cmap=plt.cm.Spectral, s=p_rad_3d**2, edgecolors="black", lw=ew_3d)
 ax.view_init(15, -72)
+ax.dist = 8
 plt_show_fullsize()
 
 # Embedding plot
@@ -95,4 +96,5 @@ for simplex in tri.simplices:
 
 ax.scatter(X[:,0], X[:,1], X[:,2], c=color, cmap=plt.cm.Spectral, s=p_rad_3d**2, edgecolors="black", lw=ew_3d)
 ax.view_init(15, -72)
+ax.dist = 8
 plt_show_fullsize()
