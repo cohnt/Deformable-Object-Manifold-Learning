@@ -250,6 +250,14 @@ class Particle():
 # ax.plot(p.points.T[:,0], p.points.T[:,1])
 # plt.show()
 
+noise_list = []
+for _ in range(15):
+	i = np.random.randint(1080)
+	j = np.random.randint(1920)
+	w = np.random.randint(25, 50)
+	h = np.random.randint(25, 50)
+	noise_list.append([i, j, w, h])
+constant_noise = True
 
 num_particles = 100
 exploration_factor = 0.1
@@ -271,17 +279,30 @@ while cap.isOpened():
 		frame_corrected[:,:,[0,1,2]] = frame[:,:,[2,1,0]]
 
 		# Add red
-		for _ in range(25):
-			i = np.random.randint(frame_corrected.shape[0])
-			j = np.random.randint(frame_corrected.shape[1])
-			w = np.random.randint(25, 50)
-			h = np.random.randint(25, 100)
-			for i1 in range(i-w, i+w):
-				for j1 in range(j-h, j+h):
-					try:
-						frame_corrected[i1,j1] = [130, 50, 50]
-					except:
-						pass
+		if constant_noise:
+			for noise in noise_list:
+				i = noise[0]
+				j = noise[1]
+				w = noise[2]
+				h = noise[3]
+				for i1 in range(i-w, i+w):
+					for j1 in range(j-h, j+h):
+						try:
+							frame_corrected[i1,j1] = [130, 50, 50]
+						except:
+							pass
+		else:
+			for _ in range(25):
+				i = np.random.randint(frame_corrected.shape[0])
+				j = np.random.randint(frame_corrected.shape[1])
+				w = np.random.randint(25, 50)
+				h = np.random.randint(25, 50)
+				for i1 in range(i-w, i+w):
+					for j1 in range(j-h, j+h):
+						try:
+							frame_corrected[i1,j1] = [130, 50, 50]
+						except:
+							pass
 
 		frame_corrected = np.asarray(frame_corrected, dtype=float)
 		red_matrix = np.asarray(frame_corrected[:,:,0] - np.maximum(frame_corrected[:,:,1], frame_corrected[:,:,2]), dtype=float)
