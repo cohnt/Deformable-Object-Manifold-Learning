@@ -269,6 +269,20 @@ while cap.isOpened():
 
 		frame_corrected = np.copy(frame)
 		frame_corrected[:,:,[0,1,2]] = frame[:,:,[2,1,0]]
+
+		# Add red
+		for _ in range(25):
+			i = np.random.randint(frame_corrected.shape[0])
+			j = np.random.randint(frame_corrected.shape[1])
+			w = np.random.randint(25, 50)
+			h = np.random.randint(10, 25)
+			for i1 in range(i-w, i+w):
+				for j1 in range(j-h, j+h):
+					try:
+						frame_corrected[i1,j1,0] = 255
+					except:
+						pass
+
 		frame_corrected = np.asarray(frame_corrected, dtype=float)
 		red_matrix = np.asarray(frame_corrected[:,:,0] - np.maximum(frame_corrected[:,:,1], frame_corrected[:,:,2]), dtype=float)
 		red_matrix[red_matrix < 0] = 0
@@ -277,17 +291,17 @@ while cap.isOpened():
 		normalized_red_matrix = red_matrix / np.max(red_matrix)
 		# print normalized_red_matrix[200,:]
 
-		for _ in range(25):
-			i = np.random.randint(normalized_red_matrix.shape[0])
-			j = np.random.randint(normalized_red_matrix.shape[1])
-			w = np.random.randint(25, 50)
-			h = np.random.randint(10, 25)
-			for i1 in range(i-w, i+w):
-				for j1 in range(j-h, j+h):
-					try:
-						normalized_red_matrix[i1,j1] = 1.0
-					except:
-						pass
+		# for _ in range(25):
+		# 	i = np.random.randint(normalized_red_matrix.shape[0])
+		# 	j = np.random.randint(normalized_red_matrix.shape[1])
+		# 	w = np.random.randint(25, 50)
+		# 	h = np.random.randint(10, 25)
+		# 	for i1 in range(i-w, i+w):
+		# 		for j1 in range(j-h, j+h):
+		# 			try:
+		# 				normalized_red_matrix[i1,j1] = 1.0
+		# 			except:
+		# 				pass
 
 		# fig, ax = plt.subplots()
 		# ax.imshow(normalized_red_matrix, cmap="gray")
