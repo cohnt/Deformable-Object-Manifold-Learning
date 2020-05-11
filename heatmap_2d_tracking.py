@@ -275,11 +275,11 @@ while cap.isOpened():
 			i = np.random.randint(frame_corrected.shape[0])
 			j = np.random.randint(frame_corrected.shape[1])
 			w = np.random.randint(25, 50)
-			h = np.random.randint(10, 25)
+			h = np.random.randint(25, 100)
 			for i1 in range(i-w, i+w):
 				for j1 in range(j-h, j+h):
 					try:
-						frame_corrected[i1,j1,0] = 255
+						frame_corrected[i1,j1] = [130, 50, 50]
 					except:
 						pass
 
@@ -338,8 +338,8 @@ while cap.isOpened():
 		fig, axes = plt.subplots(2, 2)
 		axes[0,0].imshow(normalized_red_matrix, cmap="gray")
 		axes[1,0].imshow(normalized_red_matrix, cmap="gray")
-		axes[0,1].imshow(normalized_red_matrix, cmap="gray")
-		axes[1,1].imshow(normalized_red_matrix, cmap="gray")
+		axes[0,1].imshow(np.asarray(frame_corrected, dtype=int))
+		axes[1,1].imshow(np.asarray(frame_corrected, dtype=int))
 
 		axes[0,0].set_title("All Particles")
 		axes[1,0].set_title("Good Particles")
