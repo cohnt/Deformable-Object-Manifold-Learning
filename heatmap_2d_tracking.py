@@ -251,11 +251,11 @@ class Particle():
 # plt.show()
 
 noise_list = []
-for _ in range(15):
+for _ in range(75):
 	i = np.random.randint(1080)
 	j = np.random.randint(1920)
-	w = np.random.randint(25, 50)
-	h = np.random.randint(25, 50)
+	w = np.random.randint(10, 50)
+	h = np.random.randint(10, 50)
 	noise_list.append([i, j, w, h])
 constant_noise = True
 
@@ -332,7 +332,7 @@ while cap.isOpened():
 		# SMOOTH IT
 		from scipy.ndimage import gaussian_filter
 		# print normalized_red_matrix[200,:]
-		normalized_red_matrix = gaussian_filter(normalized_red_matrix, sigma=50, output=float)
+		normalized_red_matrix = gaussian_filter(normalized_red_matrix, sigma=25, output=float)
 		# print normalized_red_matrix[200,:]
 
 		# fig, ax = plt.subplots()
