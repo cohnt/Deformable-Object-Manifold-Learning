@@ -10,6 +10,8 @@ frame_list = []
 manifold_data = []
 
 show_video_images = False
+frames_to_train_on = 507
+train_test_overlap = True
 
 cap = cv2.VideoCapture("data/rope_two_hands.mp4")
 if not cap.isOpened():
@@ -26,7 +28,6 @@ def getRedHeight(image, x):
 
 frame_num = 0
 
-frames_to_train_on = 507
 
 while cap.isOpened():
 	ret, frame = cap.read()
@@ -279,8 +280,8 @@ while cap.isOpened():
 	ret, frame = cap.read()
 	if ret:
 		frame_num = frame_num + 1
-		# if frame_num <= frames_to_train_on:
-		# 	continue
+		if frame_num <= frames_to_train_on and not train_test_overlap:
+			continue
 
 		iter_num = iter_num + 1
 
