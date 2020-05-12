@@ -263,8 +263,8 @@ occlusion_list = []
 for _ in range(10):
 	i = np.random.randint(1080)
 	j = np.random.randint(1920)
-	w = np.random.randint(25, 100)
-	h = np.random.randint(25, 50)
+	w = np.random.randint(25, 50)
+	h = np.random.randint(25, 100)
 	occlusion_list.append([i, j, w, h])
 constant_occlusion = True
 
@@ -294,8 +294,8 @@ while cap.isOpened():
 				j = noise[1]
 				w = noise[2]
 				h = noise[3]
-				for i1 in range(i-w, i+w):
-					for j1 in range(j-h, j+h):
+				for i1 in range(i-h, i+h):
+					for j1 in range(j-w, j+w):
 						try:
 							frame_corrected[i1,j1] = [130, 50, 50]
 						except:
@@ -306,8 +306,8 @@ while cap.isOpened():
 				j = np.random.randint(frame_corrected.shape[1])
 				w = np.random.randint(25, 50)
 				h = np.random.randint(25, 50)
-				for i1 in range(i-w, i+w):
-					for j1 in range(j-h, j+h):
+				for i1 in range(i-h, i+h):
+					for j1 in range(j-w, j+w):
 						try:
 							frame_corrected[i1,j1] = [130, 50, 50]
 						except:
@@ -320,8 +320,8 @@ while cap.isOpened():
 				j = occlusion[1]
 				w = occlusion[2]
 				h = occlusion[3]
-				for i1 in range(i-w, i+w):
-					for j1 in range(j-h, j+h):
+				for i1 in range(i-h, i+h):
+					for j1 in range(j-w, j+w):
 						try:
 							frame_corrected[i1,j1] = [255, 255, 255]
 						except:
