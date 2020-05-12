@@ -10,6 +10,8 @@ frame_list = []
 manifold_data = []
 
 show_video_images = False
+frames_to_train_on = 507
+train_test_overlap = True
 
 cap = cv2.VideoCapture("data/rope_two_hands.mp4")
 if not cap.isOpened():
@@ -26,7 +28,6 @@ def getRedHeight(image, x):
 
 frame_num = 0
 
-frames_to_train_on = 450
 
 while cap.isOpened():
 	ret, frame = cap.read()
@@ -250,6 +251,23 @@ class Particle():
 # ax.plot(p.points.T[:,0], p.points.T[:,1])
 # plt.show()
 
+noise_list = []
+for _ in range(50):
+	i = np.random.randint(1080)
+	j = np.random.randint(1920)
+	w = np.random.randint(10, 30)
+	h = np.random.randint(10, 30)
+	noise_list.append([i, j, w, h])
+constant_noise = True
+
+occlusion_list = []
+for _ in range(25):
+	i = np.random.randint(1080)
+	j = np.random.randint(1920)
+	w = np.random.randint(25, 50)
+	h = np.random.randint(25, 100)
+	occlusion_list.append([i, j, w, h])
+constant_occlusion = True
 
 num_particles = 100
 exploration_factor = 0.1
@@ -262,13 +280,56 @@ while cap.isOpened():
 	ret, frame = cap.read()
 	if ret:
 		frame_num = frame_num + 1
-		if frame_num <= frames_to_train_on:
+		if frame_num <= frames_to_train_on and not train_test_overlap:
 			continue
 
 		iter_num = iter_num + 1
 
 		frame_corrected = np.copy(frame)
 		frame_corrected[:,:,[0,1,2]] = frame[:,:,[2,1,0]]
+
+		# Add red
+		if constant_noise:
+			for noise in noise_list:
+				i = noise[0]
+				j = noise[1]
+				w = noise[2]
+				h = noise[3]
+				for i1 in range(i-h, i+h):
+					for j1 in range(j-w, j+w):
+						try:
+							frame_corrected[i1,j1] = [130, 50, 50]
+						except:
+							pass
+		else:
+			for _ in range(25):
+				i = np.random.randint(frame_corrected.shape[0])
+				j = np.random.randint(frame_corrected.shape[1])
+				w = np.random.randint(25, 50)
+				h = np.random.randint(25, 50)
+				for i1 in range(i-h, i+h):
+					for j1 in range(j-w, j+w):
+						try:
+							frame_corrected[i1,j1] = [130, 50, 50]
+						except:
+							pass
+
+		# Add occlusions
+		if constant_occlusion:
+			for occlusion in occlusion_list:
+				i = occlusion[0]
+				j = occlusion[1]
+				w = occlusion[2]
+				h = occlusion[3]
+				for i1 in range(i-h, i+h):
+					for j1 in range(j-w, j+w):
+						try:
+							frame_corrected[i1,j1] = [255, 255, 255]
+						except:
+							pass
+		else:
+			pass
+
 		frame_corrected = np.asarray(frame_corrected, dtype=float)
 		red_matrix = np.asarray(frame_corrected[:,:,0] - np.maximum(frame_corrected[:,:,1], frame_corrected[:,:,2]), dtype=float)
 		red_matrix[red_matrix < 0] = 0
@@ -276,6 +337,18 @@ while cap.isOpened():
 		# print red_matrix[200,:]
 		normalized_red_matrix = red_matrix / np.max(red_matrix)
 		# print normalized_red_matrix[200,:]
+
+		# for _ in range(25):
+		# 	i = np.random.randint(normalized_red_matrix.shape[0])
+		# 	j = np.random.randint(normalized_red_matrix.shape[1])
+		# 	w = np.random.randint(25, 50)
+		# 	h = np.random.randint(10, 25)
+		# 	for i1 in range(i-w, i+w):
+		# 		for j1 in range(j-h, j+h):
+		# 			try:
+		# 				normalized_red_matrix[i1,j1] = 1.0
+		# 			except:
+		# 				pass
 
 		# fig, ax = plt.subplots()
 		# ax.imshow(normalized_red_matrix, cmap="gray")
@@ -312,8 +385,8 @@ while cap.isOpened():
 		fig, axes = plt.subplots(2, 2)
 		axes[0,0].imshow(normalized_red_matrix, cmap="gray")
 		axes[1,0].imshow(normalized_red_matrix, cmap="gray")
-		axes[0,1].imshow(normalized_red_matrix, cmap="gray")
-		axes[1,1].imshow(normalized_red_matrix, cmap="gray")
+		axes[0,1].imshow(np.asarray(frame_corrected, dtype=int))
+		axes[1,1].imshow(np.asarray(frame_corrected, dtype=int))
 
 		axes[0,0].set_title("All Particles")
 		axes[1,0].set_title("Good Particles")
