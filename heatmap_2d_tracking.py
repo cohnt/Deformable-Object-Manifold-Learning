@@ -263,7 +263,7 @@ occlusion_list = []
 for _ in range(10):
 	i = np.random.randint(1080)
 	j = np.random.randint(1920)
-	w = np.random.randint(25, 50)
+	w = np.random.randint(25, 100)
 	h = np.random.randint(25, 50)
 	occlusion_list.append([i, j, w, h])
 constant_occlusion = True
