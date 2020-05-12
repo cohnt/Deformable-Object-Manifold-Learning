@@ -197,7 +197,7 @@ class Particle():
 			self.xy = xy
 
 		if theta is None:
-			self.theta = np.random.rand() * (np.pi/2.0) - (np.pi/4.0)
+			self.theta = np.random.rand() * (2.0 * np.pi)
 		else:
 			self.theta = theta
 		
@@ -251,7 +251,7 @@ class Particle():
 # plt.show()
 
 noise_list = []
-for _ in range(75):
+for _ in range(50):
 	i = np.random.randint(1080)
 	j = np.random.randint(1920)
 	w = np.random.randint(10, 50)
@@ -332,7 +332,7 @@ while cap.isOpened():
 		# SMOOTH IT
 		from scipy.ndimage import gaussian_filter
 		# print normalized_red_matrix[200,:]
-		normalized_red_matrix = gaussian_filter(normalized_red_matrix, sigma=25, output=float)
+		normalized_red_matrix = gaussian_filter(normalized_red_matrix, sigma=37.5, output=float)
 		# print normalized_red_matrix[200,:]
 
 		# fig, ax = plt.subplots()
