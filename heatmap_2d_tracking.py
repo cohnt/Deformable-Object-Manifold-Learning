@@ -197,7 +197,7 @@ class Particle():
 			self.xy = xy
 
 		if theta is None:
-			self.theta = np.random.rand() * (2.0 * np.pi)
+			self.theta = np.random.rand() * (np.pi/2.0) - (np.pi/4.0)
 		else:
 			self.theta = theta
 		
