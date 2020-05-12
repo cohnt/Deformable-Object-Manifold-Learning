@@ -26,7 +26,7 @@ def getRedHeight(image, x):
 
 frame_num = 0
 
-frames_to_train_on = 450
+frames_to_train_on = 507
 
 while cap.isOpened():
 	ret, frame = cap.read()
@@ -251,7 +251,7 @@ class Particle():
 # plt.show()
 
 noise_list = []
-for _ in range(100):
+for _ in range(50):
 	i = np.random.randint(1080)
 	j = np.random.randint(1920)
 	w = np.random.randint(10, 30)
@@ -260,7 +260,7 @@ for _ in range(100):
 constant_noise = True
 
 occlusion_list = []
-for _ in range(10):
+for _ in range(25):
 	i = np.random.randint(1080)
 	j = np.random.randint(1920)
 	w = np.random.randint(25, 50)
@@ -279,8 +279,8 @@ while cap.isOpened():
 	ret, frame = cap.read()
 	if ret:
 		frame_num = frame_num + 1
-		if frame_num <= frames_to_train_on:
-			continue
+		# if frame_num <= frames_to_train_on:
+		# 	continue
 
 		iter_num = iter_num + 1
 
