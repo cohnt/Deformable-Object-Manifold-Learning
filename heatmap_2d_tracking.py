@@ -251,13 +251,22 @@ class Particle():
 # plt.show()
 
 noise_list = []
-for _ in range(50):
+for _ in range(100):
 	i = np.random.randint(1080)
 	j = np.random.randint(1920)
-	w = np.random.randint(10, 50)
-	h = np.random.randint(10, 50)
+	w = np.random.randint(10, 30)
+	h = np.random.randint(10, 30)
 	noise_list.append([i, j, w, h])
 constant_noise = True
+
+occlusion_list = []
+for _ in range(10):
+	i = np.random.randint(1080)
+	j = np.random.randint(1920)
+	w = np.random.randint(25, 50)
+	h = np.random.randint(25, 50)
+	occlusion_list.append([i, j, w, h])
+constant_occlusion = True
 
 num_particles = 100
 exploration_factor = 0.1
@@ -304,6 +313,22 @@ while cap.isOpened():
 						except:
 							pass
 
+		# Add occlusions
+		if constant_occlusion:
+			for occlusion in occlusion_list:
+				i = occlusion[0]
+				j = occlusion[1]
+				w = occlusion[2]
+				h = occlusion[3]
+				for i1 in range(i-w, i+w):
+					for j1 in range(j-h, j+h):
+						try:
+							frame_corrected[i1,j1] = [255, 255, 255]
+						except:
+							pass
+		else:
+			pass
+
 		frame_corrected = np.asarray(frame_corrected, dtype=float)
 		red_matrix = np.asarray(frame_corrected[:,:,0] - np.maximum(frame_corrected[:,:,1], frame_corrected[:,:,2]), dtype=float)
 		red_matrix[red_matrix < 0] = 0
@@ -332,7 +357,7 @@ while cap.isOpened():
 		# SMOOTH IT
 		from scipy.ndimage import gaussian_filter
 		# print normalized_red_matrix[200,:]
-		normalized_red_matrix = gaussian_filter(normalized_red_matrix, sigma=37.5, output=float)
+		normalized_red_matrix = gaussian_filter(normalized_red_matrix, sigma=50, output=float)
 		# print normalized_red_matrix[200,:]
 
 		# fig, ax = plt.subplots()
