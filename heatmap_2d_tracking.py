@@ -269,7 +269,7 @@ for _ in range(25):
 	occlusion_list.append([i, j, w, h])
 constant_occlusion = True
 
-num_particles = 100
+num_particles = 1000
 exploration_factor = 0.1
 particles = [Particle() for i in range(num_particles)]
 disp_thresh = 0.8
