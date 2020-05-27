@@ -275,6 +275,8 @@ particles = [Particle() for i in range(num_particles)]
 disp_thresh = 0.8
 iter_num = 0
 keep_mle = True
+num_iterations_per_frame = 1
+
 frame_num = 0
 while cap.isOpened():
 	ret, frame = cap.read()
@@ -365,103 +367,104 @@ while cap.isOpened():
 		# ax.imshow(normalized_red_matrix, cmap="gray")
 		# plt.show()
 
-		# Weight particles
-		weights = []
-		for p in particles:
-			weights.append(p.compute_raw_weight(normalized_red_matrix))
-		weights = np.asarray(weights)
-		max_weight = np.sum(weights)
-		# min_weight = np.min(weights[weights > 0])
-		normalized_weights = []
-		for p in particles:
-			# w = (p.raw_weight - min_weight) / (max_weight - min_weight)
-			w = p.raw_weight / max_weight
-			p.normalized_weight = w
-			normalized_weights.append(w)
-		max_normalized_weight = np.max(normalized_weights)
-		max_normalized_weight_ind = np.argmax(normalized_weights)
+		for iter_count in range(num_iterations_per_frame):
+			# Weight particles
+			weights = []
+			for p in particles:
+				weights.append(p.compute_raw_weight(normalized_red_matrix))
+			weights = np.asarray(weights)
+			max_weight = np.sum(weights)
+			# min_weight = np.min(weights[weights > 0])
+			normalized_weights = []
+			for p in particles:
+				# w = (p.raw_weight - min_weight) / (max_weight - min_weight)
+				w = p.raw_weight / max_weight
+				p.normalized_weight = w
+				normalized_weights.append(w)
+			max_normalized_weight = np.max(normalized_weights)
+			max_normalized_weight_ind = np.argmax(normalized_weights)
 
-		# Display
-		fig, axes = plt.subplots(2, 2)
-		axes[0,0].imshow(normalized_red_matrix, cmap="gray")
-		axes[1,0].imshow(normalized_red_matrix, cmap="gray")
-		axes[0,1].imshow(np.asarray(frame_corrected, dtype=int))
-		axes[1,1].imshow(np.asarray(frame_corrected, dtype=int))
+			# Display
+			fig, axes = plt.subplots(2, 2)
+			axes[0,0].imshow(normalized_red_matrix, cmap="gray")
+			axes[1,0].imshow(normalized_red_matrix, cmap="gray")
+			axes[0,1].imshow(np.asarray(frame_corrected, dtype=int))
+			axes[1,1].imshow(np.asarray(frame_corrected, dtype=int))
 
-		axes[0,0].set_title("All Particles")
-		axes[1,0].set_title("Good Particles")
-		axes[0,1].set_title("MLE")
-		axes[1,1].set_title("Mean")
+			axes[0,0].set_title("All Particles")
+			axes[1,0].set_title("Good Particles")
+			axes[0,1].set_title("MLE")
+			axes[1,1].set_title("Mean")
 
-		for p in particles:
-			if p.normalized_weight > 0:
-				axes[0,0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
-				if p.normalized_weight / max_normalized_weight > disp_thresh:
-					axes[1,0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=2)
-		p = particles[max_normalized_weight_ind]
-		
-		axes[0,1].plot(p.points.T[:,0], p.points.T[:,1], c="red", linewidth=3)
+			for p in particles:
+				if p.normalized_weight > 0:
+					axes[0,0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
+					if p.normalized_weight / max_normalized_weight > disp_thresh:
+						axes[1,0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=2)
+			p = particles[max_normalized_weight_ind]
+			
+			axes[0,1].plot(p.points.T[:,0], p.points.T[:,1], c="red", linewidth=3)
 
-		x_vals = np.array([p.points.T[:,0] for p in particles]).reshape(num_particles, num_points_to_track)
-		y_vals = np.array([p.points.T[:,1] for p in particles]).reshape(num_particles, num_points_to_track)
-		x_avg = np.average(x_vals, axis=0, weights=normalized_weights)
-		y_avg = np.average(y_vals, axis=0, weights=normalized_weights)
-		axes[1,1].plot(x_avg.flatten(), y_avg.flatten(), c="red", linewidth=3)
+			x_vals = np.array([p.points.T[:,0] for p in particles]).reshape(num_particles, num_points_to_track)
+			y_vals = np.array([p.points.T[:,1] for p in particles]).reshape(num_particles, num_points_to_track)
+			x_avg = np.average(x_vals, axis=0, weights=normalized_weights)
+			y_avg = np.average(y_vals, axis=0, weights=normalized_weights)
+			axes[1,1].plot(x_avg.flatten(), y_avg.flatten(), c="red", linewidth=3)
 
 
-		axes[0,0].set_xlim((0,1920))
-		axes[0,0].set_ylim((1080,0))
-		axes[1,0].set_xlim((0,1920))
-		axes[1,0].set_ylim((1080,0))
-		axes[0,1].set_xlim((0,1920))
-		axes[0,1].set_ylim((1080,0))
-		axes[1,1].set_xlim((0,1920))
-		axes[1,1].set_ylim((1080,0))
+			axes[0,0].set_xlim((0,1920))
+			axes[0,0].set_ylim((1080,0))
+			axes[1,0].set_xlim((0,1920))
+			axes[1,0].set_ylim((1080,0))
+			axes[0,1].set_xlim((0,1920))
+			axes[0,1].set_ylim((1080,0))
+			axes[1,1].set_xlim((0,1920))
+			axes[1,1].set_ylim((1080,0))
 
-		# mng = plt.get_current_fig_manager()
-		# mng.resize(*mng.window.maxsize())
-		# plt.show()
-		plt.savefig("iteration_%s.svg" % str(iter_num).zfill(2))
-		plt.close(fig)
-		print "Saved %d" % iter_num
+			# mng = plt.get_current_fig_manager()
+			# mng.resize(*mng.window.maxsize())
+			# plt.show()
+			plt.savefig("iteration_%s_%s.svg" % (str(iter_num).zfill(2), str(iter_count).zfill(2)))
+			plt.close(fig)
+			print "Saved %d" % iter_num
 
-		# Resample
-		newParticles = []
-		cs = np.cumsum(normalized_weights)
-		step = 1/float((num_particles * (1-exploration_factor))+1-int(keep_mle))
-		chkVal = step
-		chkIdx = 0
-		for i in range(int(keep_mle), int(np.ceil(num_particles * (1-exploration_factor)))):
-			while cs[chkIdx] < chkVal:
-				chkIdx = chkIdx + 1
-			chkVal = chkVal + step
-			newParticles.append(Particle(xy=particles[chkIdx].xy,
-			                             theta=particles[chkIdx].theta,
-			                             deformation=particles[chkIdx].deformation))
-		for i in range(len(newParticles), num_particles-int(keep_mle)):
-			newParticles.append(Particle())
+			# Resample
+			newParticles = []
+			cs = np.cumsum(normalized_weights)
+			step = 1/float((num_particles * (1-exploration_factor))+1-int(keep_mle))
+			chkVal = step
+			chkIdx = 0
+			for i in range(int(keep_mle), int(np.ceil(num_particles * (1-exploration_factor)))):
+				while cs[chkIdx] < chkVal:
+					chkIdx = chkIdx + 1
+				chkVal = chkVal + step
+				newParticles.append(Particle(xy=particles[chkIdx].xy,
+				                             theta=particles[chkIdx].theta,
+				                             deformation=particles[chkIdx].deformation))
+			for i in range(len(newParticles), num_particles-int(keep_mle)):
+				newParticles.append(Particle())
 
-		if keep_mle:
-			newParticles.append(particles[max_normalized_weight_ind])
+			if keep_mle:
+				newParticles.append(particles[max_normalized_weight_ind])
 
-		# Add noise
-		particles = newParticles
-		for p in particles:
-			xy_var = 200
-			p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
+			# Add noise
+			particles = newParticles
+			for p in particles:
+				xy_var = 200
+				p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
 
-			theta_var = np.pi/16
-			p.theta = p.theta + np.random.normal(0, theta_var)
-			p.theta = ((p.theta + np.pi/4.0) % (np.pi/2.0)) - np.pi/4.0
+				theta_var = np.pi/16
+				p.theta = p.theta + np.random.normal(0, theta_var)
+				p.theta = ((p.theta + np.pi/4.0) % (np.pi/2.0)) - np.pi/4.0
 
-			deformation_var = 500
-			while True:
-				delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
-				if interpolator.find_simplex(p.deformation + delta) != -1:
-					p.deformation = p.deformation + delta
-					break
+				deformation_var = 2500
+				while True:
+					delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
+					if interpolator.find_simplex(p.deformation + delta) != -1:
+						p.deformation = p.deformation + delta
+						break
 
-			p.compute_points()
+				p.compute_points()
 	else:
 		break
 
