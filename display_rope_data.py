@@ -26,4 +26,4 @@ for i in range(2, data_normalized.shape[0]):
 	line = ax.plot(data_normalized[i,:,0], data_normalized[i,:,1], data_normalized[i,:,2])
 
 	fig.canvas.draw()
-	time.sleep(0.05)
+	time.sleep(0.01)
