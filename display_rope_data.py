@@ -27,9 +27,9 @@ for i in range(len(data_centered)):
 	for j in range(len(data_centered[i])):
 		data_rotated[i,j,:] = np.matmul(R, data_centered[i,j,:])
 
-x_lims = (np.min(data[:,:,0]), np.max(data[:,:,0]))
-y_lims = (np.min(data[:,:,1]), np.max(data[:,:,1]))
-z_lims = (np.min(data[:,:,2]), np.max(data[:,:,2]))
+x_lims = (np.min(data_rotated[:,:,0]), np.max(data_rotated[:,:,0]))
+y_lims = (np.min(data_rotated[:,:,1]), np.max(data_rotated[:,:,1]))
+z_lims = (np.min(data_rotated[:,:,2]), np.max(data_rotated[:,:,2]))
 
 plt.ion()
 
