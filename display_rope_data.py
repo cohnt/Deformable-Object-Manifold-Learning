@@ -13,7 +13,7 @@ data_centered = data[:,:,:] - np.repeat(data[:,0,:].reshape(data.shape[0], 1, da
 data_rotated = np.zeros(data_centered.shape)
 for i in range(len(data_centered)):
 	# https://math.stackexchange.com/a/476311
-	a = data_centered[i,1,:] / np.linalg.norm(data_centered[i,1,:])
+	a = data_centered[i,-1,:] / np.linalg.norm(data_centered[i,-1,:])
 	b = np.array([1, 0, 0])
 	v = np.cross(a, b)
 	s = np.linalg.norm(v)
