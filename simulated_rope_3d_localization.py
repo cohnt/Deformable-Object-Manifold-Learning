@@ -130,7 +130,7 @@ def compute_deformation(interpolator, deformation_coords):
 		print "Error: outside of convex hull!"
 		raise ValueError
 
-frame = 1005
+frame = 500
 num_points_to_track = len(data[frame])
 x_min, x_max = -3, 0
 y_min, y_max = 0, 2
