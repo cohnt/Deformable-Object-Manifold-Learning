@@ -200,15 +200,42 @@ for i in range(heatmap_shape[0]):
 	for j in range(heatmap_shape[1]):
 		for k in range(heatmap_shape[2]):
 			x = x_min + (i * heatmap_resolution)
-			y = y_min + (i * heatmap_resolution)
-			z = z_min + (i * heatmap_resolution)
+			y = y_min + (j * heatmap_resolution)
+			z = z_min + (k * heatmap_resolution)
 			dists = np.linalg.norm(data[frame] - np.array([x, y, z]), axis=1)
-			heatmap[i, j, k] = 1 / (1 + np.min(dists)**2)
+			heatmap[i, j, k] = 1 / (1 + np.min(dists))
+
+# Verify that the heatmap is good
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection="3d")
+# ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2])
+
+# points = []
+# for i in range(heatmap_shape[0]):
+# 	for j in range(heatmap_shape[1]):
+# 		for k in range(heatmap_shape[2]):
+# 			if heatmap[i,j,k] > 0.9:
+# 				x = x_min + (i * heatmap_resolution)
+# 				y = y_min + (j * heatmap_resolution)
+# 				z = z_min + (k * heatmap_resolution)
+# 				points.append([x, y, z])
+# points = np.array(points)
+# ax.scatter(points[:,0], points[:,1], points[:,2])
+
+# mng = plt.get_current_fig_manager()
+# mng.resize(*mng.window.maxsize())
+
+# while(True):
+# 	for angle in np.arange(0, 360, 10):
+# 		ax.view_init(30, angle)
+# 		plt.draw()
+# 		plt.pause(.1)
+# plt.show()
+# exit(0)
 
 num_particles = 200
 exploration_factor = 0
 particles = [Particle() for i in range(num_particles)]
-disp_thresh = 0.9
 iter_num = 0
 
 def random_small_rotation(dimension, variance=None):
