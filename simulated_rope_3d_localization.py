@@ -100,10 +100,10 @@ def hover(event):
 
 		fig.canvas.draw_idle()
 
-fig.canvas.mpl_connect('motion_notify_event', hover)
-mng = plt.get_current_fig_manager()
-mng.resize(*mng.window.maxsize())
-plt.show()
+# fig.canvas.mpl_connect('motion_notify_event', hover)
+# mng = plt.get_current_fig_manager()
+# mng.resize(*mng.window.maxsize())
+# plt.show()
 
 ############
 # Localize #
@@ -131,13 +131,14 @@ def compute_deformation(interpolator, deformation_coords):
 		raise ValueError
 
 frame = 1005
+num_points_to_track = len(data[frame])
 x_min, x_max = -3, 0
 y_min, y_max = 0, 2
 z_min, z_max = -1, 1
 
-heatmap_resolution = 0.05
+heatmap_resolution = 0.1
 heatmap_n_decimals = int(-np.log10(heatmap_resolution))
-zero_index = np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
+zero_index = -np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
 heatmap_shape = (int((x_max-x_min)/heatmap_resolution)+1, int((y_max-y_min)/heatmap_resolution)+1, int((z_max-z_min)/heatmap_resolution)+1)
 
 from scipy.stats import special_ortho_group
@@ -152,7 +153,8 @@ class Particle():
 			self.xyz = xyz
 
 		if orien is None:
-			self.orien = special_ortho_group.rvs(3)
+			# self.orien = special_ortho_group.rvs(3)
+			self.orien = np.eye(3)
 		else:
 			self.orien = orien
 		
@@ -162,6 +164,7 @@ class Particle():
 		else:
 			self.deformation = deformation
 
+		self.num_points = num_points_to_track
 		self.compute_points()
 
 		self.raw_weight = None
@@ -169,11 +172,8 @@ class Particle():
 
 	def compute_points(self):
 		raw_points = compute_deformation(interpolator, self.deformation)
-		# print raw_points.shape
-		# print raw_points
-		rotated_points = np.matmul(self.orien, raw_points)
+		rotated_points = np.matmul(self.orien, raw_points.T)
 		self.points = rotated_points + np.asarray(self.xyz).reshape(-1, 1)
-		# print self.points.T
 
 	def compute_raw_weight(self, heatmap):
 		running_total = 0.0
@@ -196,9 +196,80 @@ heatmap = np.zeros(heatmap_shape)
 for i in range(heatmap_shape[0]):
 	for j in range(heatmap_shape[1]):
 		for k in range(heatmap_shape[2]):
-			print i, j, k
 			x = x_min + (i * heatmap_resolution)
 			y = y_min + (i * heatmap_resolution)
 			z = z_min + (i * heatmap_resolution)
-			dists = np.linalg.norm(data_centered[frame] - np.array([x, y, z]), axis=1)
+			dists = np.linalg.norm(data_rotated[frame] - np.array([x, y, z]), axis=1)
 			heatmap[i, j, k] = 1 / (1 + np.min(dists))
+
+num_particles = 200
+exploration_factor = 0.25
+particles = [Particle() for i in range(num_particles)]
+disp_thresh = 0.9
+iter_num = 0
+
+while True:
+	iter_num = iter_num + 1
+
+	# Weight particles
+	weights = []
+	for p in particles:
+		weights.append(p.compute_raw_weight(heatmap))
+	weights = np.asarray(weights)
+	max_weight = np.sum(weights)
+	# min_weight = np.min(weights[weights > 0])
+	normalized_weights = []
+	for p in particles:
+		# w = (p.raw_weight - min_weight) / (max_weight - min_weight)
+		print p.raw_weight
+		w = p.raw_weight / max_weight
+		p.normalized_weight = w
+		normalized_weights.append(w)
+	max_normalized_weight = np.max(normalized_weights)
+	max_normalized_weight_ind = np.argmax(normalized_weights)
+
+	fig = plt.figure()
+	ax = fig.add_subplot(1, 1, 1, projection="3d")
+
+	for p in particles:
+		if p.normalized_weight > 0:
+			ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
+
+	mng = plt.get_current_fig_manager()
+	mng.resize(*mng.window.maxsize())
+	plt.show()
+
+	# Resample
+	newParticles = []
+	cs = np.cumsum(normalized_weights)
+	step = 1/float((num_particles * (1-exploration_factor))+1)
+	chkVal = step
+	chkIdx = 0
+	for i in range(int(np.ceil(num_particles * (1-exploration_factor)))):
+		while cs[chkIdx] < chkVal:
+			chkIdx = chkIdx + 1
+		chkVal = chkVal + step
+		newParticles.append(Particle(xy=particles[chkIdx].xy,
+		                             theta=particles[chkIdx].theta,
+		                             deformation=particles[chkIdx].deformation))
+	for i in range(len(newParticles), num_particles):
+		newParticles.append(Particle())
+
+	# Add noise
+	particles = newParticles
+	for p in particles:
+		xy_var = 100
+		p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
+
+		theta_var = np.pi/32
+		p.theta = p.theta + np.random.normal(0, theta_var)
+		p.theta = ((p.theta + np.pi/4.0) % (np.pi/2.0)) - np.pi/4.0
+
+		deformation_var = 250
+		while True:
+			delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
+			if interpolator.find_simplex(p.deformation + delta) != -1:
+				p.deformation = p.deformation + delta
+				break
+
+		p.compute_points()
