@@ -100,10 +100,10 @@ def hover(event):
 
 		fig.canvas.draw_idle()
 
-# fig.canvas.mpl_connect('motion_notify_event', hover)
-# mng = plt.get_current_fig_manager()
-# mng.resize(*mng.window.maxsize())
-# plt.show()
+fig.canvas.mpl_connect('motion_notify_event', hover)
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
+plt.show()
 
 ############
 # Localize #
@@ -154,7 +154,7 @@ class Particle():
 
 		if orien is None:
 			# self.orien = special_ortho_group.rvs(3)
-			self.orien = np.eye(3)
+			self.orien = np.eye(3) # TODO: CHANGE
 		else:
 			self.orien = orien
 		
@@ -199,7 +199,7 @@ for i in range(heatmap_shape[0]):
 			x = x_min + (i * heatmap_resolution)
 			y = y_min + (i * heatmap_resolution)
 			z = z_min + (i * heatmap_resolution)
-			dists = np.linalg.norm(data_rotated[frame] - np.array([x, y, z]), axis=1)
+			dists = np.linalg.norm(data_rotated[frame] - np.array([x, y, z]), axis=1) # TODO: Change to data_centerd, or even data
 			heatmap[i, j, k] = 1 / (1 + np.min(dists))
 
 num_particles = 200
@@ -234,6 +234,7 @@ while True:
 	for p in particles:
 		if p.normalized_weight > 0:
 			ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
+	ax.plot(data_rotated[frame,:,0], data_rotated[frame,:,1], data_rotated[frame,:,2], color="black")
 
 	mng = plt.get_current_fig_manager()
 	mng.resize(*mng.window.maxsize())
