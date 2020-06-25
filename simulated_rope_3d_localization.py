@@ -203,10 +203,10 @@ for i in range(heatmap_shape[0]):
 			y = y_min + (i * heatmap_resolution)
 			z = z_min + (i * heatmap_resolution)
 			dists = np.linalg.norm(data[frame] - np.array([x, y, z]), axis=1)
-			heatmap[i, j, k] = 1 / (1 + 100*np.min(dists))
+			heatmap[i, j, k] = 1 / (1 + np.min(dists))
 
 num_particles = 200
-exploration_factor = 0.1
+exploration_factor = 0
 particles = [Particle() for i in range(num_particles)]
 disp_thresh = 0.9
 iter_num = 0
@@ -267,7 +267,8 @@ while True:
 	step = 1/float((num_particles * (1-exploration_factor))+1)
 	chkVal = step
 	chkIdx = 0
-	for i in range(int(np.ceil(num_particles * (1-exploration_factor)))):
+	newParticles.append(particles[max_normalized_weight_ind])
+	for i in range(1, int(np.ceil(num_particles * (1-exploration_factor)))):
 		while cs[chkIdx] < chkVal:
 			chkIdx = chkIdx + 1
 		chkVal = chkVal + step
@@ -279,15 +280,16 @@ while True:
 
 	# Add noise
 	particles = newParticles
-	for p in particles:
-		xyz_var = 0
+	for i in range(1, len(particles)):
+		p = particles[i]
+		xyz_var = 0.05
 		p.xyz = p.xyz + np.random.multivariate_normal(np.zeros(3), xyz_var*np.eye(3))
 
-		orien_var = np.pi/32
+		orien_var = 5
 		rot = random_small_rotation(3, orien_var)
 		p.orien = np.matmul(rot, p.orien)
 
-		deformation_var = 5
+		deformation_var = 0.1
 		while True:
 			delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
 			if interpolator.find_simplex(p.deformation + delta) != -1:
