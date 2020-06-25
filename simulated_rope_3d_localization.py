@@ -200,7 +200,7 @@ for i in range(heatmap_shape[0]):
 			y = y_min + (i * heatmap_resolution)
 			z = z_min + (i * heatmap_resolution)
 			dists = np.linalg.norm(data[frame] - np.array([x, y, z]), axis=1)
-			heatmap[i, j, k] = 1 / (1 + np.min(dists))
+			heatmap[i, j, k] = 1 / (1 + 100*np.min(dists))
 
 num_particles = 200
 exploration_factor = 0.1
