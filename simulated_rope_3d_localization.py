@@ -135,7 +135,7 @@ x_min, x_max = -3, 0
 y_min, y_max = 0, 2
 z_min, z_max = -1, 1
 
-heatmap_resolution = 0.01
+heatmap_resolution = 0.05
 heatmap_n_decimals = int(-np.log10(heatmap_resolution))
 zero_index = np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
 heatmap_shape = (int((x_max-x_min)/heatmap_resolution)+1, int((y_max-y_min)/heatmap_resolution)+1, int((z_max-z_min)/heatmap_resolution)+1)
@@ -189,3 +189,16 @@ class Particle():
 
 		self.raw_weight = running_total
 		return self.raw_weight
+
+print "Making heatmap"
+
+heatmap = np.zeros(heatmap_shape)
+for i in range(heatmap_shape[0]):
+	for j in range(heatmap_shape[1]):
+		for k in range(heatmap_shape[2]):
+			print i, j, k
+			x = x_min + (i * heatmap_resolution)
+			y = y_min + (i * heatmap_resolution)
+			z = z_min + (i * heatmap_resolution)
+			dists = np.linalg.norm(data_centered[frame] - np.array([x, y, z]), axis=1)
+			heatmap[i, j, k] = 1 / (1 + np.min(dists))
