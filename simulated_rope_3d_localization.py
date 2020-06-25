@@ -154,8 +154,7 @@ class Particle():
 			self.xyz = xyz
 
 		if orien is None:
-			# self.orien = special_ortho_group.rvs(3)
-			self.orien = np.eye(3) # TODO: CHANGE
+			self.orien = special_ortho_group.rvs(3)
 		else:
 			self.orien = orien
 		
