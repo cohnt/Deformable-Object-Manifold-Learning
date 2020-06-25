@@ -139,6 +139,10 @@ y_max = int(np.ceil(np.max(data[frame,:,1])))
 z_min = int(np.floor(np.min(data[frame,:,2])))
 z_max = int(np.ceil(np.max(data[frame,:,2])))
 
+# print x_min, x_max
+# print y_min, y_max
+# print z_min, z_max
+
 heatmap_resolution = 0.05
 heatmap_n_decimals = int(-np.log10(heatmap_resolution))
 zero_index = -np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
@@ -278,6 +282,10 @@ while True:
 			ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
 	ax.plot(particles[max_normalized_weight_ind].points.T[:,0], particles[max_normalized_weight_ind].points.T[:,1], particles[max_normalized_weight_ind].points.T[:,2], color="red", linewidth=3)
 	ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2], color="black", linewidth=5)
+
+	ax.set_xlim(x_min, x_max)
+	ax.set_ylim(y_min, y_max)
+	ax.set_zlim(z_min, z_max)
 
 	mng = plt.get_current_fig_manager()
 	mng.resize(*mng.window.maxsize())
