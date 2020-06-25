@@ -199,7 +199,7 @@ for i in range(heatmap_shape[0]):
 			x = x_min + (i * heatmap_resolution)
 			y = y_min + (i * heatmap_resolution)
 			z = z_min + (i * heatmap_resolution)
-			dists = np.linalg.norm(data_rotated[frame] - np.array([x, y, z]), axis=1) # TODO: Change to data_centerd, or even data
+			dists = np.linalg.norm(data[frame] - np.array([x, y, z]), axis=1)
 			heatmap[i, j, k] = 1 / (1 + np.min(dists))
 
 num_particles = 200
@@ -207,6 +207,19 @@ exploration_factor = 0.25
 particles = [Particle() for i in range(num_particles)]
 disp_thresh = 0.9
 iter_num = 0
+
+def random_small_rotation(dimension, variance=None):
+	if variance is None:
+		variance = 0.05 * dimension * 180.0 / np.pi
+	theta = np.random.normal(0, variance) * np.pi / 180.0
+	rotMat = np.eye(dimension)
+	rotMat[0,0] = np.cos(theta)
+	rotMat[0,1] = -np.sin(theta)
+	rotMat[1,0] = np.sin(theta)
+	rotMat[1,1] = np.cos(theta)
+	basis = special_ortho_group.rvs(dimension)
+	basis_inv = basis.transpose()
+	return basis.dot(rotMat).dot(basis_inv)
 
 while True:
 	iter_num = iter_num + 1
@@ -221,7 +234,6 @@ while True:
 	normalized_weights = []
 	for p in particles:
 		# w = (p.raw_weight - min_weight) / (max_weight - min_weight)
-		print p.raw_weight
 		w = p.raw_weight / max_weight
 		p.normalized_weight = w
 		normalized_weights.append(w)
@@ -234,11 +246,15 @@ while True:
 	for p in particles:
 		if p.normalized_weight > 0:
 			ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
-	ax.plot(data_rotated[frame,:,0], data_rotated[frame,:,1], data_rotated[frame,:,2], color="black")
+	ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2], color="black")
 
 	mng = plt.get_current_fig_manager()
 	mng.resize(*mng.window.maxsize())
-	plt.show()
+	for angle in np.arange(0, 360, 10):
+		ax.view_init(30, angle)
+		plt.draw()
+		plt.pause(.001)
+	plt.close(fig)
 
 	# Resample
 	newParticles = []
@@ -250,8 +266,8 @@ while True:
 		while cs[chkIdx] < chkVal:
 			chkIdx = chkIdx + 1
 		chkVal = chkVal + step
-		newParticles.append(Particle(xy=particles[chkIdx].xy,
-		                             theta=particles[chkIdx].theta,
+		newParticles.append(Particle(xyz=particles[chkIdx].xyz,
+		                             orien=particles[chkIdx].orien,
 		                             deformation=particles[chkIdx].deformation))
 	for i in range(len(newParticles), num_particles):
 		newParticles.append(Particle())
@@ -259,14 +275,14 @@ while True:
 	# Add noise
 	particles = newParticles
 	for p in particles:
-		xy_var = 100
-		p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
+		xyz_var = 0.1
+		p.xyz = p.xyz + np.random.multivariate_normal(np.zeros(3), xyz_var*np.eye(3))
 
-		theta_var = np.pi/32
-		p.theta = p.theta + np.random.normal(0, theta_var)
-		p.theta = ((p.theta + np.pi/4.0) % (np.pi/2.0)) - np.pi/4.0
+		orien_var = np.pi/32
+		rot = random_small_rotation(3, orien_var)
+		p.orien = np.matmul(rot, p.orien)
 
-		deformation_var = 250
+		deformation_var = 5
 		while True:
 			delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
 			if interpolator.find_simplex(p.deformation + delta) != -1:
