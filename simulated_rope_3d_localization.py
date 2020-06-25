@@ -139,7 +139,7 @@ y_max = int(np.ceil(np.max(data[frame,:,1])))
 z_min = int(np.floor(np.min(data[frame,:,2])))
 z_max = int(np.ceil(np.max(data[frame,:,2])))
 
-heatmap_resolution = 0.1
+heatmap_resolution = 0.05
 heatmap_n_decimals = int(-np.log10(heatmap_resolution))
 zero_index = -np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
 heatmap_shape = (int((x_max-x_min)/heatmap_resolution)+1, int((y_max-y_min)/heatmap_resolution)+1, int((z_max-z_min)/heatmap_resolution)+1)
@@ -203,7 +203,7 @@ for i in range(heatmap_shape[0]):
 			y = y_min + (i * heatmap_resolution)
 			z = z_min + (i * heatmap_resolution)
 			dists = np.linalg.norm(data[frame] - np.array([x, y, z]), axis=1)
-			heatmap[i, j, k] = 1 / (1 + np.min(dists))
+			heatmap[i, j, k] = 1 / (1 + np.min(dists)**2)
 
 num_particles = 200
 exploration_factor = 0
@@ -282,14 +282,14 @@ while True:
 	particles = newParticles
 	for i in range(1, len(particles)):
 		p = particles[i]
-		xyz_var = 0.05
+		xyz_var = 0
 		p.xyz = p.xyz + np.random.multivariate_normal(np.zeros(3), xyz_var*np.eye(3))
 
 		orien_var = 5
 		rot = random_small_rotation(3, orien_var)
 		p.orien = np.matmul(rot, p.orien)
 
-		deformation_var = 0.1
+		deformation_var = 0.5
 		while True:
 			delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
 			if interpolator.find_simplex(p.deformation + delta) != -1:
