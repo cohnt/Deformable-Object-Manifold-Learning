@@ -132,9 +132,12 @@ def compute_deformation(interpolator, deformation_coords):
 
 frame = 50
 num_points_to_track = len(data[frame])
-x_min, x_max = -3, 0
-y_min, y_max = 0, 2
-z_min, z_max = -1, 1
+x_min = int(np.floor(np.min(data[frame,:,0])))
+x_max = int(np.ceil(np.max(data[frame,:,0])))
+y_min = int(np.floor(np.min(data[frame,:,1])))
+y_max = int(np.ceil(np.max(data[frame,:,1])))
+z_min = int(np.floor(np.min(data[frame,:,2])))
+z_max = int(np.ceil(np.max(data[frame,:,2])))
 
 heatmap_resolution = 0.1
 heatmap_n_decimals = int(-np.log10(heatmap_resolution))
