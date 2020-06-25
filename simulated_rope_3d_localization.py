@@ -182,7 +182,7 @@ class Particle():
 		running_total = 0.0
 		for i in range(self.num_points):
 			point = self.points[:,i]
-			heatmap_coords = np.round(point * (10**heatmap_n_decimals)) + zero_index
+			heatmap_coords = np.round((point - np.array([x_min, y_min, z_min])) / heatmap_resolution)
 			heatmap_index = np.asarray(heatmap_coords, dtype=int)
 
 			if (0 <= heatmap_index).all() and (heatmap_index < heatmap_shape).all():
