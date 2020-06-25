@@ -130,4 +130,62 @@ def compute_deformation(interpolator, deformation_coords):
 		print "Error: outside of convex hull!"
 		raise ValueError
 
-frame = n_train
+frame = 1005
+x_min, x_max = -3, 0
+y_min, y_max = 0, 2
+z_min, z_max = -1, 1
+
+heatmap_resolution = 0.01
+heatmap_n_decimals = int(-np.log10(heatmap_resolution))
+zero_index = np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
+heatmap_shape = (int((x_max-x_min)/heatmap_resolution)+1, int((y_max-y_min)/heatmap_resolution)+1, int((z_max-z_min)/heatmap_resolution)+1)
+
+from scipy.stats import special_ortho_group
+
+class Particle():
+	def __init__(self, xyz=None, orien=None, deformation=None):
+		if xyz is None:
+			self.xyz = (np.random.uniform(x_min, x_max),
+			            np.random.uniform(y_min, y_max),
+			            np.random.uniform(z_min, z_max))
+		else:
+			self.xyz = xyz
+
+		if orien is None:
+			self.orien = special_ortho_group.rvs(3)
+		else:
+			self.orien = orien
+		
+		if deformation is None:
+			deformation_ind = np.random.randint(0, len(train))
+			self.deformation = embedding[deformation_ind]
+		else:
+			self.deformation = deformation
+
+		self.compute_points()
+
+		self.raw_weight = None
+		self.normalized_weight = None
+
+	def compute_points(self):
+		raw_points = compute_deformation(interpolator, self.deformation)
+		# print raw_points.shape
+		# print raw_points
+		rotated_points = np.matmul(self.orien, raw_points)
+		self.points = rotated_points + np.asarray(self.xyz).reshape(-1, 1)
+		# print self.points.T
+
+	def compute_raw_weight(self, heatmap):
+		running_total = 0.0
+		for i in range(self.num_points):
+			point = self.points[:,i]
+			heatmap_coords = np.round(point * (10**heatmap_n_decimals)) + zero_index
+			heatmap_index = np.asarray(heatmap_coords, dtype=int)
+
+			if (0 <= heatmap_index).all() and (heatmap_index < heatmap_shape).all():
+				running_total += heatmap[tuple(heatmap_index)]
+			else:
+				continue
+
+		self.raw_weight = running_total
+		return self.raw_weight
