@@ -130,7 +130,7 @@ def compute_deformation(interpolator, deformation_coords):
 		print "Error: outside of convex hull!"
 		raise ValueError
 
-frame = 500
+frame = 50
 num_points_to_track = len(data[frame])
 x_min, x_max = -3, 0
 y_min, y_max = 0, 2
@@ -203,7 +203,7 @@ for i in range(heatmap_shape[0]):
 			heatmap[i, j, k] = 1 / (1 + np.min(dists))
 
 num_particles = 200
-exploration_factor = 0.25
+exploration_factor = 0.1
 particles = [Particle() for i in range(num_particles)]
 disp_thresh = 0.9
 iter_num = 0
@@ -246,7 +246,8 @@ while True:
 	for p in particles:
 		if p.normalized_weight > 0:
 			ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
-	ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2], color="black")
+	ax.plot(particles[max_normalized_weight_ind].points.T[:,0], particles[max_normalized_weight_ind].points.T[:,1], particles[max_normalized_weight_ind].points.T[:,2], color="red", linewidth=3)
+	ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2], color="black", linewidth=5)
 
 	mng = plt.get_current_fig_manager()
 	mng.resize(*mng.window.maxsize())
@@ -255,6 +256,7 @@ while True:
 		plt.draw()
 		plt.pause(.001)
 	plt.close(fig)
+	# plt.show()
 
 	# Resample
 	newParticles = []
