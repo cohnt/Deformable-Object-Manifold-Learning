@@ -275,27 +275,28 @@ while True:
 	max_normalized_weight = np.max(normalized_weights)
 	max_normalized_weight_ind = np.argmax(normalized_weights)
 
-	fig = plt.figure()
-	ax = fig.add_subplot(1, 1, 1, projection="3d")
+	if iter_num > 10:
+		fig = plt.figure()
+		ax = fig.add_subplot(1, 1, 1, projection="3d")
 
-	for p in particles:
-		if p.normalized_weight > 0:
-			ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
-	ax.plot(particles[max_normalized_weight_ind].points.T[:,0], particles[max_normalized_weight_ind].points.T[:,1], particles[max_normalized_weight_ind].points.T[:,2], color="red", linewidth=3)
-	ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2], color="black", linewidth=5)
+		for p in particles:
+			if p.normalized_weight > 0:
+				ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
+		ax.plot(particles[max_normalized_weight_ind].points.T[:,0], particles[max_normalized_weight_ind].points.T[:,1], particles[max_normalized_weight_ind].points.T[:,2], color="red", linewidth=3)
+		ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2], color="black", linewidth=5)
 
-	ax.set_xlim(x_min, x_max)
-	ax.set_ylim(y_min, y_max)
-	ax.set_zlim(z_min, z_max)
+		ax.set_xlim(x_min, x_max)
+		ax.set_ylim(y_min, y_max)
+		ax.set_zlim(z_min, z_max)
 
-	mng = plt.get_current_fig_manager()
-	mng.resize(*mng.window.maxsize())
-	for angle in np.arange(0, 360, 10):
-		ax.view_init(30, angle)
-		plt.draw()
-		plt.pause(.001)
-	plt.close(fig)
-	# plt.show()
+		mng = plt.get_current_fig_manager()
+		mng.resize(*mng.window.maxsize())
+		for angle in np.arange(0, 360, 10):
+			ax.view_init(30, angle)
+			plt.draw()
+			plt.pause(.001)
+		plt.close(fig)
+		# plt.show()
 
 	# Resample
 	newParticles = []
@@ -321,11 +322,11 @@ while True:
 		xyz_var = 0
 		p.xyz = p.xyz + np.random.multivariate_normal(np.zeros(3), xyz_var*np.eye(3))
 
-		orien_var = 5
+		orien_var = 15
 		rot = random_small_rotation(3, orien_var)
 		p.orien = np.matmul(rot, p.orien)
 
-		deformation_var = 0.5
+		deformation_var = 1
 		while True:
 			delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
 			if interpolator.find_simplex(p.deformation + delta) != -1:
