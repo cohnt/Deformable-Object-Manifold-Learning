@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
+n_train = 1000
+
 # Load the data
 with open("data/rope_3d_dataset.npy", "rb") as f:
 	data = np.load(f)
@@ -30,7 +32,7 @@ mfd_xlims = (np.min(data_rotated[:,:,0]), np.max(data_rotated[:,:,0]))
 mfd_ylims = (np.min(data_rotated[:,:,1]), np.max(data_rotated[:,:,1]))
 mfd_zlims = (np.min(data_rotated[:,:,2]), np.max(data_rotated[:,:,2]))
 
-train = data_rotated[0:1000].reshape(1000,-1)
+train = data_rotated[0:n_train].reshape(n_train,-1)
 
 
 from sklearn.manifold import Isomap
@@ -102,3 +104,30 @@ fig.canvas.mpl_connect('motion_notify_event', hover)
 mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 plt.show()
+
+############
+# Localize #
+############
+
+def compute_deformation(interpolator, deformation_coords):
+	simplex_num = interpolator.find_simplex(deformation_coords)
+	if simplex_num != -1:
+		simplex_indices = interpolator.simplices[simplex_num]
+		simplex = interpolator.points[simplex_indices]
+
+		# Compute barycentric coordinates
+		A = np.vstack((simplex.T, np.ones((1, 3))))
+		b = np.vstack((deformation_coords.reshape(-1, 1), np.ones((1, 1))))
+		b_coords = np.linalg.solve(A, b)
+		b = np.asarray(b_coords).flatten()
+
+		# Interpolate the deformation
+		mult_vec = np.zeros(len(train))
+		mult_vec[simplex_indices] = b
+		curve = np.sum(np.matmul(np.diag(mult_vec), train), axis=0).reshape(-1,3)
+		return curve
+	else:
+		print "Error: outside of convex hull!"
+		raise ValueError
+
+frame = n_train
