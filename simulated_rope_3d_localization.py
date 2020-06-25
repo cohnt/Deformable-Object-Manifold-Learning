@@ -153,10 +153,10 @@ from scipy.stats import special_ortho_group
 class Particle():
 	def __init__(self, xyz=None, orien=None, deformation=None):
 		if xyz is None:
-			# self.xyz = (np.random.uniform(x_min, x_max),
-			#             np.random.uniform(y_min, y_max),
-			#             np.random.uniform(z_min, z_max))
-			self.xyz = data[frame,0]
+			self.xyz = (np.random.uniform(x_min, x_max),
+			            np.random.uniform(y_min, y_max),
+			            np.random.uniform(z_min, z_max))
+			# self.xyz = data[frame,0]
 		else:
 			self.xyz = xyz
 
@@ -319,7 +319,7 @@ while True:
 	particles = newParticles
 	for i in range(1, len(particles)):
 		p = particles[i]
-		xyz_var = 0
+		xyz_var = 0.1
 		p.xyz = p.xyz + np.random.multivariate_normal(np.zeros(3), xyz_var*np.eye(3))
 
 		orien_var = 15
