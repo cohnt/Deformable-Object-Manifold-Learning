@@ -26,6 +26,10 @@ for i in range(len(data_centered)):
 	for j in range(len(data_centered[i])):
 		data_rotated[i,j,:] = np.matmul(R, data_centered[i,j,:])
 
+mfd_xlims = (np.min(data_rotated[:,:,0]), np.max(data_rotated[:,:,0]))
+mfd_ylims = (np.min(data_rotated[:,:,1]), np.max(data_rotated[:,:,1]))
+mfd_zlims = (np.min(data_rotated[:,:,2]), np.max(data_rotated[:,:,2]))
+
 train = data_rotated[0:1000].reshape(1000,-1)
 
 
@@ -88,6 +92,9 @@ def hover(event):
 		# print "curve", curve
 		axes[1].clear()
 		axes[1].plot(curve[:,0], curve[:,1], curve[:,2])
+		axes[1].set_xlim(mfd_xlims)
+		axes[1].set_ylim(mfd_ylims)
+		axes[1].set_zlim(mfd_zlims)
 
 		fig.canvas.draw_idle()
 
