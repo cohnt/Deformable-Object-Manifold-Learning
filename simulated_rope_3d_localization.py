@@ -207,8 +207,8 @@ for i in range(heatmap_shape[0]):
 			x = x_min + (i * heatmap_resolution)
 			y = y_min + (j * heatmap_resolution)
 			z = z_min + (k * heatmap_resolution)
-			dists = np.linalg.norm(data[frame] - np.array([x, y, z]), axis=1)
-			heatmap[i, j, k] = 1 / (1 + 50*(np.min(dists)**2))
+			dists = np.linalg.norm(data[frame] - np.array([x, y, z]), axis=1)**2
+			heatmap[i, j, k] = 1 / (1 + 10*np.min(dists))
 
 # Verify that the heatmap is good
 fig = plt.figure()
@@ -231,12 +231,16 @@ ax.scatter(points[:,0], points[:,1], points[:,2])
 mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 
-while(True):
-	for angle in np.arange(0, 360, 10):
-		ax.view_init(30, angle)
-		plt.draw()
-		plt.pause(.1)
-plt.show()
+try:
+	while(True):
+		for angle in np.arange(0, 360, 10):
+			ax.view_init(30, angle)
+			plt.draw()
+			plt.pause(.1)
+except:
+	pass
+
+exit(0)
 
 num_particles = 1000
 exploration_factor = 0
@@ -326,7 +330,7 @@ while True:
 		rot = random_small_rotation(3, orien_var)
 		p.orien = np.matmul(rot, p.orien)
 
-		deformation_var = 1
+		deformation_var = 0.25
 		while True:
 			delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
 			if interpolator.find_simplex(p.deformation + delta) != -1:
