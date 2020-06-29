@@ -231,16 +231,20 @@ ax.scatter(points[:,0], points[:,1], points[:,2])
 mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 
-try:
-	while(True):
-		for angle in np.arange(0, 360, 10):
-			ax.view_init(30, angle)
-			plt.draw()
-			plt.pause(.1)
-except:
-	pass
+# try:
+# 	while(True):
+# 		for angle in np.arange(0, 360, 10):
+# 			ax.view_init(30, angle)
+# 			plt.draw()
+# 			plt.pause(.1)
+# except:
+# 	pass
 
-exit(0)
+for angle in np.arange(0, 720, 10):
+	ax.view_init(30, angle)
+	plt.draw()
+	plt.pause(.1)
+plt.close(fig)
 
 num_particles = 1000
 exploration_factor = 0
