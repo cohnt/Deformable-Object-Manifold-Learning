@@ -143,7 +143,7 @@ z_max = int(np.ceil(np.max(data[frame,:,2])))
 # print y_min, y_max
 # print z_min, z_max
 
-heatmap_resolution = 0.05
+heatmap_resolution = 0.01
 heatmap_n_decimals = int(-np.log10(heatmap_resolution))
 zero_index = -np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
 heatmap_shape = (int((x_max-x_min)/heatmap_resolution)+1, int((y_max-y_min)/heatmap_resolution)+1, int((z_max-z_min)/heatmap_resolution)+1)
@@ -208,37 +208,37 @@ for i in range(heatmap_shape[0]):
 			y = y_min + (j * heatmap_resolution)
 			z = z_min + (k * heatmap_resolution)
 			dists = np.linalg.norm(data[frame] - np.array([x, y, z]), axis=1)
-			heatmap[i, j, k] = 1 / (1 + np.min(dists))
+			heatmap[i, j, k] = 1 / (1 + 50*(np.min(dists)**2))
 
 # Verify that the heatmap is good
-# fig = plt.figure()
-# ax = fig.add_subplot(111, projection="3d")
-# ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2])
+fig = plt.figure()
+ax = fig.add_subplot(111, projection="3d")
+ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2])
 
-# points = []
-# for i in range(heatmap_shape[0]):
-# 	for j in range(heatmap_shape[1]):
-# 		for k in range(heatmap_shape[2]):
-# 			if heatmap[i,j,k] > 0.9:
-# 				x = x_min + (i * heatmap_resolution)
-# 				y = y_min + (j * heatmap_resolution)
-# 				z = z_min + (k * heatmap_resolution)
-# 				points.append([x, y, z])
-# points = np.array(points)
-# ax.scatter(points[:,0], points[:,1], points[:,2])
+points = []
+for i in range(heatmap_shape[0]):
+	for j in range(heatmap_shape[1]):
+		for k in range(heatmap_shape[2]):
+			if i % 5 == 0 and j % 5 == 0 and k % 5 == 0:
+				if heatmap[i,j,k] > 0.9:
+					x = x_min + (i * heatmap_resolution)
+					y = y_min + (j * heatmap_resolution)
+					z = z_min + (k * heatmap_resolution)
+					points.append([x, y, z])
+points = np.array(points)
+ax.scatter(points[:,0], points[:,1], points[:,2])
 
-# mng = plt.get_current_fig_manager()
-# mng.resize(*mng.window.maxsize())
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
 
-# while(True):
-# 	for angle in np.arange(0, 360, 10):
-# 		ax.view_init(30, angle)
-# 		plt.draw()
-# 		plt.pause(.1)
-# plt.show()
-# exit(0)
+while(True):
+	for angle in np.arange(0, 360, 10):
+		ax.view_init(30, angle)
+		plt.draw()
+		plt.pause(.1)
+plt.show()
 
-num_particles = 200
+num_particles = 1000
 exploration_factor = 0
 particles = [Particle() for i in range(num_particles)]
 iter_num = 0
@@ -275,7 +275,7 @@ while True:
 	max_normalized_weight = np.max(normalized_weights)
 	max_normalized_weight_ind = np.argmax(normalized_weights)
 
-	if iter_num > 10:
+	if iter_num > -1:
 		fig = plt.figure()
 		ax = fig.add_subplot(1, 1, 1, projection="3d")
 
