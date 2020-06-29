@@ -191,9 +191,6 @@ class Particle():
 
 			if (0 <= heatmap_index).all() and (heatmap_index < heatmap_shape).all():
 				running_total += heatmap[tuple(heatmap_index)]
-			else:
-				self.raw_weight = 0
-				return self.raw_weight
 
 		self.raw_weight = running_total
 		return self.raw_weight
