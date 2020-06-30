@@ -91,9 +91,9 @@ while True:
 
 	# Display
 	ax.clear()
-	ax.set_xlim(-1, 1)
-	ax.set_ylim(0, 1)
-	ax.set_zlim(-1, 1)
+	ax.set_xlim(x_min, x_max)
+	ax.set_ylim(y_min, y_max)
+	ax.set_zlim(z_min, z_max)
 	coords = np.array([p.xyz for p in particles])
 	weights = np.array([p.raw_weight for p in particles])
 	ax.scatter(coords[:,0], coords[:,1], coords[:,2], cmap=plt.cm.cool, c=weights)
@@ -216,9 +216,9 @@ while True:
 
 	# Display
 	ax.clear()
-	ax.set_xlim(-1, 1)
-	ax.set_ylim(0, 1)
-	ax.set_zlim(-1, 1)
+	ax.set_xlim(x_min, x_max)
+	ax.set_ylim(y_min, y_max)
+	ax.set_zlim(z_min, z_max)
 	coords = np.array([p.point for p in particles])
 	weights = np.array([p.raw_weight for p in particles])
 	ax.scatter(coords[:,0], coords[:,1], coords[:,2], cmap=plt.cm.cool, c=weights)
