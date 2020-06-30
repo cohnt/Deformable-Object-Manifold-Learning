@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 t = np.linspace(0, np.pi, 100)
 data = np.array([0.5 + (0.5 * np.cos(t)), 0.5 * np.sin(t)]).transpose()
@@ -20,7 +21,7 @@ def likelihood(point):
 class SimpleParticle():
 	def __init__(self, xy=None):
 		if xy is None:
-			self.xy = np.array([np.random.uniform(0, 1), np.random.uniform(0, 0.5)])
+			self.xy = np.array([np.random.uniform(0, 1), np.random.uniform(0, 1)])
 		else:
 			self.xy = xy
 
@@ -29,16 +30,31 @@ class SimpleParticle():
 
 num_particles = 100
 exploration_factor = 0
-particles = [Particle() for i in range(num_particles)]
+particles = [SimpleParticle() for i in range(num_particles)]
 iter_num = 0
 
 while True:
 	iter_num = iter_num + 1
 
-	# Compute raw weights
+	# Compute weights
 	normalization_factor = 0
 	for p in particles:
 		p.raw_weight = likelihood(p.xy)
 		normalization_factor = normalization_factor + p.raw_weight
 	for p in particles:
 		p.normalized_weight = p.raw_weight / normalization_factor
+
+	# Predict
+	mle = particles[np.argmax([p.normalized_weight for p in particles])]
+	average = np.average([p.xy for p in particles], axis=0, weights=[p.normalized_weight for p in particles])
+
+	# Display
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+
+	coords = np.array([p.xy for p in particles])
+	weights = np.array([p.raw_weight for p in particles])
+	ax.scatter(coords[:,0], coords[:,1], cmap=plt.cm.cool, c=weights)
+	ax.scatter([mle.xy[0]], [mle.xy[1]], color="black", marker="*")
+	ax.scatter([average[0]], [average[1]], color="black", marker="x")
+	plt.show()
