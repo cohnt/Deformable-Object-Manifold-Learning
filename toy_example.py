@@ -32,7 +32,7 @@ num_particles = 100
 exploration_factor = 0
 particles = [SimpleParticle() for i in range(num_particles)]
 iter_num = 0
-xy_var = 0.1
+xy_var = 0.01
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -59,6 +59,8 @@ while True:
 
 	# Display
 	ax.clear()
+	ax.set_xlim(0, 1)
+	ax.set_ylim(0, 1)
 	coords = np.array([p.xy for p in particles])
 	weights = np.array([p.raw_weight for p in particles])
 	ax.scatter(coords[:,0], coords[:,1], cmap=plt.cm.cool, c=weights)
@@ -77,7 +79,7 @@ while True:
 		while cs[chkIdx] < chkVal:
 			chkIdx = chkIdx + 1
 		chkVal = chkVal + step
-		newParticles.append(particles[chkIdx])
+		newParticles.append(SimpleParticle(xy=particles[chkIdx].xy))
 	for i in range(len(newParticles), num_particles):
 		newParticles.append(SimpleParticle())
 	particles = newParticles
