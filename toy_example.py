@@ -9,6 +9,7 @@ t_len = len(t)
 s = np.repeat(s, t_len)
 t = np.tile(t, s_len)
 data = np.array([0.05 * t * np.cos(t), s, 0.05 * t * np.sin(t)]).transpose()
+data = np.array([np.append(d, np.zeros(3)) for d in data])
 
 # fig = plt.figure()
 # ax = fig.add_subplot(111, projection="3d")
@@ -17,12 +18,12 @@ data = np.array([0.05 * t * np.cos(t), s, 0.05 * t * np.sin(t)]).transpose()
 
 x_min = -1
 x_max = 1
-y_min = 0
+y_min = -1
 y_max = 1
 z_min = -1
 z_max = 1
 
-actual = np.array([0.05 * 4 * np.pi, 0.5, 0])
+actual = np.array([0.05 * 4 * np.pi, 0.5, 0, 0, 0, 0])
 
 from scipy.stats import multivariate_normal
 def likelihood(point):
@@ -35,7 +36,7 @@ def likelihood(point):
 class SimpleParticle():
 	def __init__(self, xyz=None):
 		if xyz is None:
-			self.xyz = np.array([np.random.uniform(x_min, x_max), np.random.uniform(y_min, y_max), np.random.uniform(z_min, z_max)])
+			self.xyz = np.random.uniform(-1, 1, size=6)
 		else:
 			self.xyz = xyz
 
@@ -45,7 +46,7 @@ class SimpleParticle():
 num_particles = 100
 exploration_factor = 0
 pos_var = 0.005
-convergence_threshold = 0.005
+convergence_threshold = 0.01
 particles = [SimpleParticle() for i in range(num_particles)]
 iter_num = 0
 
@@ -141,7 +142,7 @@ def compute_interpolation(interpolator, embedding_coords):
 		simplex = interpolator.points[simplex_indices]
 
 		# Compute barycentric coordinates
-		A = np.vstack((simplex.T, np.ones((1, 3))))
+		A = np.vstack((simplex.T, np.ones((1, 2+1))))
 		b = np.vstack((embedding_coords.reshape(-1, 1), np.ones((1, 1))))
 		b_coords = np.linalg.solve(A, b)
 		b = np.asarray(b_coords).flatten()
@@ -149,7 +150,7 @@ def compute_interpolation(interpolator, embedding_coords):
 		# Interpolate back to the manifold
 		mult_vec = np.zeros(len(data))
 		mult_vec[simplex_indices] = b
-		curve = np.sum(np.matmul(np.diag(mult_vec), data), axis=0).reshape(-1,3)
+		curve = np.sum(np.matmul(np.diag(mult_vec), data), axis=0).reshape(-1,len(actual))
 		return curve[0]
 	else:
 		print "Error: outside of convex hull!"
