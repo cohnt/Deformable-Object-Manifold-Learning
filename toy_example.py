@@ -33,6 +33,13 @@ exploration_factor = 0
 particles = [SimpleParticle() for i in range(num_particles)]
 iter_num = 0
 
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.set_xlim(0, 1)
+ax.set_ylim(0, 1)
+plt.draw()
+plt.pause(0.1)
+
 while True:
 	iter_num = iter_num + 1
 
@@ -49,12 +56,11 @@ while True:
 	average = np.average([p.xy for p in particles], axis=0, weights=[p.normalized_weight for p in particles])
 
 	# Display
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-
+	ax.clear()
 	coords = np.array([p.xy for p in particles])
 	weights = np.array([p.raw_weight for p in particles])
 	ax.scatter(coords[:,0], coords[:,1], cmap=plt.cm.cool, c=weights)
 	ax.scatter([mle.xy[0]], [mle.xy[1]], color="black", marker="*")
 	ax.scatter([average[0]], [average[1]], color="black", marker="x")
-	plt.show()
+	plt.draw()
+	plt.pause(0.1)
