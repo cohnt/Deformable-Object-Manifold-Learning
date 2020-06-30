@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
-extra_dims = 100
+extra_dims = 50
 max_iters = 200
 predict_mode = "average" # mle or average
-norm = np.inf
+norm = 2
 
 s = np.arange(0, 1, 0.05)
 t = np.arange(2 * np.pi, 6 * np.pi, 0.05)
@@ -52,7 +52,7 @@ class SimpleParticle():
 num_particles = 200
 exploration_factor = 0.1
 pos_var = 0.005
-convergence_threshold = 0.01
+convergence_threshold = 0.005
 particles = [SimpleParticle() for i in range(num_particles)]
 iter_num = 0
 
@@ -138,8 +138,8 @@ while True:
 
 print "Original Particle Filter Results:"
 print "Number of iterations:", (iter_num - 1)
-print "Final prediction:", prediction
-print "Error:", np.linalg.norm(prediction - actual, norm)
+print "Final prediction:", mle
+print "Error:", np.linalg.norm(mle - actual, norm)
 
 ##########################
 # Isomap Particle Filter #
@@ -279,5 +279,5 @@ while True:
 
 print "ISOMAP Particle Filter Results:"
 print "Number of iterations:", (iter_num - 1)
-print "Final prediction:", prediction
-print "Error:", np.linalg.norm(prediction - actual, norm)
+print "Final prediction:", mle
+print "Error:", np.linalg.norm(mle - actual, norm)
