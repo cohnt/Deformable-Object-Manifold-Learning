@@ -32,7 +32,8 @@ num_particles = 100
 exploration_factor = 0
 particles = [SimpleParticle() for i in range(num_particles)]
 iter_num = 0
-xy_var = 0.01
+xy_var = 0.005
+convergence_threshold = 0.005
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -40,6 +41,8 @@ ax.set_xlim(0, 1)
 ax.set_ylim(0, 1)
 plt.draw()
 plt.pause(0.1)
+
+prediction = None
 
 while True:
 	iter_num = iter_num + 1
@@ -56,6 +59,16 @@ while True:
 	normalized_weights = [p.normalized_weight for p in particles]
 	mle = particles[np.argmax(normalized_weights)]
 	average = np.average([p.xy for p in particles], axis=0, weights=normalized_weights)
+
+	if prediction is None:
+		prediction = average
+	else:
+		change = np.linalg.norm(average - prediction)
+		prediction = average
+		if change < convergence_threshold:
+			break
+
+	print "Iteraton %d: predicted" % iter_num, prediction
 
 	# Display
 	ax.clear()
