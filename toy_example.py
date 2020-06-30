@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
 extra_dims = 5
+predict_mode = "average" # mle or average
 
 s = np.arange(0, 1, 0.05)
 t = np.arange(2 * np.pi, 6 * np.pi, 0.05)
@@ -79,11 +80,20 @@ while True:
 	mle = particles[np.argmax(normalized_weights)].xyz
 	average = np.average([p.xyz for p in particles], axis=0, weights=normalized_weights)
 
-	if prediction is None:
-		prediction = average
+	p = None
+	if predict_mode == "average":
+		p = average
+	elif predict_mode == "mle":
+		p = mle
 	else:
-		change = np.linalg.norm(average - prediction)
-		prediction = average
+		print "predict_mode must be mle or average!"
+		raise TypeError
+
+	if prediction is None:
+		prediction = p
+	else:
+		change = np.linalg.norm(p - prediction)
+		prediction = p
 		if change < convergence_threshold:
 			break
 
@@ -204,11 +214,20 @@ while True:
 	mle = particles[np.argmax(normalized_weights)].point
 	average = np.average([p.point for p in particles], axis=0, weights=normalized_weights)
 
-	if prediction is None:
-		prediction = average
+	p = None
+	if predict_mode == "average":
+		p = average
+	elif predict_mode == "mle":
+		p = mle
 	else:
-		change = np.linalg.norm(average - prediction)
-		prediction = average
+		print "predict_mode must be mle or average!"
+		raise TypeError
+
+	if prediction is None:
+		prediction = p
+	else:
+		change = np.linalg.norm(p - prediction)
+		prediction = p
 		if change < convergence_threshold:
 			break
 
