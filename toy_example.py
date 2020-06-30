@@ -52,8 +52,9 @@ while True:
 		p.normalized_weight = p.raw_weight / normalization_factor
 
 	# Predict
-	mle = particles[np.argmax([p.normalized_weight for p in particles])]
-	average = np.average([p.xy for p in particles], axis=0, weights=[p.normalized_weight for p in particles])
+	normalized_weights = [p.normalized_weight for p in particles]
+	mle = particles[np.argmax(normalized_weights)]
+	average = np.average([p.xy for p in particles], axis=0, weights=normalized_weights)
 
 	# Display
 	ax.clear()
@@ -64,3 +65,18 @@ while True:
 	ax.scatter([average[0]], [average[1]], color="black", marker="x")
 	plt.draw()
 	plt.pause(0.1)
+
+	# Resample
+	newParticles = []
+	cs = np.cumsum([normalized_weights])
+	step = 1/float((num_particles * (1-exploration_factor))+1)
+	chkVal = step
+	chkIdx = 0
+	for i in range(0, int(np.ceil(num_particles * (1-exploration_factor)))):
+		while cs[chkIdx] < chkVal:
+			chkIdx = chkIdx + 1
+		chkVal = chkVal + step
+		newParticles.append(particles[chkIdx])
+	for i in range(len(newParticles), num_particles):
+		newParticles.append(SimpleParticle())
+	particles = newParticles
