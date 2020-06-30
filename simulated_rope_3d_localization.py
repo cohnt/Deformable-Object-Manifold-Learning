@@ -265,22 +265,24 @@ while True:
 	iter_num = iter_num + 1
 
 	# Weight particles
+	normalization_factor = 0
 	weights = []
 	for p in particles:
-		weights.append(p.compute_raw_weight(heatmap))
+		w = p.compute_raw_weight(heatmap)
+		weights.append(w)
+		normalization_factor = normalization_factor + w
 	weights = np.asarray(weights)
-	max_weight = np.sum(weights)
 	# min_weight = np.min(weights[weights > 0])
 	normalized_weights = []
 	for p in particles:
 		# w = (p.raw_weight - min_weight) / (max_weight - min_weight)
-		w = p.raw_weight / max_weight
+		w = p.raw_weight / normalization_factor
 		p.normalized_weight = w
 		normalized_weights.append(w)
 	max_normalized_weight = np.max(normalized_weights)
 	max_normalized_weight_ind = np.argmax(normalized_weights)
 
-	if iter_num > -1:
+	if iter_num > 25:
 		fig = plt.figure()
 		ax = fig.add_subplot(1, 1, 1, projection="3d")
 

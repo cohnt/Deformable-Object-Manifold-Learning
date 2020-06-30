@@ -27,3 +27,18 @@ class SimpleParticle():
 		self.raw_weight = None
 		self.normalized_weight = None
 
+num_particles = 100
+exploration_factor = 0
+particles = [Particle() for i in range(num_particles)]
+iter_num = 0
+
+while True:
+	iter_num = iter_num + 1
+
+	# Compute raw weights
+	normalization_factor = 0
+	for p in particles:
+		p.raw_weight = likelihood(p.xy)
+		normalization_factor = normalization_factor + p.raw_weight
+	for p in particles:
+		p.normalized_weight = p.raw_weight / normalization_factor
