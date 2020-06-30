@@ -101,3 +101,8 @@ while True:
 	# Diffusion Noise
 	for p in particles:
 		p.xy = p.xy + np.random.multivariate_normal(np.zeros(2), xy_var*np.eye(2))
+
+print "Original Particle Filter Results:"
+print "Number of iterations:", (iter_num - 1)
+print "Final prediction:", prediction
+print "Error:", np.linalg.norm(prediction - actual)
