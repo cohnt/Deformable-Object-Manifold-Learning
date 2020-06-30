@@ -243,7 +243,7 @@ for angle in np.arange(0, 720, 10):
 	plt.pause(.1)
 plt.close(fig)
 
-num_particles = 1000
+num_particles = 10000
 exploration_factor = 0
 particles = [Particle() for i in range(num_particles)]
 iter_num = 0
@@ -265,27 +265,29 @@ while True:
 	iter_num = iter_num + 1
 
 	# Weight particles
+	normalization_factor = 0
 	weights = []
 	for p in particles:
-		weights.append(p.compute_raw_weight(heatmap))
+		w = p.compute_raw_weight(heatmap)
+		weights.append(w)
+		normalization_factor = normalization_factor + w
 	weights = np.asarray(weights)
-	max_weight = np.sum(weights)
 	# min_weight = np.min(weights[weights > 0])
 	normalized_weights = []
 	for p in particles:
 		# w = (p.raw_weight - min_weight) / (max_weight - min_weight)
-		w = p.raw_weight / max_weight
+		w = p.raw_weight / normalization_factor
 		p.normalized_weight = w
 		normalized_weights.append(w)
 	max_normalized_weight = np.max(normalized_weights)
 	max_normalized_weight_ind = np.argmax(normalized_weights)
 
-	if iter_num > -1:
+	if iter_num > 25:
 		fig = plt.figure()
 		ax = fig.add_subplot(1, 1, 1, projection="3d")
 
 		for p in particles:
-			if p.normalized_weight > 0:
+			if p.normalized_weight > -1:
 				ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
 		ax.plot(particles[max_normalized_weight_ind].points.T[:,0], particles[max_normalized_weight_ind].points.T[:,1], particles[max_normalized_weight_ind].points.T[:,2], color="red", linewidth=3)
 		ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2], color="black", linewidth=5)
@@ -327,11 +329,11 @@ while True:
 		xyz_var = 0.1
 		p.xyz = p.xyz + np.random.multivariate_normal(np.zeros(3), xyz_var*np.eye(3))
 
-		orien_var = 15
+		orien_var = 5
 		rot = random_small_rotation(3, orien_var)
 		p.orien = np.matmul(rot, p.orien)
 
-		deformation_var = 0.25
+		deformation_var = 0.1
 		while True:
 			delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
 			if interpolator.find_simplex(p.deformation + delta) != -1:
