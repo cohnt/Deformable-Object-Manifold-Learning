@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
 extra_dims = 100
+max_iters = 200
 predict_mode = "average" # mle or average
 norm = np.inf
 
@@ -96,6 +97,8 @@ while True:
 		change = np.linalg.norm(p - prediction, norm)
 		prediction = p
 		if change < convergence_threshold:
+			break
+		if iter_num >= max_iters:
 			break
 
 	print "Iteraton %d: predicted" % iter_num, prediction
@@ -230,6 +233,8 @@ while True:
 		change = np.linalg.norm(p - prediction, norm)
 		prediction = p
 		if change < convergence_threshold:
+			break
+		if iter_num >= max_iters:
 			break
 
 	print "Iteraton %d: predicted" % iter_num, prediction
