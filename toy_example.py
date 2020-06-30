@@ -32,6 +32,7 @@ num_particles = 100
 exploration_factor = 0
 particles = [SimpleParticle() for i in range(num_particles)]
 iter_num = 0
+xy_var = 0.1
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -80,3 +81,7 @@ while True:
 	for i in range(len(newParticles), num_particles):
 		newParticles.append(SimpleParticle())
 	particles = newParticles
+
+	# Diffusion Noise
+	for p in particles:
+		p.xy = p.xy + np.random.multivariate_normal(np.zeros(2), xy_var*np.eye(2))
