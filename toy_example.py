@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
+extra_dims = 5
+
 s = np.arange(0, 1, 0.05)
 t = np.arange(2 * np.pi, 6 * np.pi, 0.05)
 s_len = len(s)
@@ -9,7 +11,7 @@ t_len = len(t)
 s = np.repeat(s, t_len)
 t = np.tile(t, s_len)
 data = np.array([0.05 * t * np.cos(t), s, 0.05 * t * np.sin(t)]).transpose()
-data = np.array([np.append(d, np.zeros(3)) for d in data])
+data = np.array([np.append(d, np.zeros(extra_dims)) for d in data])
 
 # fig = plt.figure()
 # ax = fig.add_subplot(111, projection="3d")
@@ -23,7 +25,8 @@ y_max = 1
 z_min = -1
 z_max = 1
 
-actual = np.array([0.05 * 4 * np.pi, 0.5, 0, 0, 0, 0])
+actual = np.array([0.05 * 4 * np.pi, 0.5, 0.0])
+actual = np.append(actual, np.zeros(extra_dims))
 
 from scipy.stats import multivariate_normal
 def likelihood(point):
@@ -36,7 +39,7 @@ def likelihood(point):
 class SimpleParticle():
 	def __init__(self, xyz=None):
 		if xyz is None:
-			self.xyz = np.random.uniform(-1, 1, size=6)
+			self.xyz = np.random.uniform(-1, 1, size=len(actual))
 		else:
 			self.xyz = xyz
 
