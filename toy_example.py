@@ -46,8 +46,8 @@ class SimpleParticle():
 		self.raw_weight = None
 		self.normalized_weight = None
 
-num_particles = 100
-exploration_factor = 0
+num_particles = 200
+exploration_factor = 0.1
 pos_var = 0.005
 convergence_threshold = 0.01
 particles = [SimpleParticle() for i in range(num_particles)]
