@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
-n_train = 1000
+n_train = 500
 
 # Load the data
 with open("data/rope_3d_dataset.npy", "rb") as f:
@@ -130,7 +130,7 @@ def compute_deformation(interpolator, deformation_coords):
 		print "Error: outside of convex hull!"
 		raise ValueError
 
-frame = 50
+frame = 250
 num_points_to_track = len(data[frame])
 x_min = int(np.floor(np.min(data[frame,:,0])))
 x_max = int(np.ceil(np.max(data[frame,:,0])))
@@ -143,7 +143,7 @@ z_max = int(np.ceil(np.max(data[frame,:,2])))
 # print y_min, y_max
 # print z_min, z_max
 
-heatmap_resolution = 0.01
+heatmap_resolution = 0.05
 heatmap_n_decimals = int(-np.log10(heatmap_resolution))
 zero_index = -np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
 heatmap_shape = (int((x_max-x_min)/heatmap_resolution)+1, int((y_max-y_min)/heatmap_resolution)+1, int((z_max-z_min)/heatmap_resolution)+1)
@@ -243,7 +243,7 @@ for angle in np.arange(0, 720, 10):
 	plt.pause(.1)
 plt.close(fig)
 
-num_particles = 10000
+num_particles = 1000
 exploration_factor = 0
 particles = [Particle() for i in range(num_particles)]
 iter_num = 0
