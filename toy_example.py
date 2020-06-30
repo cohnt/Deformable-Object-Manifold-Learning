@@ -66,6 +66,7 @@ while True:
 	ax.scatter(coords[:,0], coords[:,1], cmap=plt.cm.cool, c=weights)
 	ax.scatter([mle.xy[0]], [mle.xy[1]], color="black", marker="*")
 	ax.scatter([average[0]], [average[1]], color="black", marker="x")
+	ax.scatter([actual[0]], [actual[1]], color="green", marker="+")
 	plt.draw()
 	plt.pause(0.1)
 
