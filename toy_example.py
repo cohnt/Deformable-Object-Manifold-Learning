@@ -30,7 +30,7 @@ actual = np.append(actual, np.zeros(extra_dims))
 
 from scipy.stats import multivariate_normal
 def likelihood(point):
-	return multivariate_normal.pdf(point, mean=actual, cov=np.eye(len(actual)))
+	return multivariate_normal.pdf(point, mean=actual, cov=0.5*np.eye(len(actual)))
 
 ######################
 # 2D Particle Filter #
@@ -46,8 +46,8 @@ class SimpleParticle():
 		self.raw_weight = None
 		self.normalized_weight = None
 
-num_particles = 100
-exploration_factor = 0
+num_particles = 200
+exploration_factor = 0.1
 pos_var = 0.005
 convergence_threshold = 0.01
 particles = [SimpleParticle() for i in range(num_particles)]
@@ -91,9 +91,9 @@ while True:
 
 	# Display
 	ax.clear()
-	ax.set_xlim(-1, 1)
-	ax.set_ylim(0, 1)
-	ax.set_zlim(-1, 1)
+	ax.set_xlim(x_min, x_max)
+	ax.set_ylim(y_min, y_max)
+	ax.set_zlim(z_min, z_max)
 	coords = np.array([p.xyz for p in particles])
 	weights = np.array([p.raw_weight for p in particles])
 	ax.scatter(coords[:,0], coords[:,1], coords[:,2], cmap=plt.cm.cool, c=weights)
@@ -216,9 +216,9 @@ while True:
 
 	# Display
 	ax.clear()
-	ax.set_xlim(-1, 1)
-	ax.set_ylim(0, 1)
-	ax.set_zlim(-1, 1)
+	ax.set_xlim(x_min, x_max)
+	ax.set_ylim(y_min, y_max)
+	ax.set_zlim(z_min, z_max)
 	coords = np.array([p.point for p in particles])
 	weights = np.array([p.raw_weight for p in particles])
 	ax.scatter(coords[:,0], coords[:,1], coords[:,2], cmap=plt.cm.cool, c=weights)
