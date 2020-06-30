@@ -2,8 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
-extra_dims = 5
+extra_dims = 100
 predict_mode = "average" # mle or average
+norm = np.inf
 
 s = np.arange(0, 1, 0.05)
 t = np.arange(2 * np.pi, 6 * np.pi, 0.05)
@@ -92,7 +93,7 @@ while True:
 	if prediction is None:
 		prediction = p
 	else:
-		change = np.linalg.norm(p - prediction)
+		change = np.linalg.norm(p - prediction, norm)
 		prediction = p
 		if change < convergence_threshold:
 			break
@@ -135,7 +136,7 @@ while True:
 print "Original Particle Filter Results:"
 print "Number of iterations:", (iter_num - 1)
 print "Final prediction:", prediction
-print "Error:", np.linalg.norm(prediction - actual)
+print "Error:", np.linalg.norm(prediction - actual, norm)
 
 ##########################
 # Isomap Particle Filter #
@@ -226,7 +227,7 @@ while True:
 	if prediction is None:
 		prediction = p
 	else:
-		change = np.linalg.norm(p - prediction)
+		change = np.linalg.norm(p - prediction, norm)
 		prediction = p
 		if change < convergence_threshold:
 			break
@@ -274,4 +275,4 @@ while True:
 print "ISOMAP Particle Filter Results:"
 print "Number of iterations:", (iter_num - 1)
 print "Final prediction:", prediction
-print "Error:", np.linalg.norm(prediction - actual)
+print "Error:", np.linalg.norm(prediction - actual, norm)
