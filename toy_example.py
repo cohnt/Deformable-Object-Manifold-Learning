@@ -12,3 +12,18 @@ embedding = ism.fit_transform(data)
 from scipy.stats import multivariate_normal
 def likelihood(point):
 	return multivariate_normal.pdf(point, mean=actual, cov=np.eye(2))
+
+######################
+# 2D Particle Filter #
+######################
+
+class SimpleParticle():
+	def __init__(self, xy=None):
+		if xy is None:
+			self.xy = np.array([np.random.uniform(0, 1), np.random.uniform(0, 0.5)])
+		else:
+			self.xy = xy
+
+		self.raw_weight = None
+		self.normalized_weight = None
+
