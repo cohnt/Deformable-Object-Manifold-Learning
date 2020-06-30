@@ -30,7 +30,7 @@ actual = np.append(actual, np.zeros(extra_dims))
 
 from scipy.stats import multivariate_normal
 def likelihood(point):
-	return multivariate_normal.pdf(point, mean=actual, cov=np.eye(len(actual)))
+	return multivariate_normal.pdf(point, mean=actual, cov=0.5*np.eye(len(actual)))
 
 ######################
 # 2D Particle Filter #
