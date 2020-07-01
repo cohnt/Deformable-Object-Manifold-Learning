@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
-extra_dims = 47
+extra_dims = 0
 max_iters = 200
 predict_mode = "average" # mle or average
 norm = 2
@@ -61,6 +61,7 @@ ax = fig.add_subplot(111, projection="3d")
 ax.set_xlim(x_min, x_max)
 ax.set_ylim(y_min, y_max)
 ax.set_zlim(z_min, z_max)
+ax.view_init(30, 285)
 plt.draw()
 plt.pause(0.1)
 
@@ -108,6 +109,7 @@ while True:
 	ax.set_xlim(x_min, x_max)
 	ax.set_ylim(y_min, y_max)
 	ax.set_zlim(z_min, z_max)
+	ax.view_init(30, 285)
 	coords = np.array([p.xyz for p in particles])
 	weights = np.array([p.raw_weight for p in particles])
 	ax.scatter(coords[:,0], coords[:,1], coords[:,2], cmap=plt.cm.cool, c=weights)
@@ -197,6 +199,7 @@ ax = fig.add_subplot(111, projection="3d")
 ax.set_xlim(x_min, x_max)
 ax.set_ylim(y_min, y_max)
 ax.set_zlim(z_min, z_max)
+ax.view_init(30, 285)
 plt.draw()
 plt.pause(0.1)
 
@@ -244,6 +247,7 @@ while True:
 	ax.set_xlim(x_min, x_max)
 	ax.set_ylim(y_min, y_max)
 	ax.set_zlim(z_min, z_max)
+	ax.view_init(30, 285)
 	coords = np.array([p.point for p in particles])
 	weights = np.array([p.raw_weight for p in particles])
 	ax.scatter(coords[:,0], coords[:,1], coords[:,2], cmap=plt.cm.cool, c=weights)
