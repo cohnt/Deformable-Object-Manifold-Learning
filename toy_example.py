@@ -281,3 +281,5 @@ print "ISOMAP Particle Filter Results:"
 print "Number of iterations:", (iter_num - 1)
 print "Final prediction:", mle
 print "Error:", np.linalg.norm(mle - actual, norm)
+
+plt.show()
