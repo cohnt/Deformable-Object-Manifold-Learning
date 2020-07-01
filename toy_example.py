@@ -2,7 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
-extra_dims = 5
+extra_dims = 47
+max_iters = 200
+predict_mode = "average" # mle or average
+norm = 2
 
 s = np.arange(0, 1, 0.05)
 t = np.arange(2 * np.pi, 6 * np.pi, 0.05)
@@ -49,7 +52,7 @@ class SimpleParticle():
 num_particles = 200
 exploration_factor = 0.1
 pos_var = 0.005
-convergence_threshold = 0.01
+convergence_threshold = 0.005
 particles = [SimpleParticle() for i in range(num_particles)]
 iter_num = 0
 
@@ -79,12 +82,23 @@ while True:
 	mle = particles[np.argmax(normalized_weights)].xyz
 	average = np.average([p.xyz for p in particles], axis=0, weights=normalized_weights)
 
-	if prediction is None:
-		prediction = average
+	p = None
+	if predict_mode == "average":
+		p = average
+	elif predict_mode == "mle":
+		p = mle
 	else:
-		change = np.linalg.norm(average - prediction)
-		prediction = average
+		print "predict_mode must be mle or average!"
+		raise TypeError
+
+	if prediction is None:
+		prediction = p
+	else:
+		change = np.linalg.norm(p - prediction, norm)
+		prediction = p
 		if change < convergence_threshold:
+			break
+		if iter_num >= max_iters:
 			break
 
 	print "Iteraton %d: predicted" % iter_num, prediction
@@ -124,8 +138,8 @@ while True:
 
 print "Original Particle Filter Results:"
 print "Number of iterations:", (iter_num - 1)
-print "Final prediction:", prediction
-print "Error:", np.linalg.norm(prediction - actual)
+print "Final prediction:", mle
+print "Error:", np.linalg.norm(mle - actual, norm)
 
 ##########################
 # Isomap Particle Filter #
@@ -204,12 +218,23 @@ while True:
 	mle = particles[np.argmax(normalized_weights)].point
 	average = np.average([p.point for p in particles], axis=0, weights=normalized_weights)
 
-	if prediction is None:
-		prediction = average
+	p = None
+	if predict_mode == "average":
+		p = average
+	elif predict_mode == "mle":
+		p = mle
 	else:
-		change = np.linalg.norm(average - prediction)
-		prediction = average
+		print "predict_mode must be mle or average!"
+		raise TypeError
+
+	if prediction is None:
+		prediction = p
+	else:
+		change = np.linalg.norm(p - prediction, norm)
+		prediction = p
 		if change < convergence_threshold:
+			break
+		if iter_num >= max_iters:
 			break
 
 	print "Iteraton %d: predicted" % iter_num, prediction
@@ -254,5 +279,5 @@ while True:
 
 print "ISOMAP Particle Filter Results:"
 print "Number of iterations:", (iter_num - 1)
-print "Final prediction:", prediction
-print "Error:", np.linalg.norm(prediction - actual)
+print "Final prediction:", mle
+print "Error:", np.linalg.norm(mle - actual, norm)
