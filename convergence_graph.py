@@ -14,7 +14,7 @@ pos_var = 0.005
 convergence_threshold = 0.005
 
 dim_list = range(0, 7+1)
-num_runs = 25
+num_runs = 10
 orig_data = np.zeros((len(dim_list), num_runs))
 my_data = np.zeros((len(dim_list), num_runs))
 
@@ -225,11 +225,14 @@ print "Means:"
 print orig_means
 print my_means
 
+orig_err_bars = [orig_means - np.min(orig_data, axis=1), np.max(orig_data, axis=1) - orig_means]
+my_err_bars = [my_means - np.min(my_data, axis=1), np.max(my_data, axis=1) - my_means]
+
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.plot(dim_list, orig_means, label="Regular PF")
-ax.plot(dim_list, my_means, label="Coordinate Chart PF")
-ax.xlabel("Data Dimension")
-ax.ylabel("Average Number of Iterations to Converge")
+ax.errorbar(dim_list, orig_means, yerr=orig_err_bars, labe
+ax.errorbar(dim_list, my_means, yerr=my_err_bars, label="Coordinate Chart PF", capsize=5)
+ax.set_xlabel("Data Dimension")
+ax.set_ylabel("Average Number of Iterations to Converge")
 ax.legend()
 plt.show()
