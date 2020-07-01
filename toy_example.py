@@ -2,13 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
-extra_dims = 0
-max_iters = 200
+extra_dims = 7
+max_iters = 500
 predict_mode = "average" # mle or average
-norm = 2
+norm = np.inf
 
-s = np.arange(0, 1, 0.05)
-t = np.arange(2 * np.pi, 6 * np.pi, 0.05)
+train_resolution = 0.2
+
+s = np.arange(0, 1, train_resolution)
+t = np.arange(2 * np.pi, 6 * np.pi, train_resolution)
 s_len = len(s)
 t_len = len(t)
 s = np.repeat(s, t_len)
