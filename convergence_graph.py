@@ -5,7 +5,7 @@ from scipy.stats import multivariate_normal
 from sklearn.manifold import Isomap
 from scipy.spatial import Delaunay
 
-max_iters = 500
+max_iters = 1000
 norm = np.inf
 train_resolution = 0.2
 num_particles = 200
@@ -14,7 +14,7 @@ pos_var = 0.005
 convergence_threshold = 0.005
 
 dim_list = range(0, 7+1)
-num_runs = 10
+num_runs = 25
 orig_data = np.zeros((len(dim_list), num_runs))
 my_data = np.zeros((len(dim_list), num_runs))
 
