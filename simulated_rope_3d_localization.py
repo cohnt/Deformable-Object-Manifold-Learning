@@ -9,7 +9,8 @@ n_train = 500
 with open("data/rope_3d_dataset.npy", "rb") as f:
 	data = np.load(f)
 
-data = data[:,[0,10, 20, 30, 40, 47],:]
+# data = data[:,[0, 10, 20, 30, 40, 47],:]
+data = data[:,[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 47],:]
 
 data_centered = data[:,:,:] - np.repeat(data[:,0,:].reshape(data.shape[0], 1, data.shape[2]), data.shape[1], axis=1)
 
@@ -132,7 +133,7 @@ def compute_deformation(interpolator, deformation_coords):
 		print "Error: outside of convex hull!"
 		raise ValueError
 
-frame = 250
+frame = 34
 num_points_to_track = len(data[frame])
 # x_min = int(np.floor(np.min(data[frame,:,0])))
 # x_max = int(np.ceil(np.max(data[frame,:,0])))
@@ -212,9 +213,12 @@ for i in range(heatmap_shape[0]):
 			heatmap[i, j, k] = 1 / (1 + 10*np.min(dists))
 
 # Verify that the heatmap is good
-# fig = plt.figure()
-# ax = fig.add_subplot(111, projection="3d")
-# ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2])
+fig = plt.figure()
+ax = fig.add_subplot(111, projection="3d")
+ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2])
+ax.set_xlim((x_min, x_max))
+ax.set_ylim((y_min, y_max))
+ax.set_zlim((z_min, z_max))
 
 # points = []
 # for i in range(heatmap_shape[0]):
@@ -229,8 +233,9 @@ for i in range(heatmap_shape[0]):
 # points = np.array(points)
 # ax.scatter(points[:,0], points[:,1], points[:,2])
 
-# mng = plt.get_current_fig_manager()
-# mng.resize(*mng.window.maxsize())
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
+plt.show()
 
 # try:
 # 	while(True):
@@ -286,7 +291,7 @@ while True:
 	max_normalized_weight = np.max(normalized_weights)
 	max_normalized_weight_ind = np.argmax(normalized_weights)
 
-	if iter_num > -1:
+	if iter_num > 25:
 		fig = plt.figure()
 		ax = fig.add_subplot(1, 1, 1, projection="3d")
 
