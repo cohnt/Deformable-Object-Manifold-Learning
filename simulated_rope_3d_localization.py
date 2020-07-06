@@ -9,6 +9,8 @@ n_train = 500
 with open("data/rope_3d_dataset.npy", "rb") as f:
 	data = np.load(f)
 
+data = data[:,[0,10, 20, 30, 40, 47],:]
+
 data_centered = data[:,:,:] - np.repeat(data[:,0,:].reshape(data.shape[0], 1, data.shape[2]), data.shape[1], axis=1)
 
 data_rotated = np.zeros(data_centered.shape)
@@ -132,18 +134,20 @@ def compute_deformation(interpolator, deformation_coords):
 
 frame = 250
 num_points_to_track = len(data[frame])
-x_min = int(np.floor(np.min(data[frame,:,0])))
-x_max = int(np.ceil(np.max(data[frame,:,0])))
-y_min = int(np.floor(np.min(data[frame,:,1])))
-y_max = int(np.ceil(np.max(data[frame,:,1])))
-z_min = int(np.floor(np.min(data[frame,:,2])))
-z_max = int(np.ceil(np.max(data[frame,:,2])))
+# x_min = int(np.floor(np.min(data[frame,:,0])))
+# x_max = int(np.ceil(np.max(data[frame,:,0])))
+# y_min = int(np.floor(np.min(data[frame,:,1])))
+# y_max = int(np.ceil(np.max(data[frame,:,1])))
+# z_min = int(np.floor(np.min(data[frame,:,2])))
+# z_max = int(np.ceil(np.max(data[frame,:,2])))
+x_min = y_min = z_min = int(np.floor(np.min(data[0:n_train])))
+x_max = y_max = z_max = int(np.ceil(np.max(data[0:n_train])))
 
-# print x_min, x_max
+print x_min, x_max
 # print y_min, y_max
 # print z_min, z_max
 
-heatmap_resolution = 0.05
+heatmap_resolution = 0.1
 heatmap_n_decimals = int(-np.log10(heatmap_resolution))
 zero_index = -np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
 heatmap_shape = (int((x_max-x_min)/heatmap_resolution)+1, int((y_max-y_min)/heatmap_resolution)+1, int((z_max-z_min)/heatmap_resolution)+1)
@@ -208,25 +212,25 @@ for i in range(heatmap_shape[0]):
 			heatmap[i, j, k] = 1 / (1 + 10*np.min(dists))
 
 # Verify that the heatmap is good
-fig = plt.figure()
-ax = fig.add_subplot(111, projection="3d")
-ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2])
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection="3d")
+# ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2])
 
-points = []
-for i in range(heatmap_shape[0]):
-	for j in range(heatmap_shape[1]):
-		for k in range(heatmap_shape[2]):
-			if i % 5 == 0 and j % 5 == 0 and k % 5 == 0:
-				if heatmap[i,j,k] > 0.9:
-					x = x_min + (i * heatmap_resolution)
-					y = y_min + (j * heatmap_resolution)
-					z = z_min + (k * heatmap_resolution)
-					points.append([x, y, z])
-points = np.array(points)
-ax.scatter(points[:,0], points[:,1], points[:,2])
+# points = []
+# for i in range(heatmap_shape[0]):
+# 	for j in range(heatmap_shape[1]):
+# 		for k in range(heatmap_shape[2]):
+# 			if i % 5 == 0 and j % 5 == 0 and k % 5 == 0:
+# 				if heatmap[i,j,k] > 0.9:
+# 					x = x_min + (i * heatmap_resolution)
+# 					y = y_min + (j * heatmap_resolution)
+# 					z = z_min + (k * heatmap_resolution)
+# 					points.append([x, y, z])
+# points = np.array(points)
+# ax.scatter(points[:,0], points[:,1], points[:,2])
 
-mng = plt.get_current_fig_manager()
-mng.resize(*mng.window.maxsize())
+# mng = plt.get_current_fig_manager()
+# mng.resize(*mng.window.maxsize())
 
 # try:
 # 	while(True):
@@ -237,13 +241,13 @@ mng.resize(*mng.window.maxsize())
 # except:
 # 	pass
 
-for angle in np.arange(0, 720, 10):
-	ax.view_init(30, angle)
-	plt.draw()
-	plt.pause(.1)
-plt.close(fig)
+# for angle in np.arange(0, 720, 10):
+# 	ax.view_init(30, angle)
+# 	plt.draw()
+# 	plt.pause(.1)
+# plt.close(fig)
 
-num_particles = 1000
+num_particles = 500
 exploration_factor = 0
 particles = [Particle() for i in range(num_particles)]
 iter_num = 0
@@ -282,7 +286,7 @@ while True:
 	max_normalized_weight = np.max(normalized_weights)
 	max_normalized_weight_ind = np.argmax(normalized_weights)
 
-	if iter_num > 25:
+	if iter_num > -1:
 		fig = plt.figure()
 		ax = fig.add_subplot(1, 1, 1, projection="3d")
 
