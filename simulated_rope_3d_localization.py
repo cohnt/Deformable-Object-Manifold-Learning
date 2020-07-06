@@ -133,7 +133,7 @@ def compute_deformation(interpolator, deformation_coords):
 		print "Error: outside of convex hull!"
 		raise ValueError
 
-frame = 499
+frame = 400
 num_points_to_track = len(data[frame])
 # x_min = int(np.floor(np.min(data[frame,:,0])))
 # x_max = int(np.ceil(np.max(data[frame,:,0])))
@@ -252,7 +252,7 @@ plt.show()
 # 	plt.pause(.1)
 # plt.close(fig)
 
-num_particles = 2000
+num_particles = 1000
 exploration_factor = 0
 particles = [Particle() for i in range(num_particles)]
 iter_num = 0
@@ -312,10 +312,13 @@ while True:
 		plt.pause(0.001)
 		plt.savefig("iteration%02d.png" % iter_num)
 
-		# for angle in np.arange(0, 360, 10):
-		# 	ax.view_init(30, angle)
-		# 	plt.draw()
-		# 	plt.pause(.001)
+		if iter_num >= 50:
+			for idx, angle in enumerate(np.arange(-60+10, 300+360, 10)):
+				ax.view_init(30, angle)
+				plt.draw()
+				plt.pause(.001)
+				plt.savefig("iteration%02d.png" % (iter_num + idx + 1))
+			break
 		# plt.close(fig)
 		# plt.show()
 
