@@ -148,7 +148,7 @@ print x_min, x_max
 # print y_min, y_max
 # print z_min, z_max
 
-heatmap_resolution = 0.1
+heatmap_resolution = 0.25
 heatmap_n_decimals = int(-np.log10(heatmap_resolution))
 zero_index = -np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
 heatmap_shape = (int((x_max-x_min)/heatmap_resolution)+1, int((y_max-y_min)/heatmap_resolution)+1, int((z_max-z_min)/heatmap_resolution)+1)
@@ -252,7 +252,7 @@ plt.show()
 # 	plt.pause(.1)
 # plt.close(fig)
 
-num_particles = 500
+num_particles = 2000
 exploration_factor = 0
 particles = [Particle() for i in range(num_particles)]
 iter_num = 0
@@ -269,6 +269,11 @@ def random_small_rotation(dimension, variance=None):
 	basis = special_ortho_group.rvs(dimension)
 	basis_inv = basis.transpose()
 	return basis.dot(rotMat).dot(basis_inv)
+
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1, projection="3d")
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
 
 while True:
 	iter_num = iter_num + 1
@@ -292,10 +297,8 @@ while True:
 	max_normalized_weight = np.max(normalized_weights)
 	max_normalized_weight_ind = np.argmax(normalized_weights)
 
-	if iter_num > 100:
-		fig = plt.figure()
-		ax = fig.add_subplot(1, 1, 1, projection="3d")
-
+	if iter_num > -1:
+		ax.clear()
 		for p in particles:
 			if p.normalized_weight > -1:
 				ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
@@ -305,14 +308,15 @@ while True:
 		ax.set_xlim(x_min, x_max)
 		ax.set_ylim(y_min, y_max)
 		ax.set_zlim(z_min, z_max)
+		plt.draw()
+		plt.pause(0.001)
+		plt.savefig("iteration%02d.png" % iter_num)
 
-		mng = plt.get_current_fig_manager()
-		mng.resize(*mng.window.maxsize())
-		for angle in np.arange(0, 360, 10):
-			ax.view_init(30, angle)
-			plt.draw()
-			plt.pause(.001)
-		plt.close(fig)
+		# for angle in np.arange(0, 360, 10):
+		# 	ax.view_init(30, angle)
+		# 	plt.draw()
+		# 	plt.pause(.001)
+		# plt.close(fig)
 		# plt.show()
 
 	# Resample
