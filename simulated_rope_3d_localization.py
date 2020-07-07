@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
-n_train = 601
+n_train = 500
 
 # Load the data
 with open("data/rope_3d_dataset.npy", "rb") as f:
@@ -134,7 +134,7 @@ def compute_deformation(interpolator, deformation_coords):
 		raise ValueError
 
 # Interesting frames: 325, 400, 499, 600
-frame = 600
+frame = 400
 num_points_to_track = len(data[frame])
 # x_min = int(np.floor(np.min(data[frame,:,0])))
 # x_max = int(np.ceil(np.max(data[frame,:,0])))
