@@ -9,6 +9,9 @@ n_train = 500
 with open("data/rope_3d_dataset.npy", "rb") as f:
 	data = np.load(f)
 
+# data = data[:,[0, 10, 20, 30, 40, 47],:]
+# data = data[:,[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 47],:]
+
 data_centered = data[:,:,:] - np.repeat(data[:,0,:].reshape(data.shape[0], 1, data.shape[2]), data.shape[1], axis=1)
 
 data_rotated = np.zeros(data_centered.shape)
@@ -39,14 +42,14 @@ from sklearn.manifold import Isomap
 
 embedding = Isomap(n_neighbors=12, n_components=2).fit_transform(train)
 
-fig = plt.figure()
-ax0 = fig.add_subplot(1, 2, 1)
-ax1 = fig.add_subplot(1, 2, 2, projection="3d")
-axes = [ax0, ax1]
+# fig = plt.figure()
+# ax0 = fig.add_subplot(1, 2, 1)
+# ax1 = fig.add_subplot(1, 2, 2, projection="3d")
+# axes = [ax0, ax1]
 
-points = axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
-xlim = axes[0].get_xlim()
-ylim = axes[0].get_ylim()
+# points = axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
+# xlim = axes[0].get_xlim()
+# ylim = axes[0].get_ylim()
 
 
 from scipy.spatial import Delaunay
@@ -57,53 +60,53 @@ interpolator = Delaunay(embedding, qhull_options="QJ")
 # Display Plot #
 ################
 
-def hover(event):
-	xy = np.array([event.xdata, event.ydata])
+# def hover(event):
+# 	xy = np.array([event.xdata, event.ydata])
 
-	# Check if xy is in the convex hull
-	simplex_num = interpolator.find_simplex(xy)
-	# print "xy", xy, "\tsimplex_num", simplex_num
-	if simplex_num != -1:
-		# Get the simplex
-		simplex_indices = interpolator.simplices[simplex_num]
-		# print "simplex_indices", simplex_indices
-		simplex = interpolator.points[simplex_indices]
-		# print "simplex", simplex
+# 	# Check if xy is in the convex hull
+# 	simplex_num = interpolator.find_simplex(xy)
+# 	# print "xy", xy, "\tsimplex_num", simplex_num
+# 	if simplex_num != -1:
+# 		# Get the simplex
+# 		simplex_indices = interpolator.simplices[simplex_num]
+# 		# print "simplex_indices", simplex_indices
+# 		simplex = interpolator.points[simplex_indices]
+# 		# print "simplex", simplex
 
-		# Display the simplex vertices
-		axes[0].clear()
-		axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
-		axes[0].scatter(embedding[simplex_indices,0], embedding[simplex_indices,1], c="blue", s=20**2)
-		axes[0].plot(embedding[simplex_indices[[0,1]],0], embedding[simplex_indices[[0,1]],1], c="blue", linewidth=3)
-		axes[0].plot(embedding[simplex_indices[[1,2]],0], embedding[simplex_indices[[1,2]],1], c="blue", linewidth=3)
-		axes[0].plot(embedding[simplex_indices[[0,2]],0], embedding[simplex_indices[[0,2]],1], c="blue", linewidth=3)
-		axes[0].set_xlim(xlim)
-		axes[0].set_ylim(ylim)
+# 		# Display the simplex vertices
+# 		axes[0].clear()
+# 		axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
+# 		axes[0].scatter(embedding[simplex_indices,0], embedding[simplex_indices,1], c="blue", s=20**2)
+# 		axes[0].plot(embedding[simplex_indices[[0,1]],0], embedding[simplex_indices[[0,1]],1], c="blue", linewidth=3)
+# 		axes[0].plot(embedding[simplex_indices[[1,2]],0], embedding[simplex_indices[[1,2]],1], c="blue", linewidth=3)
+# 		axes[0].plot(embedding[simplex_indices[[0,2]],0], embedding[simplex_indices[[0,2]],1], c="blue", linewidth=3)
+# 		axes[0].set_xlim(xlim)
+# 		axes[0].set_ylim(ylim)
 
-		# Compute barycentric coordinates
-		A = np.vstack((simplex.T, np.ones((1, 3))))
-		b = np.vstack((xy.reshape(-1, 1), np.ones((1, 1))))
-		b_coords = np.linalg.solve(A, b)
-		b = np.asarray(b_coords).flatten()
-		print "b_coords", b, np.sum(b_coords)
+# 		# Compute barycentric coordinates
+# 		A = np.vstack((simplex.T, np.ones((1, 3))))
+# 		b = np.vstack((xy.reshape(-1, 1), np.ones((1, 1))))
+# 		b_coords = np.linalg.solve(A, b)
+# 		b = np.asarray(b_coords).flatten()
+# 		print "b_coords", b, np.sum(b_coords)
 
-		# Interpolate the deformation
-		mult_vec = np.zeros(len(train))
-		mult_vec[simplex_indices] = b
-		curve = np.sum(np.matmul(np.diag(mult_vec), train), axis=0).reshape(-1,3)
-		# print "curve", curve
-		axes[1].clear()
-		axes[1].plot(curve[:,0], curve[:,1], curve[:,2])
-		axes[1].set_xlim(mfd_xlims)
-		axes[1].set_ylim(mfd_ylims)
-		axes[1].set_zlim(mfd_zlims)
+# 		# Interpolate the deformation
+# 		mult_vec = np.zeros(len(train))
+# 		mult_vec[simplex_indices] = b
+# 		curve = np.sum(np.matmul(np.diag(mult_vec), train), axis=0).reshape(-1,3)
+# 		# print "curve", curve
+# 		axes[1].clear()
+# 		axes[1].plot(curve[:,0], curve[:,1], curve[:,2])
+# 		axes[1].set_xlim(mfd_xlims)
+# 		axes[1].set_ylim(mfd_ylims)
+# 		axes[1].set_zlim(mfd_zlims)
 
-		fig.canvas.draw_idle()
+# 		fig.canvas.draw_idle()
 
-fig.canvas.mpl_connect('motion_notify_event', hover)
-mng = plt.get_current_fig_manager()
-mng.resize(*mng.window.maxsize())
-plt.show()
+# fig.canvas.mpl_connect('motion_notify_event', hover)
+# mng = plt.get_current_fig_manager()
+# mng.resize(*mng.window.maxsize())
+# plt.show()
 
 ############
 # Localize #
@@ -130,20 +133,23 @@ def compute_deformation(interpolator, deformation_coords):
 		print "Error: outside of convex hull!"
 		raise ValueError
 
-frame = 250
+# Interesting frames: 325, 400, 499, 600
+frame = 499
 num_points_to_track = len(data[frame])
-x_min = int(np.floor(np.min(data[frame,:,0])))
-x_max = int(np.ceil(np.max(data[frame,:,0])))
-y_min = int(np.floor(np.min(data[frame,:,1])))
-y_max = int(np.ceil(np.max(data[frame,:,1])))
-z_min = int(np.floor(np.min(data[frame,:,2])))
-z_max = int(np.ceil(np.max(data[frame,:,2])))
+# x_min = int(np.floor(np.min(data[frame,:,0])))
+# x_max = int(np.ceil(np.max(data[frame,:,0])))
+# y_min = int(np.floor(np.min(data[frame,:,1])))
+# y_max = int(np.ceil(np.max(data[frame,:,1])))
+# z_min = int(np.floor(np.min(data[frame,:,2])))
+# z_max = int(np.ceil(np.max(data[frame,:,2])))
+x_min = y_min = z_min = int(np.floor(np.min(data[0:n_train])))
+x_max = y_max = z_max = int(np.ceil(np.max(data[0:n_train])))
 
-# print x_min, x_max
+print x_min, x_max
 # print y_min, y_max
 # print z_min, z_max
 
-heatmap_resolution = 0.05
+heatmap_resolution = 0.1
 heatmap_n_decimals = int(-np.log10(heatmap_resolution))
 zero_index = -np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
 heatmap_shape = (int((x_max-x_min)/heatmap_resolution)+1, int((y_max-y_min)/heatmap_resolution)+1, int((z_max-z_min)/heatmap_resolution)+1)
@@ -208,25 +214,29 @@ for i in range(heatmap_shape[0]):
 			heatmap[i, j, k] = 1 / (1 + 10*np.min(dists))
 
 # Verify that the heatmap is good
-fig = plt.figure()
-ax = fig.add_subplot(111, projection="3d")
-ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2])
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection="3d")
+# ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2])
+# ax.set_xlim((x_min, x_max))
+# ax.set_ylim((y_min, y_max))
+# ax.set_zlim((z_min, z_max))
 
-points = []
-for i in range(heatmap_shape[0]):
-	for j in range(heatmap_shape[1]):
-		for k in range(heatmap_shape[2]):
-			if i % 5 == 0 and j % 5 == 0 and k % 5 == 0:
-				if heatmap[i,j,k] > 0.9:
-					x = x_min + (i * heatmap_resolution)
-					y = y_min + (j * heatmap_resolution)
-					z = z_min + (k * heatmap_resolution)
-					points.append([x, y, z])
-points = np.array(points)
-ax.scatter(points[:,0], points[:,1], points[:,2])
+# points = []
+# for i in range(heatmap_shape[0]):
+# 	for j in range(heatmap_shape[1]):
+# 		for k in range(heatmap_shape[2]):
+# 			if i % 5 == 0 and j % 5 == 0 and k % 5 == 0:
+# 				if heatmap[i,j,k] > 0.9:
+# 					x = x_min + (i * heatmap_resolution)
+# 					y = y_min + (j * heatmap_resolution)
+# 					z = z_min + (k * heatmap_resolution)
+# 					points.append([x, y, z])
+# points = np.array(points)
+# ax.scatter(points[:,0], points[:,1], points[:,2])
 
-mng = plt.get_current_fig_manager()
-mng.resize(*mng.window.maxsize())
+# mng = plt.get_current_fig_manager()
+# mng.resize(*mng.window.maxsize())
+# plt.show()
 
 # try:
 # 	while(True):
@@ -237,13 +247,13 @@ mng.resize(*mng.window.maxsize())
 # except:
 # 	pass
 
-for angle in np.arange(0, 720, 10):
-	ax.view_init(30, angle)
-	plt.draw()
-	plt.pause(.1)
-plt.close(fig)
+# for angle in np.arange(0, 720, 10):
+# 	ax.view_init(30, angle)
+# 	plt.draw()
+# 	plt.pause(.1)
+# plt.close(fig)
 
-num_particles = 1000
+num_particles = 2000
 exploration_factor = 0
 particles = [Particle() for i in range(num_particles)]
 iter_num = 0
@@ -261,8 +271,14 @@ def random_small_rotation(dimension, variance=None):
 	basis_inv = basis.transpose()
 	return basis.dot(rotMat).dot(basis_inv)
 
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1, projection="3d")
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
+
 while True:
 	iter_num = iter_num + 1
+	print "Iteration %d" % iter_num
 
 	# Weight particles
 	normalization_factor = 0
@@ -282,27 +298,29 @@ while True:
 	max_normalized_weight = np.max(normalized_weights)
 	max_normalized_weight_ind = np.argmax(normalized_weights)
 
-	if iter_num > 25:
-		fig = plt.figure()
-		ax = fig.add_subplot(1, 1, 1, projection="3d")
-
+	if iter_num > -1:
+		ax.clear()
 		for p in particles:
 			if p.normalized_weight > -1:
 				ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
-		ax.plot(particles[max_normalized_weight_ind].points.T[:,0], particles[max_normalized_weight_ind].points.T[:,1], particles[max_normalized_weight_ind].points.T[:,2], color="red", linewidth=3)
 		ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2], color="black", linewidth=5)
+		ax.plot(particles[max_normalized_weight_ind].points.T[:,0], particles[max_normalized_weight_ind].points.T[:,1], particles[max_normalized_weight_ind].points.T[:,2], color="red", linewidth=3)
 
 		ax.set_xlim(x_min, x_max)
 		ax.set_ylim(y_min, y_max)
 		ax.set_zlim(z_min, z_max)
+		plt.draw()
+		plt.pause(0.001)
+		plt.savefig("iteration%02d.png" % iter_num)
 
-		mng = plt.get_current_fig_manager()
-		mng.resize(*mng.window.maxsize())
-		for angle in np.arange(0, 360, 10):
-			ax.view_init(30, angle)
-			plt.draw()
-			plt.pause(.001)
-		plt.close(fig)
+		if iter_num >= 50:
+			for idx, angle in enumerate(np.arange(-60+10, 300+360, 10)):
+				ax.view_init(30, angle)
+				plt.draw()
+				plt.pause(.001)
+				plt.savefig("iteration%02d.png" % (iter_num + idx + 1))
+			break
+		# plt.close(fig)
 		# plt.show()
 
 	# Resample
@@ -341,3 +359,6 @@ while True:
 				break
 
 		p.compute_points()
+
+import os
+os.system('ffmpeg -f image2 -r 1/0.1 -i iteration\%02d.png -c:v libx264 -pix_fmt yuv420p out.mp4')

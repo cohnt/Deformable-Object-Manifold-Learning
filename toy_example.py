@@ -2,13 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
-extra_dims = 47
-max_iters = 200
+extra_dims = 7
+max_iters = 500
 predict_mode = "average" # mle or average
-norm = 2
+norm = np.inf
 
-s = np.arange(0, 1, 0.05)
-t = np.arange(2 * np.pi, 6 * np.pi, 0.05)
+train_resolution = 0.2
+
+s = np.arange(0, 1, train_resolution)
+t = np.arange(2 * np.pi, 6 * np.pi, train_resolution)
 s_len = len(s)
 t_len = len(t)
 s = np.repeat(s, t_len)
@@ -61,6 +63,7 @@ ax = fig.add_subplot(111, projection="3d")
 ax.set_xlim(x_min, x_max)
 ax.set_ylim(y_min, y_max)
 ax.set_zlim(z_min, z_max)
+ax.view_init(30, 285)
 plt.draw()
 plt.pause(0.1)
 
@@ -108,6 +111,7 @@ while True:
 	ax.set_xlim(x_min, x_max)
 	ax.set_ylim(y_min, y_max)
 	ax.set_zlim(z_min, z_max)
+	ax.view_init(30, 285)
 	coords = np.array([p.xyz for p in particles])
 	weights = np.array([p.raw_weight for p in particles])
 	ax.scatter(coords[:,0], coords[:,1], coords[:,2], cmap=plt.cm.cool, c=weights)
@@ -197,6 +201,7 @@ ax = fig.add_subplot(111, projection="3d")
 ax.set_xlim(x_min, x_max)
 ax.set_ylim(y_min, y_max)
 ax.set_zlim(z_min, z_max)
+ax.view_init(30, 285)
 plt.draw()
 plt.pause(0.1)
 
@@ -244,6 +249,7 @@ while True:
 	ax.set_xlim(x_min, x_max)
 	ax.set_ylim(y_min, y_max)
 	ax.set_zlim(z_min, z_max)
+	ax.view_init(30, 285)
 	coords = np.array([p.point for p in particles])
 	weights = np.array([p.raw_weight for p in particles])
 	ax.scatter(coords[:,0], coords[:,1], coords[:,2], cmap=plt.cm.cool, c=weights)
@@ -281,3 +287,5 @@ print "ISOMAP Particle Filter Results:"
 print "Number of iterations:", (iter_num - 1)
 print "Final prediction:", mle
 print "Error:", np.linalg.norm(mle - actual, norm)
+
+plt.show()
