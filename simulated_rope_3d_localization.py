@@ -206,8 +206,9 @@ print "Making heatmap"
 
 # Used for frame 499
 part1 = data[frame, data[frame,:,0] < -2]
-part2 = data[frame, data[frame,:,0] > -1.5]
-occluded = np.append(part1, part2, axis=0)
+part2 = data[frame, np.logical_and(data[frame,:,0] >= -2, data[frame,:,0] <= -1.5)]
+part3 = data[frame, data[frame,:,0] > -1.5]
+occluded = np.append(part1, part3, axis=0)
 
 heatmap = np.zeros(heatmap_shape)
 for i in range(heatmap_shape[0]):
@@ -309,7 +310,8 @@ while True:
 			if p.normalized_weight > -1:
 				ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
 		ax.plot(part1[:,0], part1[:,1], part1[:,2], color="black", linewidth=5)
-		ax.plot(part2[:,0], part2[:,1], part2[:,2], color="black", linewidth=5)
+		ax.plot(part2[:,0], part2[:,1], part2[:,2], color="grey", linewidth=5)
+		ax.plot(part3[:,0], part3[:,1], part3[:,2], color="black", linewidth=5)
 		ax.plot(particles[max_normalized_weight_ind].points.T[:,0], particles[max_normalized_weight_ind].points.T[:,1], particles[max_normalized_weight_ind].points.T[:,2], color="red", linewidth=3)
 
 		ax.set_xlim(x_min, x_max)
