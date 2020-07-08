@@ -146,6 +146,7 @@ x_min = y_min = z_min = int(np.floor(np.min(data[0:n_train])))
 x_max = y_max = z_max = int(np.ceil(np.max(data[0:n_train])))
 
 print x_min, x_max
+print data[frame]
 # print y_min, y_max
 # print z_min, z_max
 
@@ -210,9 +211,14 @@ for i in range(heatmap_shape[0]):
 			x = x_min + (i * heatmap_resolution)
 			y = y_min + (j * heatmap_resolution)
 			z = z_min + (k * heatmap_resolution)
-			dists = np.linalg.norm(data[frame] - np.array([x, y, z]), axis=1)**2
-			heatmap[i, j, k] = 1 / (1 + 10*np.min(dists))
+			if -2 < x and x < -1.5: # Use for frame 499
+				heatmap[i, j, k] = 0
+			else:
+				dists = np.linalg.norm(data[frame] - np.array([x, y, z]), axis=1)**2
+				heatmap[i, j, k] = 1 / (1 + 10*np.min(dists))
 
+part1 = data[frame, data[frame,:,0] < -2]
+part2 = data[frame, data[frame,:,0] > -1.5]
 # Verify that the heatmap is good
 # fig = plt.figure()
 # ax = fig.add_subplot(111, projection="3d")
@@ -303,12 +309,16 @@ while True:
 		for p in particles:
 			if p.normalized_weight > -1:
 				ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
-		ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2], color="black", linewidth=5)
+		ax.plot(part1[:,0], part1[:,1], part1[:,2], color="black", linewidth=5)
+		ax.plot(part2[:,0], part2[:,1], part2[:,2], color="black", linewidth=5)
 		ax.plot(particles[max_normalized_weight_ind].points.T[:,0], particles[max_normalized_weight_ind].points.T[:,1], particles[max_normalized_weight_ind].points.T[:,2], color="red", linewidth=3)
 
 		ax.set_xlim(x_min, x_max)
 		ax.set_ylim(y_min, y_max)
 		ax.set_zlim(z_min, z_max)
+		ax.set_xlabel('X axis')
+		ax.set_ylabel('Y axis')
+		ax.set_zlabel('Z axis')
 		plt.draw()
 		plt.pause(0.001)
 		plt.savefig("iteration%02d.png" % iter_num)
