@@ -42,14 +42,14 @@ from sklearn.manifold import Isomap
 
 embedding = Isomap(n_neighbors=12, n_components=2).fit_transform(train)
 
-fig = plt.figure()
-ax0 = fig.add_subplot(1, 2, 1)
-ax1 = fig.add_subplot(1, 2, 2, projection="3d")
-axes = [ax0, ax1]
+# fig = plt.figure()
+# ax0 = fig.add_subplot(1, 2, 1)
+# ax1 = fig.add_subplot(1, 2, 2, projection="3d")
+# axes = [ax0, ax1]
 
-points = axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
-xlim = axes[0].get_xlim()
-ylim = axes[0].get_ylim()
+# points = axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
+# xlim = axes[0].get_xlim()
+# ylim = axes[0].get_ylim()
 
 
 from scipy.spatial import Delaunay
@@ -60,53 +60,53 @@ interpolator = Delaunay(embedding, qhull_options="QJ")
 # Display Plot #
 ################
 
-def hover(event):
-	xy = np.array([event.xdata, event.ydata])
+# def hover(event):
+# 	xy = np.array([event.xdata, event.ydata])
 
-	# Check if xy is in the convex hull
-	simplex_num = interpolator.find_simplex(xy)
-	# print "xy", xy, "\tsimplex_num", simplex_num
-	if simplex_num != -1:
-		# Get the simplex
-		simplex_indices = interpolator.simplices[simplex_num]
-		# print "simplex_indices", simplex_indices
-		simplex = interpolator.points[simplex_indices]
-		# print "simplex", simplex
+# 	# Check if xy is in the convex hull
+# 	simplex_num = interpolator.find_simplex(xy)
+# 	# print "xy", xy, "\tsimplex_num", simplex_num
+# 	if simplex_num != -1:
+# 		# Get the simplex
+# 		simplex_indices = interpolator.simplices[simplex_num]
+# 		# print "simplex_indices", simplex_indices
+# 		simplex = interpolator.points[simplex_indices]
+# 		# print "simplex", simplex
 
-		# Display the simplex vertices
-		axes[0].clear()
-		axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
-		axes[0].scatter(embedding[simplex_indices,0], embedding[simplex_indices,1], c="blue", s=20**2)
-		axes[0].plot(embedding[simplex_indices[[0,1]],0], embedding[simplex_indices[[0,1]],1], c="blue", linewidth=3)
-		axes[0].plot(embedding[simplex_indices[[1,2]],0], embedding[simplex_indices[[1,2]],1], c="blue", linewidth=3)
-		axes[0].plot(embedding[simplex_indices[[0,2]],0], embedding[simplex_indices[[0,2]],1], c="blue", linewidth=3)
-		axes[0].set_xlim(xlim)
-		axes[0].set_ylim(ylim)
+# 		# Display the simplex vertices
+# 		axes[0].clear()
+# 		axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
+# 		axes[0].scatter(embedding[simplex_indices,0], embedding[simplex_indices,1], c="blue", s=20**2)
+# 		axes[0].plot(embedding[simplex_indices[[0,1]],0], embedding[simplex_indices[[0,1]],1], c="blue", linewidth=3)
+# 		axes[0].plot(embedding[simplex_indices[[1,2]],0], embedding[simplex_indices[[1,2]],1], c="blue", linewidth=3)
+# 		axes[0].plot(embedding[simplex_indices[[0,2]],0], embedding[simplex_indices[[0,2]],1], c="blue", linewidth=3)
+# 		axes[0].set_xlim(xlim)
+# 		axes[0].set_ylim(ylim)
 
-		# Compute barycentric coordinates
-		A = np.vstack((simplex.T, np.ones((1, 3))))
-		b = np.vstack((xy.reshape(-1, 1), np.ones((1, 1))))
-		b_coords = np.linalg.solve(A, b)
-		b = np.asarray(b_coords).flatten()
-		print "b_coords", b, np.sum(b_coords)
+# 		# Compute barycentric coordinates
+# 		A = np.vstack((simplex.T, np.ones((1, 3))))
+# 		b = np.vstack((xy.reshape(-1, 1), np.ones((1, 1))))
+# 		b_coords = np.linalg.solve(A, b)
+# 		b = np.asarray(b_coords).flatten()
+# 		print "b_coords", b, np.sum(b_coords)
 
-		# Interpolate the deformation
-		mult_vec = np.zeros(len(train))
-		mult_vec[simplex_indices] = b
-		curve = np.sum(np.matmul(np.diag(mult_vec), train), axis=0).reshape(-1,3)
-		# print "curve", curve
-		axes[1].clear()
-		axes[1].plot(curve[:,0], curve[:,1], curve[:,2])
-		axes[1].set_xlim(mfd_xlims)
-		axes[1].set_ylim(mfd_ylims)
-		axes[1].set_zlim(mfd_zlims)
+# 		# Interpolate the deformation
+# 		mult_vec = np.zeros(len(train))
+# 		mult_vec[simplex_indices] = b
+# 		curve = np.sum(np.matmul(np.diag(mult_vec), train), axis=0).reshape(-1,3)
+# 		# print "curve", curve
+# 		axes[1].clear()
+# 		axes[1].plot(curve[:,0], curve[:,1], curve[:,2])
+# 		axes[1].set_xlim(mfd_xlims)
+# 		axes[1].set_ylim(mfd_ylims)
+# 		axes[1].set_zlim(mfd_zlims)
 
-		fig.canvas.draw_idle()
+# 		fig.canvas.draw_idle()
 
-fig.canvas.mpl_connect('motion_notify_event', hover)
-mng = plt.get_current_fig_manager()
-mng.resize(*mng.window.maxsize())
-plt.show()
+# fig.canvas.mpl_connect('motion_notify_event', hover)
+# mng = plt.get_current_fig_manager()
+# mng.resize(*mng.window.maxsize())
+# plt.show()
 
 ############
 # Localize #
@@ -214,12 +214,12 @@ for i in range(heatmap_shape[0]):
 			heatmap[i, j, k] = 1 / (1 + 10*np.min(dists))
 
 # Verify that the heatmap is good
-fig = plt.figure()
-ax = fig.add_subplot(111, projection="3d")
-ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2])
-ax.set_xlim((x_min, x_max))
-ax.set_ylim((y_min, y_max))
-ax.set_zlim((z_min, z_max))
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection="3d")
+# ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2])
+# ax.set_xlim((x_min, x_max))
+# ax.set_ylim((y_min, y_max))
+# ax.set_zlim((z_min, z_max))
 
 # points = []
 # for i in range(heatmap_shape[0]):
@@ -234,9 +234,9 @@ ax.set_zlim((z_min, z_max))
 # points = np.array(points)
 # ax.scatter(points[:,0], points[:,1], points[:,2])
 
-mng = plt.get_current_fig_manager()
-mng.resize(*mng.window.maxsize())
-plt.show()
+# mng = plt.get_current_fig_manager()
+# mng.resize(*mng.window.maxsize())
+# plt.show()
 
 # try:
 # 	while(True):
