@@ -204,6 +204,11 @@ class Particle():
 
 print "Making heatmap"
 
+# Used for frame 499
+part1 = data[frame, data[frame,:,0] < -2]
+part2 = data[frame, data[frame,:,0] > -1.5]
+occluded = np.append(part1, part2, axis=0)
+
 heatmap = np.zeros(heatmap_shape)
 for i in range(heatmap_shape[0]):
 	for j in range(heatmap_shape[1]):
@@ -211,14 +216,8 @@ for i in range(heatmap_shape[0]):
 			x = x_min + (i * heatmap_resolution)
 			y = y_min + (j * heatmap_resolution)
 			z = z_min + (k * heatmap_resolution)
-			if -2 < x and x < -1.5: # Use for frame 499
-				heatmap[i, j, k] = 0
-			else:
-				dists = np.linalg.norm(data[frame] - np.array([x, y, z]), axis=1)**2
-				heatmap[i, j, k] = 1 / (1 + 10*np.min(dists))
-
-part1 = data[frame, data[frame,:,0] < -2]
-part2 = data[frame, data[frame,:,0] > -1.5]
+			dists = np.linalg.norm(occluded - np.array([x, y, z]), axis=1)**2
+			heatmap[i, j, k] = 1 / (1 + 10*np.min(dists))
 # Verify that the heatmap is good
 # fig = plt.figure()
 # ax = fig.add_subplot(111, projection="3d")
