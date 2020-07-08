@@ -260,7 +260,7 @@ for i in range(heatmap_shape[0]):
 # plt.close(fig)
 
 num_particles = 2000
-exploration_factor = 0
+exploration_factor = 0.25
 particles = [Particle() for i in range(num_particles)]
 iter_num = 0
 
