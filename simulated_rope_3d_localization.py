@@ -211,9 +211,9 @@ print "Making heatmap"
 # occluded = np.append(part1, part3, axis=0)
 
 # Used for frame 400
-part1 = data[frame, data[frame,:,2] > -0.25]
-part2 = data[frame, np.logical_and(data[frame,:,2] <= -0.25, data[frame,:,2] >= -1.5)]
-part3 = data[frame, data[frame,:,2] < -1.5]
+part1 = data[frame, data[frame,:,2] > -0]
+part2 = data[frame, np.logical_and(data[frame,:,2] <= -0, data[frame,:,2] >= -1)]
+part3 = data[frame, data[frame,:,2] < -1]
 occluded = np.append(part1, part3, axis=0)
 
 heatmap = np.zeros(heatmap_shape)
