@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
-n_train = 500
+n_train = 601
 
 # Load the data
 with open("data/rope_3d_dataset.npy", "rb") as f:
@@ -134,7 +134,7 @@ def compute_deformation(interpolator, deformation_coords):
 		raise ValueError
 
 # Interesting frames: 325, 400, 499, 600
-frame = 400
+frame = 600
 num_points_to_track = len(data[frame])
 # x_min = int(np.floor(np.min(data[frame,:,0])))
 # x_max = int(np.ceil(np.max(data[frame,:,0])))
@@ -211,9 +211,15 @@ print "Making heatmap"
 # occluded = np.append(part1, part3, axis=0)
 
 # Used for frame 400
-part1 = data[frame, data[frame,:,2] > -0]
-part2 = data[frame, np.logical_and(data[frame,:,2] <= -0, data[frame,:,2] >= -1)]
-part3 = data[frame, data[frame,:,2] < -1]
+# part1 = data[frame, data[frame,:,2] > -0]
+# part2 = data[frame, np.logical_and(data[frame,:,2] <= -0, data[frame,:,2] >= -1)]
+# part3 = data[frame, data[frame,:,2] < -1]
+# occluded = np.append(part1, part3, axis=0)
+
+# Used for frame 600
+part1 = data[frame, data[frame,:,2] > 0][:19]
+part2 = data[frame, data[frame,:,2] <= 0]
+part3 = data[frame, data[frame,:,2] > 0][19:]
 occluded = np.append(part1, part3, axis=0)
 
 heatmap = np.zeros(heatmap_shape)
