@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 
-n_train = 500
+n_train = 601
 
 # Load the data
 with open("data/rope_3d_dataset.npy", "rb") as f:
@@ -134,7 +134,7 @@ def compute_deformation(interpolator, deformation_coords):
 		raise ValueError
 
 # Interesting frames: 325, 400, 499, 600
-frame = 499
+frame = 600
 num_points_to_track = len(data[frame])
 # x_min = int(np.floor(np.min(data[frame,:,0])))
 # x_max = int(np.ceil(np.max(data[frame,:,0])))
@@ -146,10 +146,11 @@ x_min = y_min = z_min = int(np.floor(np.min(data[0:n_train])))
 x_max = y_max = z_max = int(np.ceil(np.max(data[0:n_train])))
 
 print x_min, x_max
+print data[frame]
 # print y_min, y_max
 # print z_min, z_max
 
-heatmap_resolution = 0.1
+heatmap_resolution = 0.025
 heatmap_n_decimals = int(-np.log10(heatmap_resolution))
 zero_index = -np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
 heatmap_shape = (int((x_max-x_min)/heatmap_resolution)+1, int((y_max-y_min)/heatmap_resolution)+1, int((z_max-z_min)/heatmap_resolution)+1)
@@ -203,6 +204,24 @@ class Particle():
 
 print "Making heatmap"
 
+# Used for frame 499
+# part1 = data[frame, data[frame,:,0] < -2]
+# part2 = data[frame, np.logical_and(data[frame,:,0] >= -2, data[frame,:,0] <= -1.5)]
+# part3 = data[frame, data[frame,:,0] > -1.5]
+# occluded = np.append(part1, part3, axis=0)
+
+# Used for frame 400
+# part1 = data[frame, data[frame,:,2] > -0]
+# part2 = data[frame, np.logical_and(data[frame,:,2] <= -0, data[frame,:,2] >= -1)]
+# part3 = data[frame, data[frame,:,2] < -1]
+# occluded = np.append(part1, part3, axis=0)
+
+# Used for frame 600
+part1 = data[frame, data[frame,:,2] > 0][:19]
+part2 = data[frame, data[frame,:,2] <= 0]
+part3 = data[frame, data[frame,:,2] > 0][19:]
+occluded = np.append(part1, part3, axis=0)
+
 heatmap = np.zeros(heatmap_shape)
 for i in range(heatmap_shape[0]):
 	for j in range(heatmap_shape[1]):
@@ -210,9 +229,8 @@ for i in range(heatmap_shape[0]):
 			x = x_min + (i * heatmap_resolution)
 			y = y_min + (j * heatmap_resolution)
 			z = z_min + (k * heatmap_resolution)
-			dists = np.linalg.norm(data[frame] - np.array([x, y, z]), axis=1)**2
+			dists = np.linalg.norm(occluded - np.array([x, y, z]), axis=1)**2
 			heatmap[i, j, k] = 1 / (1 + 10*np.min(dists))
-
 # Verify that the heatmap is good
 # fig = plt.figure()
 # ax = fig.add_subplot(111, projection="3d")
@@ -254,7 +272,7 @@ for i in range(heatmap_shape[0]):
 # plt.close(fig)
 
 num_particles = 2000
-exploration_factor = 0
+exploration_factor = 0.1
 particles = [Particle() for i in range(num_particles)]
 iter_num = 0
 
@@ -301,14 +319,19 @@ while True:
 	if iter_num > -1:
 		ax.clear()
 		for p in particles:
-			if p.normalized_weight > -1:
+			if p.raw_weight > 0.75:
 				ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
-		ax.plot(data[frame,:,0], data[frame,:,1], data[frame,:,2], color="black", linewidth=5)
+		ax.plot(part1[:,0], part1[:,1], part1[:,2], color="black", linewidth=5)
+		ax.plot(part2[:,0], part2[:,1], part2[:,2], color="black", linewidth=5, linestyle='dotted')
+		ax.plot(part3[:,0], part3[:,1], part3[:,2], color="black", linewidth=5)
 		ax.plot(particles[max_normalized_weight_ind].points.T[:,0], particles[max_normalized_weight_ind].points.T[:,1], particles[max_normalized_weight_ind].points.T[:,2], color="red", linewidth=3)
 
 		ax.set_xlim(x_min, x_max)
 		ax.set_ylim(y_min, y_max)
 		ax.set_zlim(z_min, z_max)
+		ax.set_xlabel('X axis')
+		ax.set_ylabel('Y axis')
+		ax.set_zlabel('Z axis')
 		plt.draw()
 		plt.pause(0.001)
 		plt.savefig("iteration%02d.png" % iter_num)
