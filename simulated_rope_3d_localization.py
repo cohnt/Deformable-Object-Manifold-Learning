@@ -150,7 +150,7 @@ print data[frame]
 # print y_min, y_max
 # print z_min, z_max
 
-heatmap_resolution = 0.1
+heatmap_resolution = 0.025
 heatmap_n_decimals = int(-np.log10(heatmap_resolution))
 zero_index = -np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
 heatmap_shape = (int((x_max-x_min)/heatmap_resolution)+1, int((y_max-y_min)/heatmap_resolution)+1, int((z_max-z_min)/heatmap_resolution)+1)
@@ -319,7 +319,7 @@ while True:
 	if iter_num > -1:
 		ax.clear()
 		for p in particles:
-			if p.raw_weight > -1:
+			if p.raw_weight > 0.75:
 				ax.plot(p.points.T[:,0], p.points.T[:,1], p.points.T[:,2], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
 		ax.plot(part1[:,0], part1[:,1], part1[:,2], color="black", linewidth=5)
 		ax.plot(part2[:,0], part2[:,1], part2[:,2], color="black", linewidth=5, linestyle='dotted')
