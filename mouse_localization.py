@@ -25,6 +25,10 @@ cx, cy = 320, 240
 frame = 0
 gaussian_filter_sigma = 3
 
+# Particle Filter Parameters
+n_particles = 200
+exploration_factor = 0.25
+
 # Camera Projection
 def xyz2uvd(jnt):
 	if jnt.ndim == 2:
@@ -184,7 +188,7 @@ def compute_deformation(interpolator, deformation_coords):
 		mult_vec = np.zeros(len(train_uvd_flattened))
 		mult_vec[simplex_indices] = b
 		curve = np.sum(np.matmul(np.diag(mult_vec), train_uvd_flattened), axis=0).reshape(-1,3)
-		return curve
+		return curve[0:2] # Ignore the third dimension
 	else:
 		print "Error: outside of convex hull!"
 		raise ValueError
@@ -201,5 +205,58 @@ for i in range(heatmap.shape[0]):
 from scipy.ndimage import gaussian_filter
 heatmap = gaussian_filter(heatmap, sigma=gaussian_filter_sigma, output=float)
 
-plt.imshow(heatmap, cmap=plt.cm.gray)
-plt.show()
+# plt.imshow(heatmap, cmap=plt.cm.gray)
+# plt.show()
+
+class Particle():
+	def __init__(self, xy=None, theta=None, deformation=None):
+		if xy is None:
+			self.xy = (np.random.randint(x_min, x_max),
+			           np.random.randint(y_min, y_max))
+		else:
+			self.xy = xy
+
+		if theta is None:
+			self.theta = (np.random.rand() * np.pi) - (np.pi/2.0)
+		else:
+			self.theta = theta
+		
+		if deformation is None:
+			deformation_ind = np.random.randint(0, len(manifold_data))
+			self.deformation = embedding[deformation_ind]
+		else:
+			self.deformation = deformation
+
+		self.num_points = num_points_to_track
+		self.compute_points()
+
+		self.raw_weight = None
+		self.normalized_weight = None
+
+	def rotation_matrix(self):
+		return np.matrix([[np.cos(self.theta), -np.sin(self.theta)],
+		                  [np.sin(self.theta),  np.cos(self.theta)]])
+
+	def compute_points(self):
+		raw_points = compute_deformation(interpolator, self.deformation)
+		# print raw_points.shape
+		# print raw_points
+		rotated_points = np.matmul(self.rotation_matrix(), raw_points)
+		self.points = rotated_points + np.asarray(self.xy).reshape(-1, 1)
+		# print self.points.T
+
+	def compute_raw_weight(self, heatmap):
+		running_total = 0.0
+		for i in range(self.num_points):
+			point = self.points[:,i]
+			pixel = np.asarray(np.floor(point), dtype=int)
+			if pixel[0] < x_min or pixel[0] >= x_max or pixel[1] < y_min or pixel[1] >= y_max:
+				continue
+			pixel = np.flip(pixel).flatten()
+			running_total += heatmap[pixel[0], pixel[1]]
+		self.raw_weight = running_total
+		return self.raw_weight
+
+# Run the particle filter
+particles = [Particle() for i in range(num_particles)]
+iter_num = 0
