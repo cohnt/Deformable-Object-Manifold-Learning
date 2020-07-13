@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import PIL.Image
 
@@ -34,6 +35,8 @@ exploration_factor = 0.25
 xy_var = 20
 theta_var = np.pi/8
 deformation_var = 5
+
+matplotlib.rcParams.update({'font.size': 22})
 
 # Camera Projection
 def xyz2uvd(jnt):
@@ -273,125 +276,135 @@ axes[1,1].set_xlim((0,image_dims[0]))
 axes[1,1].set_ylim((0,image_dims[1]))
 mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
+fig.tight_layout()
 
 from sklearn.decomposition import PCA
 
 particles = [Particle() for i in range(n_particles)]
 last_centroid = None
 last_angle = None
-for frame in range(test_start_ind, n_test):
-	print "Frame %d" % frame
+try:
+	for frame in range(test_start_ind, n_test):
+		print "Frame %d" % frame
 
-	# Compute the heatmap, centroid, and orienation
-	heatmap = np.zeros(train_depths[0].shape)
-	points = []
-	for i in range(heatmap.shape[0]):
-		for j in range(heatmap.shape[1]):
-			heatmap[i,j] = 1.0 if test_depths[frame,i,j] < 1000.0 else 0.0
-			if heatmap[i,j] == 1.0:
-				points.append([j,i]) # Because matrices are row-major
-	points = np.array(points)
-	centroid = np.mean(points, axis=0)
-	orien = PCA(n_components=1).fit(points).components_[0]
-	angle = np.pi/2 if orien[0] == 0 else np.arctan(orien[1] / orien[0])
-	if last_centroid is None:
-		last_centroid = centroid
-	if last_angle is None:
-		last_angle = angle
+		# Compute the heatmap, centroid, and orienation
+		heatmap = np.zeros(train_depths[0].shape)
+		points = []
+		for i in range(heatmap.shape[0]):
+			for j in range(heatmap.shape[1]):
+				heatmap[i,j] = 1.0 if test_depths[frame,i,j] < 1000.0 else 0.0
+				if heatmap[i,j] == 1.0:
+					points.append([j,i]) # Because matrices are row-major
+		points = np.array(points)
+		centroid = np.mean(points, axis=0)
+		orien = PCA(n_components=1).fit(points).components_[0]
+		angle = np.pi/2 if orien[0] == 0 else np.arctan(orien[1] / orien[0])
+		if last_centroid is None:
+			last_centroid = centroid
+		if last_angle is None:
+			last_angle = angle
 
-	from scipy.ndimage import gaussian_filter
-	const = heatmap.copy()
-	for _ in range(n_passes):
-		heatmap = np.multiply(gaussian_filter(heatmap, sigma=gaussian_filter_sigma, output=float), const)
+		from scipy.ndimage import gaussian_filter
+		const = heatmap.copy()
+		for _ in range(n_passes):
+			heatmap = np.multiply(gaussian_filter(heatmap, sigma=gaussian_filter_sigma, output=float), const)
 
-	# Weight particles
-	weights = []
-	for p in particles:
-		weights.append(p.compute_raw_weight(heatmap))
-	weights = np.asarray(weights)
-	normalization_factor = 1.0 / np.sum(weights)
-	normalized_weights = []
-	for p in particles:
-		# w = (p.raw_weight - min_weight) / (max_weight - min_weight)
-		w = p.raw_weight * normalization_factor
-		p.normalized_weight = w
-		normalized_weights.append(w)
-	max_normalized_weight = np.max(normalized_weights)
-	max_normalized_weight_ind = np.argmax(normalized_weights)
+		# Weight particles
+		weights = []
+		for p in particles:
+			weights.append(p.compute_raw_weight(heatmap))
+		weights = np.asarray(weights)
+		normalization_factor = 1.0 / np.sum(weights)
+		normalized_weights = []
+		for p in particles:
+			# w = (p.raw_weight - min_weight) / (max_weight - min_weight)
+			w = p.raw_weight * normalization_factor
+			p.normalized_weight = w
+			normalized_weights.append(w)
+		max_normalized_weight = np.max(normalized_weights)
+		max_normalized_weight_ind = np.argmax(normalized_weights)
 
-	# Display current iteration
-	axes[0,0].cla()
-	axes[0,1].cla()
-	axes[1,0].cla()
-	axes[1,1].cla()
-	axes[0,0].imshow(heatmap, cmap="gray")
-	axes[1,0].imshow(heatmap, cmap="gray")
-	axes[0,1].imshow(heatmap, cmap="gray")
-	axes[1,1].imshow(heatmap, cmap="gray")
+		# Display current iteration
+		axes[0,0].cla()
+		axes[0,1].cla()
+		axes[1,0].cla()
+		axes[1,1].cla()
+		axes[0,0].imshow(heatmap, cmap="gray")
+		axes[1,0].imshow(heatmap, cmap="gray")
+		axes[0,1].imshow(heatmap, cmap="gray")
+		axes[1,1].imshow(heatmap, cmap="gray")
 
-	axes[0,0].set_title("All Particles")
-	axes[1,0].set_title("Good Particles")
-	axes[0,1].set_title("MLE")
-	axes[1,1].set_title("Mean")
+		axes[0,0].set_title("All Particles")
+		# axes[1,0].set_title("Good Particles")
+		axes[1,0].set_title("Ground Truth")
+		axes[0,1].set_title("MLE")
+		axes[1,1].set_title("Mean")
 
-	for p in particles:
-		if p.normalized_weight > 0:
-			axes[0,0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
-			if p.normalized_weight / max_normalized_weight > disp_thresh:
-				axes[1,0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=2)
-	p = particles[max_normalized_weight_ind]
-	
-	axes[0,1].plot(p.points.T[:,0], p.points.T[:,1], c="red", linewidth=3)
+		for p in particles:
+			if p.normalized_weight > 0:
+				axes[0,0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
+				# if p.normalized_weight / max_normalized_weight > disp_thresh:
+				# 	axes[1,0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=2)
+		p = particles[max_normalized_weight_ind]
+		
+		axes[0,1].plot(p.points.T[:,0], p.points.T[:,1], c="red", linewidth=3)
 
-	x_vals = np.array([p.points.T[:,0] for p in particles]).reshape(n_particles, n_tracked_points)
-	y_vals = np.array([p.points.T[:,1] for p in particles]).reshape(n_particles, n_tracked_points)
-	x_avg = np.average(x_vals, axis=0, weights=normalized_weights)
-	y_avg = np.average(y_vals, axis=0, weights=normalized_weights)
-	axes[1,1].plot(x_avg.flatten(), y_avg.flatten(), c="red", linewidth=3)
+		x_vals = np.array([p.points.T[:,0] for p in particles]).reshape(n_particles, n_tracked_points)
+		y_vals = np.array([p.points.T[:,1] for p in particles]).reshape(n_particles, n_tracked_points)
+		x_avg = np.average(x_vals, axis=0, weights=normalized_weights)
+		y_avg = np.average(y_vals, axis=0, weights=normalized_weights)
+		axes[1,1].plot(x_avg.flatten(), y_avg.flatten(), c="red", linewidth=3)
 
-	for ax in axes[:,1]:
-		ax.scatter([centroid[0]], [centroid[1]], c="green", s=5**2)
-		ax.plot([centroid[0]-10*orien[0], centroid[0]+10*orien[0]], [centroid[1]-10*orien[1], centroid[1]+10*orien[1]], c="green", linewidth=1)
+		for ax in axes[:,1]:
+			ax.scatter([centroid[0]], [centroid[1]], c="green", s=5**2)
+			ax.plot([centroid[0]-10*orien[0], centroid[0]+10*orien[0]], [centroid[1]-10*orien[1], centroid[1]+10*orien[1]], c="green", linewidth=1)
 
-	plt.draw()
-	plt.pause(0.001)
+		axes[1,0].plot(test_uvd[frame,:,0], test_uvd[frame,:,1], c="red", linewidth=3)
 
-	# Resample
-	newParticles = []
-	cs = np.cumsum(normalized_weights)
-	step = 1/float((n_particles * (1-exploration_factor))+1)
-	chkVal = step
-	chkIdx = 0
-	newParticles.append(particles[max_normalized_weight_ind])
-	for i in range(1, int(np.ceil(n_particles * (1-exploration_factor)))):
-		while cs[chkIdx] < chkVal:
-			chkIdx = chkIdx + 1
-		chkVal = chkVal + step
-		newParticles.append(Particle(xy=particles[chkIdx].xy,
-		                             theta=particles[chkIdx].theta,
-		                             deformation=particles[chkIdx].deformation))
-	for i in range(len(newParticles), n_particles):
-		newParticles.append(Particle())
+		plt.draw()
+		plt.pause(0.001)
+		plt.savefig("iteration%03d.png" % (frame - test_start_ind))
 
-	# Propagate particles
-	xy_change = centroid - last_centroid
-	theta_change = angle - last_angle
-	for p in particles:
-		p.xy = p.xy + xy_change
-		p.theta = p.theta + theta_change
+		# Resample
+		newParticles = []
+		cs = np.cumsum(normalized_weights)
+		step = 1/float((n_particles * (1-exploration_factor))+1)
+		chkVal = step
+		chkIdx = 0
+		newParticles.append(particles[max_normalized_weight_ind])
+		for i in range(1, int(np.ceil(n_particles * (1-exploration_factor)))):
+			while cs[chkIdx] < chkVal:
+				chkIdx = chkIdx + 1
+			chkVal = chkVal + step
+			newParticles.append(Particle(xy=particles[chkIdx].xy,
+			                             theta=particles[chkIdx].theta,
+			                             deformation=particles[chkIdx].deformation))
+		for i in range(len(newParticles), n_particles):
+			newParticles.append(Particle())
 
-	# Add noise
-	particles = newParticles
-	for p in particles:
-		p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
+		# Propagate particles
+		xy_change = centroid - last_centroid
+		theta_change = angle - last_angle
+		for p in particles:
+			p.xy = p.xy + xy_change
+			p.theta = p.theta + theta_change
 
-		p.theta = p.theta + np.random.normal(0, theta_var)
-		p.theta = ((p.theta + np.pi/4.0) % (np.pi/2.0)) - np.pi/4.0
+		# Add noise
+		particles = newParticles
+		for p in particles:
+			p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
 
-		while True:
-			delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
-			if interpolator.find_simplex(p.deformation + delta) != -1:
-				p.deformation = p.deformation + delta
-				break
+			p.theta = p.theta + np.random.normal(0, theta_var)
 
-		p.compute_points()
+			while True:
+				delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
+				if interpolator.find_simplex(p.deformation + delta) != -1:
+					p.deformation = p.deformation + delta
+					break
+
+			p.compute_points()
+except KeyboardInterrupt:
+	pass
+
+import os
+os.system('ffmpeg -f image2 -r 1/0.1 -i iteration\%03d.png -c:v libx264 -pix_fmt yuv420p out.mp4')
