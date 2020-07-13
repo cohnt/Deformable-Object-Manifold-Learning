@@ -389,7 +389,6 @@ try:
 			p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
 
 			p.theta = p.theta + np.random.normal(0, theta_var)
-			p.theta = ((p.theta + np.pi/4.0) % (np.pi/2.0)) - np.pi/4.0
 
 			while True:
 				delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
