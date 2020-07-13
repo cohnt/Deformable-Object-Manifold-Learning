@@ -222,12 +222,12 @@ class Particle():
 			self.theta = theta
 		
 		if deformation is None:
-			deformation_ind = np.random.randint(0, len(manifold_data))
+			deformation_ind = np.random.randint(0, len(embedding))
 			self.deformation = embedding[deformation_ind]
 		else:
 			self.deformation = deformation
 
-		self.num_points = num_points_to_track
+		self.n_points = n_tracked_points
 		self.compute_points()
 
 		self.raw_weight = None
@@ -247,7 +247,7 @@ class Particle():
 
 	def compute_raw_weight(self, heatmap):
 		running_total = 0.0
-		for i in range(self.num_points):
+		for i in range(self.n_points):
 			point = self.points[:,i]
 			pixel = np.asarray(np.floor(point), dtype=int)
 			if pixel[0] < x_min or pixel[0] >= x_max or pixel[1] < y_min or pixel[1] >= y_max:
@@ -258,5 +258,5 @@ class Particle():
 		return self.raw_weight
 
 # Run the particle filter
-particles = [Particle() for i in range(num_particles)]
+particles = [Particle() for i in range(n_particles)]
 iter_num = 0
