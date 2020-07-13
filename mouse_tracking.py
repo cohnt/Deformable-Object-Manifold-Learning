@@ -273,6 +273,7 @@ axes[1,1].set_xlim((0,image_dims[0]))
 axes[1,1].set_ylim((0,image_dims[1]))
 mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
+fig.tight_layout()
 
 from sklearn.decomposition import PCA
 
@@ -355,6 +356,7 @@ for frame in range(test_start_ind, n_test):
 
 	plt.draw()
 	plt.pause(0.001)
+	plt.savefig("iteration%02d.png" % frame)
 
 	# Resample
 	newParticles = []
