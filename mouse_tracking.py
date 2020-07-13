@@ -31,7 +31,7 @@ test_start_ind = 150
 # Particle Filter Parameters
 n_particles = 200
 exploration_factor = 0.25
-xy_var = 100
+xy_var = 20
 theta_var = np.pi/8
 deformation_var = 5
 
