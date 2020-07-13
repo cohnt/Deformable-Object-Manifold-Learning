@@ -25,6 +25,7 @@ image_dims = (640, 480)
 # Experiment Parameters
 gaussian_filter_sigma = 3
 disp_thresh = 0.9
+test_start_ind = 150
 
 # Particle Filter Parameters
 n_particles = 200
@@ -273,7 +274,9 @@ mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 
 particles = [Particle() for i in range(n_particles)]
-for frame in range(n_test):
+for frame in range(test_start_ind, n_test):
+	print "Frame %d" % frame
+
 	# Compute the heatmap
 	heatmap = np.zeros(train_depths[0].shape)
 	for i in range(heatmap.shape[0]):
