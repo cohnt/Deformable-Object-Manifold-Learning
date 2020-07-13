@@ -263,8 +263,10 @@ class Particle():
 # Run the particle filter
 particles = [Particle() for i in range(n_particles)]
 iter_num = 0
+fig, axes = plt.subplots(2, 2)
 while True:
 	iter_num = iter_num + 1
+	print "Iteration %d" % iter_num
 
 	# Weight particles
 	weights = []
@@ -282,7 +284,7 @@ while True:
 	max_normalized_weight_ind = np.argmax(normalized_weights)
 
 	# Display current iteration
-	fig, axes = plt.subplots(2, 2)
+	plt.cla()
 	axes[0,0].imshow(heatmap, cmap="gray")
 	axes[1,0].imshow(heatmap, cmap="gray")
 	axes[0,1].imshow(heatmap, cmap="gray")
@@ -320,7 +322,8 @@ while True:
 
 	mng = plt.get_current_fig_manager()
 	mng.resize(*mng.window.maxsize())
-	plt.show()
+	plt.draw()
+	plt.pause(0.001)
 
 	# Resample
 	newParticles = []
