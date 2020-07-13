@@ -185,7 +185,7 @@ def compute_deformation(interpolator, deformation_coords):
 		simplex = interpolator.points[simplex_indices]
 
 		# Handle cases where the simplex contains duplicate points
-		if len(np.unique(simplex, axis=0)) == 1:
+		if len(np.unique(simplex.round(4), axis=0)) == 1:
 			return train_uvd_flattened[simplex_indices[0]].T
 
 		# Compute barycentric coordinates
