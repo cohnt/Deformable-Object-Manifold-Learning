@@ -332,15 +332,16 @@ try:
 		axes[1,1].imshow(heatmap, cmap="gray")
 
 		axes[0,0].set_title("All Particles")
-		axes[1,0].set_title("Good Particles")
+		# axes[1,0].set_title("Good Particles")
+		axes[1,0].set_title("Ground Truth")
 		axes[0,1].set_title("MLE")
 		axes[1,1].set_title("Mean")
 
 		for p in particles:
 			if p.normalized_weight > 0:
 				axes[0,0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
-				if p.normalized_weight / max_normalized_weight > disp_thresh:
-					axes[1,0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=2)
+				# if p.normalized_weight / max_normalized_weight > disp_thresh:
+				# 	axes[1,0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=2)
 		p = particles[max_normalized_weight_ind]
 		
 		axes[0,1].plot(p.points.T[:,0], p.points.T[:,1], c="red", linewidth=3)
@@ -354,6 +355,8 @@ try:
 		for ax in axes[:,1]:
 			ax.scatter([centroid[0]], [centroid[1]], c="green", s=5**2)
 			ax.plot([centroid[0]-10*orien[0], centroid[0]+10*orien[0]], [centroid[1]-10*orien[1], centroid[1]+10*orien[1]], c="green", linewidth=1)
+
+		axes[1,0].plot(test_uvd[frame,:,0], test_uvd[frame,:,1], c="red", linewidth=3)
 
 		plt.draw()
 		plt.pause(0.001)
