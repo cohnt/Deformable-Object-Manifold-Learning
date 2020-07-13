@@ -350,7 +350,8 @@ for frame in range(test_start_ind, n_test):
 	axes[1,1].plot(x_avg.flatten(), y_avg.flatten(), c="red", linewidth=3)
 
 	for ax in axes[:,1]:
-		ax.scatter([centroid[0]], [centroid[1]], c="blue", s=5**2)
+		ax.scatter([centroid[0]], [centroid[1]], c="green", s=5**2)
+		ax.plot([centroid[0]-10*orien[0], centroid[0]+10*orien[0]], [centroid[1]-10*orien[1], centroid[1]+10*orien[1]], c="green", linewidth=1)
 
 	plt.draw()
 	plt.pause(0.001)
