@@ -162,3 +162,41 @@ interpolator = Delaunay(embedding, qhull_options="QJ")
 # mng = plt.get_current_fig_manager()
 # mng.resize(*mng.window.maxsize())
 # plt.show()
+
+def compute_deformation(interpolator, deformation_coords):
+	simplex_num = interpolator.find_simplex(deformation_coords)
+	if simplex_num != -1:
+		simplex_indices = interpolator.simplices[simplex_num]
+		simplex = interpolator.points[simplex_indices]
+
+		# Compute barycentric coordinates
+		A = np.vstack((simplex.T, np.ones((1, 3))))
+		b = np.vstack((deformation_coords.reshape(-1, 1), np.ones((1, 1))))
+		b_coords = np.linalg.solve(A, b)
+		b = np.asarray(b_coords).flatten()
+
+		# Interpolate the deformation
+		mult_vec = np.zeros(len(train_uvd_flattened))
+		mult_vec[simplex_indices] = b
+		curve = np.sum(np.matmul(np.diag(mult_vec), train_uvd_flattened), axis=0).reshape(-1,3)
+		return curve
+	else:
+		print "Error: outside of convex hull!"
+		raise ValueError
+
+x_min = y_min = int(np.floor(np.min(test_uvd)))
+x_max = y_max = z_max = int(np.ceil(np.max(test_uvd)))
+
+frame = 0
+
+# Create the heatmap
+heatmap = np.zeros(train_depths[0].shape)
+for i in range(heatmap.shape[0]):
+	for j in range(heatmap.shape[1]):
+		heatmap[i,j] = 1.0 if test_depths[frame,i,j] == 1000.0 else 0.0
+
+from scipy.ndimage import gaussian_filter
+heatmap = gaussian_filter(heatmap, sigma=2, output=float)
+
+plt.imshow(heatmap, cmap=plt.cm.gray)
+plt.show()
