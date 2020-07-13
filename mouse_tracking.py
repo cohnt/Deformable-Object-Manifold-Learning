@@ -343,7 +343,8 @@ for frame in range(test_start_ind, n_test):
 	step = 1/float((n_particles * (1-exploration_factor))+1)
 	chkVal = step
 	chkIdx = 0
-	for i in range(int(np.ceil(n_particles * (1-exploration_factor)))):
+	newParticles.append(particles[max_normalized_weight_ind])
+	for i in range(1, int(np.ceil(n_particles * (1-exploration_factor)))):
 		while cs[chkIdx] < chkVal:
 			chkIdx = chkIdx + 1
 		chkVal = chkVal + step
