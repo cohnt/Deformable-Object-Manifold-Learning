@@ -46,6 +46,10 @@ for i in train_inds:
 	train_xyz.append(xyz)
 	train_uvd.append(uvd)
 
+train_depths = np.array(train_depths)
+train_xyz = np.array(train_xyz)
+train_uvd = np.array(train_uvd)
+
 # Load testing data
 test_depths = []
 test_xyz = []
@@ -59,3 +63,7 @@ for i in test_inds:
 	test_depths.append(depth)
 	test_xyz.append(xyz)
 	test_uvd.append(uvd)
+
+test_depths = np.array(test_depths)
+test_xyz = np.array(test_xyz)
+test_uvd = np.array(test_uvd)
