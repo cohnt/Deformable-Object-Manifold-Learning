@@ -2,3 +2,5 @@
 test_history/*
 iteration*
 actual*
+data/mouse_dataset/*
+data/nyu_hand_dataset/*
