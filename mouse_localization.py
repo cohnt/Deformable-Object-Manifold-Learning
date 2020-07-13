@@ -184,6 +184,10 @@ def compute_deformation(interpolator, deformation_coords):
 		simplex_indices = interpolator.simplices[simplex_num]
 		simplex = interpolator.points[simplex_indices]
 
+		# Handle cases where the simplex contains duplicate points
+		if len(np.unique(simplex, axis=0)) == 1:
+			return train_uvd_flattened[simplex_indices[0]].T
+
 		# Compute barycentric coordinates
 		A = np.vstack((simplex.T, np.ones((1, 3))))
 		b = np.vstack((deformation_coords.reshape(-1, 1), np.ones((1, 1))))
