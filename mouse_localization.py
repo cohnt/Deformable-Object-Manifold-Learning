@@ -12,18 +12,21 @@ filepath = "./data/mouse_dataset/"
 # Subset
 n_train = 400
 n_test = 100
-train_inds = np.random.choice(n_train_max, n_train, replace=False)
+# train_inds = np.random.choice(n_train_max, n_train, replace=False)
 # test_inds = np.random.choice(n_test_max, n_test, replace=False)
+train_inds = range(n_train)
 test_inds = range(n_test)
 
 # Camera Parameters
 d1, d2 = 500, 1000
 focal = -533
 cx, cy = 320, 240
+image_dims = (640, 480)
 
 # Experiment Parameters
 frame = 0
 gaussian_filter_sigma = 3
+disp_thresh = 0.9
 
 # Particle Filter Parameters
 n_particles = 200
@@ -188,13 +191,10 @@ def compute_deformation(interpolator, deformation_coords):
 		mult_vec = np.zeros(len(train_uvd_flattened))
 		mult_vec[simplex_indices] = b
 		curve = np.sum(np.matmul(np.diag(mult_vec), train_uvd_flattened), axis=0).reshape(-1,3)
-		return curve[0:2] # Ignore the third dimension
+		return curve[:,0:2].T # Ignore the third dimension
 	else:
 		print "Error: outside of convex hull!"
 		raise ValueError
-
-x_min = y_min = int(np.floor(np.min(test_uvd)))
-x_max = y_max = z_max = int(np.ceil(np.max(test_uvd)))
 
 # Create the heatmap
 heatmap = np.zeros(train_depths[0].shape)
@@ -211,8 +211,8 @@ heatmap = gaussian_filter(heatmap, sigma=gaussian_filter_sigma, output=float)
 class Particle():
 	def __init__(self, xy=None, theta=None, deformation=None):
 		if xy is None:
-			self.xy = (np.random.randint(x_min, x_max),
-			           np.random.randint(y_min, y_max))
+			self.xy = (np.random.randint(0, image_dims[0]),
+			           np.random.randint(0, image_dims[1]))
 		else:
 			self.xy = xy
 
@@ -250,7 +250,7 @@ class Particle():
 		for i in range(self.n_points):
 			point = self.points[:,i]
 			pixel = np.asarray(np.floor(point), dtype=int)
-			if pixel[0] < x_min or pixel[0] >= x_max or pixel[1] < y_min or pixel[1] >= y_max:
+			if pixel[0] < 0 or pixel[0] >= image_dims[0] or pixel[1] < 0 or pixel[1] >= image_dims[1]:
 				continue
 			pixel = np.flip(pixel).flatten()
 			running_total += heatmap[pixel[0], pixel[1]]
@@ -299,21 +299,21 @@ while True:
 	
 	axes[0,1].plot(p.points.T[:,0], p.points.T[:,1], c="red", linewidth=3)
 
-	x_vals = np.array([p.points.T[:,0] for p in particles]).reshape(num_particles, num_points_to_track)
-	y_vals = np.array([p.points.T[:,1] for p in particles]).reshape(num_particles, num_points_to_track)
+	x_vals = np.array([p.points.T[:,0] for p in particles]).reshape(n_particles, n_tracked_points)
+	y_vals = np.array([p.points.T[:,1] for p in particles]).reshape(n_particles, n_tracked_points)
 	x_avg = np.average(x_vals, axis=0, weights=normalized_weights)
 	y_avg = np.average(y_vals, axis=0, weights=normalized_weights)
 	axes[1,1].plot(x_avg.flatten(), y_avg.flatten(), c="red", linewidth=3)
 
 
-	axes[0,0].set_xlim((x_min,x_max))
-	axes[0,0].set_ylim((y_min,y_max))
-	axes[1,0].set_xlim((x_min,x_max))
-	axes[1,0].set_ylim((y_min,y_max))
-	axes[0,1].set_xlim((x_min,x_max))
-	axes[0,1].set_ylim((y_min,y_max))
-	axes[1,1].set_xlim((x_min,x_max))
-	axes[1,1].set_ylim((y_min,y_max))
+	axes[0,0].set_xlim((0,image_dims[0]))
+	axes[0,0].set_ylim((0,image_dims[1]))
+	axes[1,0].set_xlim((0,image_dims[0]))
+	axes[1,0].set_ylim((0,image_dims[1]))
+	axes[0,1].set_xlim((0,image_dims[0]))
+	axes[0,1].set_ylim((0,image_dims[1]))
+	axes[1,1].set_xlim((0,image_dims[0]))
+	axes[1,1].set_ylim((0,image_dims[1]))
 
 	mng = plt.get_current_fig_manager()
 	mng.resize(*mng.window.maxsize())
