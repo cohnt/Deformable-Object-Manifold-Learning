@@ -6,6 +6,7 @@ import PIL.Image
 # Dataset Parameters
 n_train_max = 4751
 n_test_max = 6630
+n_tracked_points = 5
 filepath = "./data/mouse_dataset/"
 
 # Subset
@@ -67,3 +68,24 @@ for i in test_inds:
 test_depths = np.array(test_depths)
 test_xyz = np.array(test_xyz)
 test_uvd = np.array(test_uvd)
+
+# Center the data
+train_uvd_centered = train_uvd[:,:,:] - np.repeat(train_uvd[:,0,:].reshape(train_uvd.shape[0], 1, train_uvd.shape[2]), train_uvd.shape[1], axis=1)
+
+# Fix the rotation
+train_uvd_rotated = np.zeros(train_uvd_centered.shape)
+for i in range(len(train_uvd_centered)):
+	# https://math.stackexchange.com/a/476311
+	a = train_uvd_centered[i,-1,:] / np.linalg.norm(train_uvd_centered[i,-1,:])
+	b = np.array([1, 0, 0])
+	v = np.cross(a, b)
+	s = np.linalg.norm(v)
+	c = np.dot(a, b)
+	vx = np.array([
+		[0, -v[2], v[1]],
+		[v[2], 0, -v[0]],
+		[-v[1], v[0], 0]
+	])
+	R = np.eye(3) + vx + np.dot(vx, vx)*(1 / (1+c))
+	for j in range(len(train_uvd_centered[i])):
+		train_uvd_rotated[i,j,:] = np.matmul(R, train_uvd_centered[i,j,:])
