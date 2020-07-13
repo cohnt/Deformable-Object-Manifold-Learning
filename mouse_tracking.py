@@ -24,6 +24,7 @@ image_dims = (640, 480)
 
 # Experiment Parameters
 gaussian_filter_sigma = 3
+n_passes = 10
 disp_thresh = 0.9
 test_start_ind = 150
 
@@ -284,7 +285,9 @@ for frame in range(test_start_ind, n_test):
 			heatmap[i,j] = 1.0 if test_depths[frame,i,j] < 1000.0 else 0.0
 
 	from scipy.ndimage import gaussian_filter
-	heatmap = gaussian_filter(heatmap, sigma=gaussian_filter_sigma, output=float)
+	const = heatmap.copy()
+	for _ in range(n_passes):
+		heatmap = np.multiply(gaussian_filter(heatmap, sigma=gaussian_filter_sigma, output=float), const)
 
 	# Weight particles
 	weights = []
