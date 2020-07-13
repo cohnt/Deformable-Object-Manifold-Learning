@@ -4,9 +4,15 @@ import matplotlib.pyplot as plt
 import PIL.Image
 
 # Dataset Parameters
-n_train = 4751
-n_test = 6630
+n_train_max = 4751
+n_test_max = 6630
 filepath = "./data/mouse_dataset/"
+
+# Subset
+n_train = 400
+n_test = 100
+train_inds = np.random.choice(n_train_max, n_train, replace=False)
+test_inds = np.random.choice(n_test_max, n_test, replace=False)
 
 # Camera Parameters
 d1, d2 = 500, 1000
@@ -30,7 +36,7 @@ def xyz2uvd(jnt):
 train_depths = []
 train_xyz = []
 train_uvd = []
-for i in range(n_train):
+for i in train_inds:
 	print filepath + ("train/%05i.png" % (i+1))
 	depth = np.array(PIL.Image.open(filepath + ("train/%05i.png" % (i+1))))
 	xyz = np.loadtxt(filepath + ("train/%05i.txt" % (i+1)))
@@ -44,7 +50,7 @@ for i in range(n_train):
 test_depths = []
 test_xyz = []
 test_uvd = []
-for i in range(n_test):
+for i in test_inds:
 	print filepath + ("test/%05i.png" % (i+1))
 	depth = np.array(PIL.Image.open(filepath + ("test/%05i.png" % (i+1))))
 	xyz = np.loadtxt(filepath + ("test/%05i.txt" % (i+1)))
