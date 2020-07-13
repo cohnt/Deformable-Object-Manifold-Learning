@@ -274,8 +274,11 @@ axes[1,1].set_ylim((0,image_dims[1]))
 mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 
+from sklearn.decomposition import PCA
+
 particles = [Particle() for i in range(n_particles)]
 last_centroid = None
+last_angle = None
 for frame in range(test_start_ind, n_test):
 	print "Frame %d" % frame
 
@@ -283,15 +286,21 @@ for frame in range(test_start_ind, n_test):
 	heatmap = np.zeros(train_depths[0].shape)
 	mass_x = 0
 	mass_y = 0
+	points = []
 	for i in range(heatmap.shape[0]):
 		for j in range(heatmap.shape[1]):
 			heatmap[i,j] = 1.0 if test_depths[frame,i,j] < 1000.0 else 0.0
 			if heatmap[i,j] == 1.0:
 				mass_x = mass_x + i
 				mass_y = mass_y + j
+				points.append([i,j])
 	centroid = np.array([mass_x / heatmap.shape[0], mass_y / heatmap.shape[1]])
+	orien = PCA(n_components=1).fit(points).components_[0]
+	angle = np.pi/2 if orien[0] == 0 else np.arctan(orien[1] / orien[0])
 	if last_centroid is None:
 		last_centroid = centroid
+	if last_angle is None:
+		last_angle = angle
 
 	from scipy.ndimage import gaussian_filter
 	const = heatmap.copy()
@@ -365,8 +374,10 @@ for frame in range(test_start_ind, n_test):
 
 	# Propagate particles
 	xy_change = centroid - last_centroid
+	theta_change = angle - last_angle
 	for p in particles:
 		p.xy = p.xy + xy_change
+		p.theta = p.theta + theta_change
 
 	# Add noise
 	particles = newParticles
