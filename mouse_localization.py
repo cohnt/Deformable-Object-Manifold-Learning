@@ -260,3 +260,20 @@ class Particle():
 # Run the particle filter
 particles = [Particle() for i in range(n_particles)]
 iter_num = 0
+while True:
+	iter_num = iter_num + 1
+
+	# Weight particles
+	weights = []
+	for p in particles:
+		weights.append(p.compute_raw_weight(heatmap))
+	weights = np.asarray(weights)
+	normalization_factor = 1.0 / np.sum(weights)
+	normalized_weights = []
+	for p in particles:
+		# w = (p.raw_weight - min_weight) / (max_weight - min_weight)
+		w = p.raw_weight * normalization_factor
+		p.normalized_weight = w
+		normalized_weights.append(w)
+	max_normalized_weight = np.max(normalized_weights)
+	max_normalized_weight_ind = np.argmax(normalized_weights)
