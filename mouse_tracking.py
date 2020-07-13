@@ -32,8 +32,8 @@ test_start_ind = 150
 n_particles = 200
 exploration_factor = 0.25
 xy_var = 100
-theta_var = np.pi/32
-deformation_var = 250
+theta_var = np.pi/8
+deformation_var = 5
 
 # Camera Projection
 def xyz2uvd(jnt):
