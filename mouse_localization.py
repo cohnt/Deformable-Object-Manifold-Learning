@@ -260,10 +260,22 @@ class Particle():
 		self.raw_weight = running_total
 		return self.raw_weight
 
+# Set up the visualization
+fig, axes = plt.subplots(2, 2)
+axes[0,0].set_xlim((0,image_dims[0]))
+axes[0,0].set_ylim((0,image_dims[1]))
+axes[1,0].set_xlim((0,image_dims[0]))
+axes[1,0].set_ylim((0,image_dims[1]))
+axes[0,1].set_xlim((0,image_dims[0]))
+axes[0,1].set_ylim((0,image_dims[1]))
+axes[1,1].set_xlim((0,image_dims[0]))
+axes[1,1].set_ylim((0,image_dims[1]))
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
+
 # Run the particle filter
 particles = [Particle() for i in range(n_particles)]
 iter_num = 0
-fig, axes = plt.subplots(2, 2)
 while True:
 	iter_num = iter_num + 1
 	print "Iteration %d" % iter_num
@@ -313,18 +325,6 @@ while True:
 	y_avg = np.average(y_vals, axis=0, weights=normalized_weights)
 	axes[1,1].plot(x_avg.flatten(), y_avg.flatten(), c="red", linewidth=3)
 
-
-	axes[0,0].set_xlim((0,image_dims[0]))
-	axes[0,0].set_ylim((0,image_dims[1]))
-	axes[1,0].set_xlim((0,image_dims[0]))
-	axes[1,0].set_ylim((0,image_dims[1]))
-	axes[0,1].set_xlim((0,image_dims[0]))
-	axes[0,1].set_ylim((0,image_dims[1]))
-	axes[1,1].set_xlim((0,image_dims[0]))
-	axes[1,1].set_ylim((0,image_dims[1]))
-
-	mng = plt.get_current_fig_manager()
-	mng.resize(*mng.window.maxsize())
 	plt.draw()
 	plt.pause(0.001)
 
