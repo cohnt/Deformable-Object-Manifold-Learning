@@ -284,17 +284,14 @@ for frame in range(test_start_ind, n_test):
 
 	# Compute the heatmap, centroid, and orienation
 	heatmap = np.zeros(train_depths[0].shape)
-	mass_x = 0
-	mass_y = 0
 	points = []
 	for i in range(heatmap.shape[0]):
 		for j in range(heatmap.shape[1]):
 			heatmap[i,j] = 1.0 if test_depths[frame,i,j] < 1000.0 else 0.0
 			if heatmap[i,j] == 1.0:
-				mass_x = mass_x + i
-				mass_y = mass_y + j
-				points.append([i,j])
-	centroid = np.array([mass_x / heatmap.shape[0], mass_y / heatmap.shape[1]])
+				points.append([j,i]) # Because matrices are row-major
+	points = np.array(points)
+	centroid = np.mean(points, axis=0)
 	orien = PCA(n_components=1).fit(points).components_[0]
 	angle = np.pi/2 if orien[0] == 0 else np.arctan(orien[1] / orien[0])
 	if last_centroid is None:
@@ -351,6 +348,9 @@ for frame in range(test_start_ind, n_test):
 	x_avg = np.average(x_vals, axis=0, weights=normalized_weights)
 	y_avg = np.average(y_vals, axis=0, weights=normalized_weights)
 	axes[1,1].plot(x_avg.flatten(), y_avg.flatten(), c="red", linewidth=3)
+
+	for ax in axes[:,1]:
+		ax.scatter([centroid[0]], [centroid[1]], c="blue", s=5**2)
 
 	plt.draw()
 	plt.pause(0.001)
