@@ -13,12 +13,17 @@ filepath = "./data/mouse_dataset/"
 n_train = 400
 n_test = 100
 train_inds = np.random.choice(n_train_max, n_train, replace=False)
-test_inds = np.random.choice(n_test_max, n_test, replace=False)
+# test_inds = np.random.choice(n_test_max, n_test, replace=False)
+test_inds = range(n_test)
 
 # Camera Parameters
 d1, d2 = 500, 1000
 focal = -533
 cx, cy = 320, 240
+
+# Experiment Parameters
+frame = 0
+gaussian_filter_sigma = 3
 
 # Camera Projection
 def xyz2uvd(jnt):
@@ -187,8 +192,6 @@ def compute_deformation(interpolator, deformation_coords):
 x_min = y_min = int(np.floor(np.min(test_uvd)))
 x_max = y_max = z_max = int(np.ceil(np.max(test_uvd)))
 
-frame = 0
-
 # Create the heatmap
 heatmap = np.zeros(train_depths[0].shape)
 for i in range(heatmap.shape[0]):
@@ -196,7 +199,7 @@ for i in range(heatmap.shape[0]):
 		heatmap[i,j] = 1.0 if test_depths[frame,i,j] == 1000.0 else 0.0
 
 from scipy.ndimage import gaussian_filter
-heatmap = gaussian_filter(heatmap, sigma=2, output=float)
+heatmap = gaussian_filter(heatmap, sigma=gaussian_filter_sigma, output=float)
 
 plt.imshow(heatmap, cmap=plt.cm.gray)
 plt.show()
