@@ -277,3 +277,44 @@ while True:
 		normalized_weights.append(w)
 	max_normalized_weight = np.max(normalized_weights)
 	max_normalized_weight_ind = np.argmax(normalized_weights)
+
+	# Display current iteration
+	fig, axes = plt.subplots(2, 2)
+	axes[0,0].imshow(heatmap, cmap="gray")
+	axes[1,0].imshow(heatmap, cmap="gray")
+	axes[0,1].imshow(heatmap, cmap="gray")
+	axes[1,1].imshow(heatmap, cmap="gray")
+
+	axes[0,0].set_title("All Particles")
+	axes[1,0].set_title("Good Particles")
+	axes[0,1].set_title("MLE")
+	axes[1,1].set_title("Mean")
+
+	for p in particles:
+		if p.normalized_weight > 0:
+			axes[0,0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=1)
+			if p.normalized_weight / max_normalized_weight > disp_thresh:
+				axes[1,0].plot(p.points.T[:,0], p.points.T[:,1], c=plt.cm.cool(p.normalized_weight / max_normalized_weight), linewidth=2)
+	p = particles[max_normalized_weight_ind]
+	
+	axes[0,1].plot(p.points.T[:,0], p.points.T[:,1], c="red", linewidth=3)
+
+	x_vals = np.array([p.points.T[:,0] for p in particles]).reshape(num_particles, num_points_to_track)
+	y_vals = np.array([p.points.T[:,1] for p in particles]).reshape(num_particles, num_points_to_track)
+	x_avg = np.average(x_vals, axis=0, weights=normalized_weights)
+	y_avg = np.average(y_vals, axis=0, weights=normalized_weights)
+	axes[1,1].plot(x_avg.flatten(), y_avg.flatten(), c="red", linewidth=3)
+
+
+	axes[0,0].set_xlim((x_min,x_max))
+	axes[0,0].set_ylim((y_min,y_max))
+	axes[1,0].set_xlim((x_min,x_max))
+	axes[1,0].set_ylim((y_min,y_max))
+	axes[0,1].set_xlim((x_min,x_max))
+	axes[0,1].set_ylim((y_min,y_max))
+	axes[1,1].set_xlim((x_min,x_max))
+	axes[1,1].set_ylim((y_min,y_max))
+
+	mng = plt.get_current_fig_manager()
+	mng.resize(*mng.window.maxsize())
+	plt.show()
