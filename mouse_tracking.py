@@ -12,7 +12,7 @@ filepath = "./data/mouse_dataset/"
 
 # Subset
 n_train = 400
-n_test = 526
+n_test = 519
 # train_inds = np.random.choice(n_train_max, n_train, replace=False)
 train_inds = range(n_train)
 test_inds = range(n_test)
@@ -27,7 +27,7 @@ image_dims = (640, 480)
 gaussian_filter_sigma = 3
 n_passes = 10
 disp_thresh = 0.9
-test_start_ind = 150
+test_start_ind = 0
 
 # Particle Filter Parameters
 n_particles = 200
@@ -276,7 +276,7 @@ axes[1,1].set_xlim((0,image_dims[0]))
 axes[1,1].set_ylim((0,image_dims[1]))
 mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
-fig.tight_layout()
+fig.subplots_adjust(wspace=0.1, hspace=0.1)
 
 from sklearn.decomposition import PCA
 
