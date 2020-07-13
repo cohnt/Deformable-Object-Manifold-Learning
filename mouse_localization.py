@@ -284,7 +284,10 @@ while True:
 	max_normalized_weight_ind = np.argmax(normalized_weights)
 
 	# Display current iteration
-	plt.cla()
+	axes[0,0].cla()
+	axes[0,1].cla()
+	axes[1,0].cla()
+	axes[1,1].cla()
 	axes[0,0].imshow(heatmap, cmap="gray")
 	axes[1,0].imshow(heatmap, cmap="gray")
 	axes[0,1].imshow(heatmap, cmap="gray")
