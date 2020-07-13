@@ -31,6 +31,9 @@ disp_thresh = 0.9
 # Particle Filter Parameters
 n_particles = 200
 exploration_factor = 0.25
+xy_var = 100
+theta_var = np.pi/32
+deformation_var = 250
 
 # Camera Projection
 def xyz2uvd(jnt):
@@ -318,3 +321,35 @@ while True:
 	mng = plt.get_current_fig_manager()
 	mng.resize(*mng.window.maxsize())
 	plt.show()
+
+	# Resample
+	newParticles = []
+	cs = np.cumsum(normalized_weights)
+	step = 1/float((n_particles * (1-exploration_factor))+1)
+	chkVal = step
+	chkIdx = 0
+	for i in range(int(np.ceil(n_particles * (1-exploration_factor)))):
+		while cs[chkIdx] < chkVal:
+			chkIdx = chkIdx + 1
+		chkVal = chkVal + step
+		newParticles.append(Particle(xy=particles[chkIdx].xy,
+		                             theta=particles[chkIdx].theta,
+		                             deformation=particles[chkIdx].deformation))
+	for i in range(len(newParticles), n_particles):
+		newParticles.append(Particle())
+
+	# Add noise
+	particles = newParticles
+	for p in particles:
+		p.xy = p.xy + np.random.multivariate_normal(np.array([0, 0]), np.matrix([[xy_var, 0], [0, xy_var]]))
+
+		p.theta = p.theta + np.random.normal(0, theta_var)
+		p.theta = ((p.theta + np.pi/4.0) % (np.pi/2.0)) - np.pi/4.0
+
+		while True:
+			delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
+			if interpolator.find_simplex(p.deformation + delta) != -1:
+				p.deformation = p.deformation + delta
+				break
+
+		p.compute_points()
