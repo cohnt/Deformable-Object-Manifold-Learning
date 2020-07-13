@@ -184,6 +184,10 @@ def compute_deformation(interpolator, deformation_coords):
 		simplex_indices = interpolator.simplices[simplex_num]
 		simplex = interpolator.points[simplex_indices]
 
+		# Handle cases where the simplex contains duplicate points
+		if len(np.unique(simplex.round(4), axis=0)) == 1:
+			return train_uvd_flattened[simplex_indices[0]].T
+
 		# Compute barycentric coordinates
 		A = np.vstack((simplex.T, np.ones((1, 3))))
 		b = np.vstack((deformation_coords.reshape(-1, 1), np.ones((1, 1))))
@@ -260,11 +264,25 @@ class Particle():
 		self.raw_weight = running_total
 		return self.raw_weight
 
+# Set up the visualization
+fig, axes = plt.subplots(2, 2)
+axes[0,0].set_xlim((0,image_dims[0]))
+axes[0,0].set_ylim((0,image_dims[1]))
+axes[1,0].set_xlim((0,image_dims[0]))
+axes[1,0].set_ylim((0,image_dims[1]))
+axes[0,1].set_xlim((0,image_dims[0]))
+axes[0,1].set_ylim((0,image_dims[1]))
+axes[1,1].set_xlim((0,image_dims[0]))
+axes[1,1].set_ylim((0,image_dims[1]))
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
+
 # Run the particle filter
 particles = [Particle() for i in range(n_particles)]
 iter_num = 0
 while True:
 	iter_num = iter_num + 1
+	print "Iteration %d" % iter_num
 
 	# Weight particles
 	weights = []
@@ -282,7 +300,10 @@ while True:
 	max_normalized_weight_ind = np.argmax(normalized_weights)
 
 	# Display current iteration
-	fig, axes = plt.subplots(2, 2)
+	axes[0,0].cla()
+	axes[0,1].cla()
+	axes[1,0].cla()
+	axes[1,1].cla()
 	axes[0,0].imshow(heatmap, cmap="gray")
 	axes[1,0].imshow(heatmap, cmap="gray")
 	axes[0,1].imshow(heatmap, cmap="gray")
@@ -308,19 +329,8 @@ while True:
 	y_avg = np.average(y_vals, axis=0, weights=normalized_weights)
 	axes[1,1].plot(x_avg.flatten(), y_avg.flatten(), c="red", linewidth=3)
 
-
-	axes[0,0].set_xlim((0,image_dims[0]))
-	axes[0,0].set_ylim((0,image_dims[1]))
-	axes[1,0].set_xlim((0,image_dims[0]))
-	axes[1,0].set_ylim((0,image_dims[1]))
-	axes[0,1].set_xlim((0,image_dims[0]))
-	axes[0,1].set_ylim((0,image_dims[1]))
-	axes[1,1].set_xlim((0,image_dims[0]))
-	axes[1,1].set_ylim((0,image_dims[1]))
-
-	mng = plt.get_current_fig_manager()
-	mng.resize(*mng.window.maxsize())
-	plt.show()
+	plt.draw()
+	plt.pause(0.001)
 
 	# Resample
 	newParticles = []
