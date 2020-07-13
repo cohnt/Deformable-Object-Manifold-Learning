@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import PIL.Image
 
@@ -34,6 +35,8 @@ exploration_factor = 0.25
 xy_var = 20
 theta_var = np.pi/8
 deformation_var = 5
+
+matplotlib.rcParams.update({'font.size': 22})
 
 # Camera Projection
 def xyz2uvd(jnt):
