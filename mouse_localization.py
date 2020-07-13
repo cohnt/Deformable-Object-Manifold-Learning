@@ -203,7 +203,7 @@ def compute_deformation(interpolator, deformation_coords):
 heatmap = np.zeros(train_depths[0].shape)
 for i in range(heatmap.shape[0]):
 	for j in range(heatmap.shape[1]):
-		heatmap[i,j] = 1.0 if test_depths[frame,i,j] == 1000.0 else 0.0
+		heatmap[i,j] = 1.0 if test_depths[frame,i,j] < 1000.0 else 0.0
 
 from scipy.ndimage import gaussian_filter
 heatmap = gaussian_filter(heatmap, sigma=gaussian_filter_sigma, output=float)
