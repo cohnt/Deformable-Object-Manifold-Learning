@@ -349,17 +349,21 @@ try:
 		
 		axes[0,1].plot(p.points.T[:,0], p.points.T[:,1], c="red", linewidth=3)
 
-		mean_xy = np.mean([p.xy for p in particles], axis=0)
-		mean_theta = np.mean([p.theta for p in particles])
-		mean_deformation = np.mean([p.deformation for p in particles], axis=0)
-		mean_particle = Particle(xy=mean_xy, theta=mean_theta, deformation=mean_deformation)
-		axes[1,1].plot(mean_particle.points.T[:,0], mean_particle.points.T[:,1], c="red", linewidth=3)
+		# mean_xy = np.mean([p.xy for p in particles], axis=0)
+		# mean_theta = np.mean([p.theta for p in particles])
+		# mean_deformation = np.mean([p.deformation for p in particles], axis=0)
+		# mean_particle = Particle(xy=mean_xy, theta=mean_theta, deformation=mean_deformation)
+		# axes[1,1].plot(mean_particle.points.T[:,0], mean_particle.points.T[:,1], c="red", linewidth=3)
 
-		# x_vals = np.array([p.points.T[:,0] for p in particles]).reshape(n_particles, n_tracked_points)
-		# y_vals = np.array([p.points.T[:,1] for p in particles]).reshape(n_particles, n_tracked_points)
-		# x_avg = np.average(x_vals, axis=0, weights=normalized_weights)
-		# y_avg = np.average(y_vals, axis=0, weights=normalized_weights)
-		# axes[1,1].plot(x_avg.flatten(), y_avg.flatten(), c="red", linewidth=3)
+		x_vals = np.array([p.points.T[:,0] for p in particles]).reshape(n_particles, n_tracked_points)
+		y_vals = np.array([p.points.T[:,1] for p in particles]).reshape(n_particles, n_tracked_points)
+		for i in range(len(particles)):
+			if x_vals[i,0] > x_vals[i,1]:
+				x_vals[i] = x_vals[i,::-1]
+				y_vals[i] = y_vals[i,::-1]
+		x_avg = np.average(x_vals, axis=0, weights=normalized_weights)
+		y_avg = np.average(y_vals, axis=0, weights=normalized_weights)
+		axes[1,1].plot(x_avg.flatten(), y_avg.flatten(), c="red", linewidth=3)
 
 		for ax in axes[:,1]:
 			ax.scatter([centroid[0]], [centroid[1]], c="green", s=5**2)
