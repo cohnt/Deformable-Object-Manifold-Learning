@@ -16,6 +16,7 @@ n_test = 519
 # train_inds = np.random.choice(n_train_max, n_train, replace=False)
 train_inds = range(n_train)
 test_inds = range(n_test)
+test_start_ind = 14
 
 # Camera Parameters
 d1, d2 = 500, 1000
@@ -27,7 +28,6 @@ image_dims = (640, 480)
 gaussian_filter_sigma = 3
 n_passes = 10
 disp_thresh = 0.9
-test_start_ind = 0
 
 # Particle Filter Parameters
 n_particles = 200
