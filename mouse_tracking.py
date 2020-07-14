@@ -32,9 +32,9 @@ disp_thresh = 0.9
 # Particle Filter Parameters
 n_particles = 200
 exploration_factor = 0.25
-xy_var = 20
-theta_var = np.pi/8
-deformation_var = 5
+xy_var = 10
+theta_var = np.pi/16
+deformation_var = 10
 
 matplotlib.rcParams.update({'font.size': 22})
 
