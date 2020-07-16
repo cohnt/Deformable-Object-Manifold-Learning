@@ -119,4 +119,40 @@ gt_circle.draw(ax)
 for rectangle in gt_rectangles:
 	rectangle.draw(ax)
 
-plt.show()
+plt.draw()
+plt.pause(0.001)
+
+#######################
+# Shape IOU Functions #
+#######################
+
+def intersection_over_union(shape1, shape2):
+	if isinstance(shape1, Circle) and isinstance(shape2, Circle):
+		return iou_circle_circle(shape1, shape2)
+	elif isinstance(shape1, Circle) and isinstance(shape2, Rectangle):
+		return iou_circle_rectangle(shape1, shape2)
+	elif isinstance(shape1, Rectangle) and isinstance(shape2, Circle):
+		return iou_circle_rectangle(shape2, shape1)
+	elif isinstance(shape1, Rectangle) and isinstance(shape2, Rectangle):
+		return iou_rectangle_rectangle(shape1, shape2)
+
+def circle_area(circle):
+	return np.pi * (circle.radius**2)
+
+def iou_circle_circle(circle1, circle2):
+	# https://mathworld.wolfram.com/Circle-CircleIntersection.html
+	R = circle1.radius
+	r = circle2.radius
+	d = np.linalg.norm(circle2.position - circle1.position)
+	
+	x = ((d**2) - (r**2) + (R**2)) / (2 * d)
+	
+	d1 = x
+	d2 = d - x
+	A = ((r**2) * np.arccos(((d**2) + (r**2) - (R**2)) / (2 * d * r)))\
+	  + ((R**2) * np.arccos(((d**2) + (R**2) - (r**2)) / (2 * d * R)))\
+	  - (0.5 * np.sqrt((-d+r+R)*(d+r-R)*(d-r+R)*(d+r+R)))
+
+	intersection = A
+	union = circle_area(circle1) + circle_area(circle2) - intersection
+	return intersection / union
