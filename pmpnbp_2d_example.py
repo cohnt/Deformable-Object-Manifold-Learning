@@ -69,6 +69,18 @@ class Rectangle():
 		rectangle = plt.Rectangle(self.position-render_offset, self.size[0], self.size[1], angle=rad2deg(self.orientation), facecolor=color)
 		ax.add_patch(rectangle)
 
+	def get_vertices(self):
+		base_corner = self.position - np.array([0, rectangle_dims[1]/2])
+		vec1 = np.array([self.size[0] * np.cos(self.orientation), self.size[1] * np.sin(self.orientation)])
+		vec2 = np.array([self.size[0] * np.cos(self.orientation + np.pi/2), self.size[1] * np.sin(self.orientation + np.pi/2)])
+		vertices = [
+			base_corner,
+			base_corner + vec1,
+			base_corner + vec1 + vec2,
+			base_corner + vec2
+		]
+		return vertices
+
 ####################
 # Create the Scene #
 ####################
@@ -164,13 +176,7 @@ def iou_circle_circle(circle1, circle2):
 	return intersection / union
 
 def iou_circle_rectangle(circle, rectangle):
-	rectangle_coords = [
-		rectangle.position,
-		rectangle.position + [rectangle.size[0], 0],
-		rectangle.position + rectangle.size,
-		rectangle.position + [0, rectangle.size[1]]
-	]
-	shapely_rectangle = Polygon(rectangle_coords)
+	shapely_rectangle = Polygon(rectangle.get_vertices())
 	shapely_circle = Point(circle.position).buffer(circle.radius)
 
 	intersection = shapely_rectangle.intersection(shapely_circle).area
@@ -178,20 +184,8 @@ def iou_circle_rectangle(circle, rectangle):
 	return intersection / union
 
 def iou_rectangle_rectangle(rectangle1, rectangle2):
-	rectangle1_coords = [
-		rectangle1.position,
-		rectangle1.position + [rectangle1.size[0], 0],
-		rectangle1.position + rectangle1.size,
-		rectangle1.position + [0, rectangle1.size[1]]
-	]
-	rectangle2_coords = [
-		rectangle2.position,
-		rectangle2.position + [rectangle2.size[0], 0],
-		rectangle2.position + rectangle2.size,
-		rectangle2.position + [0, rectangle2.size[1]]
-	]
-	shapely_rectangle1 = Polygon(rectangle1_coords)
-	shapely_rectangle2 = Polygon(rectangle2_coords)
+	shapely_rectangle1 = Polygon(rectangle1.get_vertices())
+	shapely_rectangle2 = Polygon(rectangle2.get_vertices())
 
 	intersection = shapely_rectangle1.intersection(shapely_rectangle2).area
 	union = rectangle_area(rectangle1) + rectangle_area(rectangle2) - intersection
