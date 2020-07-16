@@ -360,6 +360,9 @@ while True:
 	draw_scene(ax)
 	for p in particles:
 		p.draw(ax)
+	ax.scatter([particles[max_normalized_weight_ind].circle.position[0]], [particles[max_normalized_weight_ind].circle.position[1]], color="red")
+	for rectangle in particles[max_normalized_weight_ind].rectangles:
+		ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="red")
 	plt.draw()
 	plt.pause(0.001)
 
