@@ -24,6 +24,10 @@ gt_outer_dist = rectangle_dims[0] + 1.0
 gt_cardinal_direction_angles = [0, np.pi/2, np.pi, 3*np.pi/2]
 gt_angle_var = np.pi / 16
 
+# Dataset parameters
+n_train = 200
+restrict_deformations = True
+
 #########
 # Types #
 #########
@@ -93,12 +97,12 @@ for _ in range(n_rectangles):
 	rectangles.append(Rectangle())
 
 # Construct ground truth
-def make_ground_truth(angle_noises=None, restrict_deformations=True):
+def make_ground_truth(angle_noises=None):
 	if angle_noises is None:
 		angle_noises = np.random.normal(loc=0, scale=gt_angle_var, size=2*len(gt_cardinal_direction_angles))
-	if restrict_deformations:
-		for i in range(4):
-			angle_noises[2*i] = angle_noises[2*i+1]
+		if restrict_deformations:
+			for i in range(len(gt_cardinal_direction_angles)):
+				angle_noises[2*i] = angle_noises[2*i+1]
 	gt_circle = Circle(position=dims/2, radius=circle_radius)
 	gt_rectangles = []
 	# Inner layer
@@ -118,7 +122,7 @@ gt_circle, gt_rectangles = make_ground_truth()
 
 def gt_to_state_vec(gt_circle, gt_rectangles):
 	angles = np.array([r.orientation for r in gt_rectangles])
-	state_vec = angles - gt_cardinal_direction_angles
+	state_vec = angles - np.vstack((gt_cardinal_direction_angles, gt_cardinal_direction_angles)).flatten("F")
 	return state_vec
 
 def state_vec_to_gt(state_vec):
@@ -202,3 +206,12 @@ def iou_rectangle_rectangle(rectangle1, rectangle2):
 	intersection = shapely_rectangle1.intersection(shapely_rectangle2).area
 	union = rectangle_area(rectangle1) + rectangle_area(rectangle2) - intersection
 	return intersection / union
+
+######################
+# Make Training Data #
+######################
+
+train = []
+for _ in range(n_train):
+	gt_circle, gt_rectangles = make_ground_truth()
+	train.append(gt_to_state_vec(gt_circle, gt_rectangles))
