@@ -144,23 +144,29 @@ def state_vec_to_gt(state_vec):
 # Display the Scene #
 #####################
 
+def draw_scene(ax):
+	for circle in scene_circles:
+		circle.draw(ax, color="grey")
+	for rectangle in scene_rectangles:
+		rectangle.draw(ax, color="grey")
+
+	gt_circle.draw(ax)
+	for rectangle in gt_rectangles:
+		rectangle.draw(ax)
+
+def clear(ax):
+	ax.cla()
+	ax.set_xlim((0, dims[0]))
+	ax.set_ylim((0, dims[1]))
+	ax.set_aspect('equal')
+	ax.set_facecolor("black")
+
 fig, ax = plt.subplots(1, 1)
-ax.set_xlim((0, dims[0]))
-ax.set_ylim((0, dims[1]))
-ax.set_aspect('equal')
-ax.set_facecolor("black")
+clear(ax)
 mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 
-for circle in scene_circles:
-	circle.draw(ax, color="grey")
-for rectangle in scene_rectangles:
-	rectangle.draw(ax, color="grey")
-
-gt_circle.draw(ax)
-for rectangle in gt_rectangles:
-	rectangle.draw(ax)
-
+draw_scene(ax)
 plt.draw()
 plt.pause(0.001)
 # plt.show()
@@ -322,7 +328,31 @@ def particle_weight(particle):
 	return np.prod(weights)
 
 particles = [Particle() for _ in range(n_particles)]
-for p in particles:
-	p.raw_weight = particle_weight(p)
-	p.draw(ax)
-plt.show()
+iter_num = 0
+
+while True:
+	iter_num = iter_num + 1
+	print "Iteration %d" % iter_num
+
+	# Weight particles
+	weights = []
+	for p in particles:
+		p.raw_weight = particle_weight(p)
+		weights.append(p.raw_weight)
+	weights = np.asarray(weights)
+	normalization_factor = 1.0 / np.sum(weights)
+	normalized_weights = []
+	for p in particles:
+		w = p.raw_weight * normalization_factor
+		p.normalized_weight = w
+		normalized_weights.append(w)
+	max_normalized_weight = np.max(normalized_weights)
+	max_normalized_weight_ind = np.argmax(normalized_weights)
+
+	# Display
+	clear(ax)
+	draw_scene(ax)
+	for p in particles:
+		p.draw(ax)
+	plt.draw()
+	plt.pause(0.001)
