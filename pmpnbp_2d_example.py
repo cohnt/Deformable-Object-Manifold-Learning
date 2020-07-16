@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+from shapely.geometry.point import Point
+import shapely.affinity
+from shapely.geometry import Polygon
 
 ##############
 # Parameters #
@@ -139,6 +142,9 @@ def intersection_over_union(shape1, shape2):
 def circle_area(circle):
 	return np.pi * (circle.radius**2)
 
+def rectangle_area(rectangle):
+	return rectangle.size[0] * rectangle.size[1]
+
 def iou_circle_circle(circle1, circle2):
 	# https://mathworld.wolfram.com/Circle-CircleIntersection.html
 	R = circle1.radius
@@ -155,4 +161,19 @@ def iou_circle_circle(circle1, circle2):
 
 	intersection = A
 	union = circle_area(circle1) + circle_area(circle2) - intersection
+	return intersection / union
+
+def iou_circle_rectangle(circle, rectangle):
+	rectangle_coords = [
+		rectangle.position,
+		rectangle.position + [rectangle.size[0], 0],
+		rectangle.position + rectangle.size,
+		rectangle.position + [0, rectangle.size[1]]
+	]
+	print rectangle_coords
+	shapely_rectangle = Polygon(rectangle_coords)
+	shapely_circle = Point(circle.position).buffer(circle.radius)
+
+	intersection = shapely_rectangle.intersection(shapely_circle).area
+	union = circle_area(circle) + rectangle_area(rectangle) - intersection
 	return intersection / union
