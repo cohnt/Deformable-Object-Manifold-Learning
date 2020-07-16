@@ -170,10 +170,29 @@ def iou_circle_rectangle(circle, rectangle):
 		rectangle.position + rectangle.size,
 		rectangle.position + [0, rectangle.size[1]]
 	]
-	print rectangle_coords
 	shapely_rectangle = Polygon(rectangle_coords)
 	shapely_circle = Point(circle.position).buffer(circle.radius)
 
 	intersection = shapely_rectangle.intersection(shapely_circle).area
 	union = circle_area(circle) + rectangle_area(rectangle) - intersection
+	return intersection / union
+
+def iou_rectangle_rectangle(rectangle1, rectangle2):
+	rectangle1_coords = [
+		rectangle1.position,
+		rectangle1.position + [rectangle1.size[0], 0],
+		rectangle1.position + rectangle1.size,
+		rectangle1.position + [0, rectangle1.size[1]]
+	]
+	rectangle2_coords = [
+		rectangle2.position,
+		rectangle2.position + [rectangle2.size[0], 0],
+		rectangle2.position + rectangle2.size,
+		rectangle2.position + [0, rectangle2.size[1]]
+	]
+	shapely_rectangle1 = Polygon(rectangle1_coords)
+	shapely_rectangle2 = Polygon(rectangle2_coords)
+
+	intersection = shapely_rectangle1.intersection(shapely_rectangle2).area
+	union = rectangle_area(rectangle1) + rectangle_area(rectangle2) - intersection
 	return intersection / union
