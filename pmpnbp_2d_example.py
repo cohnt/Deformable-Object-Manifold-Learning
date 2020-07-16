@@ -28,6 +28,10 @@ gt_angle_var = np.pi / 16
 n_train = 200
 restrict_deformations = True
 
+# Manifold learning parameters
+target_dim = 4
+neighbors_k = 12
+
 #########
 # Types #
 #########
@@ -215,3 +219,11 @@ train = []
 for _ in range(n_train):
 	gt_circle, gt_rectangles = make_ground_truth()
 	train.append(gt_to_state_vec(gt_circle, gt_rectangles))
+
+# Compute the Isomap embedding
+from sklearn.manifold import Isomap
+embedding = Isomap(n_neighbors=neighbors_k, n_components=target_dim).fit_transform(train)
+
+# Compute the Delaunay triangulation
+from scipy.spatial import Delaunay
+interpolator = Delaunay(embedding, qhull_options="QJ")
