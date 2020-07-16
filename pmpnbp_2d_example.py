@@ -93,9 +93,12 @@ for _ in range(n_rectangles):
 	rectangles.append(Rectangle())
 
 # Construct ground truth
-def make_ground_truth(angle_noises=None):
+def make_ground_truth(angle_noises=None, restrict_deformations=True):
 	if angle_noises is None:
 		angle_noises = np.random.normal(loc=0, scale=gt_angle_var, size=2*len(gt_cardinal_direction_angles))
+	if restrict_deformations:
+		for i in range(4):
+			angle_noises[2*i] = angle_noises[2*i+1]
 	gt_circle = Circle(position=dims/2, radius=circle_radius)
 	gt_rectangles = []
 	# Inner layer
@@ -120,8 +123,6 @@ def gt_to_state_vec(gt_circle, gt_rectangles):
 
 def state_vec_to_gt(state_vec):
 	return make_ground_truth(angle_noises=state_vec)
-
-gt_circle, gt_rectangles = state_vec_to_gt([0, 0, 0, 0, 0, 0, 0, 0])
 
 #####################
 # Display the Scene #
