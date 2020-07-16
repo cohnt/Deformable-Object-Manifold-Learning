@@ -159,8 +159,8 @@ for rectangle in gt_rectangles:
 	rectangle.draw(ax)
 
 plt.draw()
-# plt.pause(0.001)
-plt.show()
+plt.pause(0.001)
+# plt.show()
 
 #######################
 # Shape IOU Functions #
@@ -288,6 +288,12 @@ class Particle():
 	def project_up(self):
 		self.state_vec = compute_deformation(interpolator, self.deformation)
 		self.circle, self.rectangles = make_ground_truth(angle_noises=self.state_vec, position=self.position)
+
+	def draw(self, ax):
+		color = plt.cm.cool(self.raw_weight)
+		self.circle.draw(ax, color)
+		for rectangle in self.rectangles:
+			rectangle.draw(ax, color)
 
 def shape_weight(shape):
 	ious = []
