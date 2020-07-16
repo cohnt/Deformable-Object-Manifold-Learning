@@ -34,6 +34,9 @@ neighbors_k = 12
 
 # Particle filter parameters
 n_particles = 10
+exploration_factor = 0.0
+position_var = 0.1
+deformation_var = 0.1
 
 #########
 # Types #
@@ -246,6 +249,9 @@ for _ in range(n_train):
 from sklearn.manifold import Isomap
 embedding = Isomap(n_neighbors=neighbors_k, n_components=target_dim).fit_transform(train)
 
+print np.min(embedding)
+print np.max(embedding)
+
 # Compute the Delaunay triangulation
 from scipy.spatial import Delaunay
 interpolator = Delaunay(embedding, qhull_options="QJ")
@@ -325,7 +331,7 @@ def particle_weight(particle):
 	weights.append(shape_weight(particle.circle))
 	for rectangle in particle.rectangles:
 		weights.append(shape_weight(rectangle))
-	return np.prod(weights)
+	return np.mean(weights)
 
 particles = [Particle() for _ in range(n_particles)]
 iter_num = 0
@@ -356,3 +362,31 @@ while True:
 		p.draw(ax)
 	plt.draw()
 	plt.pause(0.001)
+
+	# Resample
+	newParticles = []
+	cs = np.cumsum(normalized_weights)
+	step = 1/float((n_particles * (1-exploration_factor))+1)
+	chkVal = step
+	chkIdx = 0
+	for i in range(int(np.ceil(n_particles * (1-exploration_factor)))):
+		while cs[chkIdx] < chkVal:
+			chkIdx = chkIdx + 1
+		chkVal = chkVal + step
+		newParticles.append(Particle(position=particles[chkIdx].position,
+		                             deformation=particles[chkIdx].deformation))
+	for i in range(len(newParticles), n_particles):
+		newParticles.append(Particle())
+
+	# Add noise
+	particles = newParticles
+	for p in particles:
+		p.position = p.position + np.random.multivariate_normal(np.zeros(2), position_var*np.eye(2))
+
+		while True:
+			delta = np.random.multivariate_normal(np.zeros(target_dim), deformation_var*np.eye(target_dim))
+			if interpolator.find_simplex(p.deformation + delta) != -1:
+				p.deformation = p.deformation + delta
+				break
+
+		p.project_up()
