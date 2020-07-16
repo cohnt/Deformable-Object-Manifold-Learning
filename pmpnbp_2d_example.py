@@ -227,3 +227,33 @@ embedding = Isomap(n_neighbors=neighbors_k, n_components=target_dim).fit_transfo
 # Compute the Delaunay triangulation
 from scipy.spatial import Delaunay
 interpolator = Delaunay(embedding, qhull_options="QJ")
+
+def compute_deformation(interpolator, deformation_coords):
+	simplex_num = interpolator.find_simplex(deformation_coords)
+	if simplex_num != -1:
+		simplex_indices = interpolator.simplices[simplex_num]
+		simplex = interpolator.points[simplex_indices]
+
+		# Compute barycentric coordinates
+		A = np.vstack((simplex.T, np.ones((1, target_dim+1))))
+		b = np.vstack((deformation_coords.reshape(-1, 1), np.ones((1, 1))))
+		try:
+			b_coords = np.linalg.solve(A, b)
+		except:
+			print deformation_coords
+			print simplex_num
+			print simplex_indices
+			print simplex
+			print A
+			print b
+			exit(1)
+		b = np.asarray(b_coords).flatten()
+
+		# Interpolate the deformation
+		mult_vec = np.zeros(len(train))
+		mult_vec[simplex_indices] = b
+		output = np.sum(np.matmul(np.diag(mult_vec), train), axis=0)
+		return output
+	else:
+		print "Error: outside of convex hull!"
+		raise ValueError
