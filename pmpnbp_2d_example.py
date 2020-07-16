@@ -56,3 +56,9 @@ class Rectangle():
 # Create the Scene #
 ####################
 
+circles = []
+rectangles = []
+for _ in range(n_circles):
+	circles.append(Circle())
+for _ in range(n_rectangles):
+	rectangles.append(Rectangle())
