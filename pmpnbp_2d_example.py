@@ -268,12 +268,12 @@ def compute_deformation(interpolator, deformation_coords):
 #########################
 
 class Particle():
-	def __init__(self, xy=None, deformation=None):
-		if xy is None:
-			self.xy = (np.random.randint(0, dims[0]),
-			           np.random.randint(0, dims[1]))
+	def __init__(self, position=None, deformation=None):
+		if position is None:
+			self.position = (np.random.randint(0, dims[0]),
+			                 np.random.randint(0, dims[1]))
 		else:
-			self.xy = xy
+			self.position = position
 
 		if deformation is None:
 			deformation_ind = np.random.randint(0, len(embedding))
@@ -288,6 +288,7 @@ class Particle():
 
 	def project_up(self):
 		self.state_vec = compute_deformation(interpolator, self.deformation)
+		self.circle, self.rectangles = make_ground_truth(angle_noises=self.state_vec, position=self.position)
 
 def shape_weight(shape):
 	ious = []
@@ -298,9 +299,8 @@ def shape_weight(shape):
 	return np.max(ious)
 
 def particle_weight(particle):
-	particle_circle, particle_rectangles = make_ground_truth(angle_noises=particle.state_vec, position=particle.xy)
 	weights = []
-	weights.append(shape_weight(particle_circle))
-	for rectangle in particle_rectangles:
+	weights.append(shape_weight(particle.circle))
+	for rectangle in particle.rectangles:
 		weights.append(shape_weight(rectangle))
 	return np.prod(weights)
