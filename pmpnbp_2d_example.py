@@ -22,7 +22,7 @@ n_rectangles = 100
 gt_inner_dist = circle_radius + 1.0
 gt_outer_dist = rectangle_dims[0] + 1.0
 gt_cardinal_direction_angles = [0, np.pi/2, np.pi, 3*np.pi/2]
-gt_angle_var = np.pi / 16
+gt_angle_var = np.pi / 24
 
 # Dataset parameters
 n_train = 200
@@ -101,15 +101,17 @@ for _ in range(n_rectangles):
 	scene_rectangles.append(Rectangle())
 
 # Construct ground truth
-def make_ground_truth(angle_noises=None):
+def make_ground_truth(angle_noises=None, position=None):
 	if angle_noises is None:
 		angle_noises = np.random.normal(loc=0, scale=gt_angle_var, size=2*len(gt_cardinal_direction_angles))
 		if restrict_deformations:
 			for i in range(len(gt_cardinal_direction_angles)):
 				angle_noises[2*i] = angle_noises[2*i+1]
-	gt_circle = Circle(position=dims/2, radius=circle_radius)
+	if position is None:
+		position = dims/2
+
+	gt_circle = Circle(position=position, radius=circle_radius)
 	gt_rectangles = []
-	# Inner layer
 	for i in range(len(gt_cardinal_direction_angles)):
 		angle = gt_cardinal_direction_angles[i]
 		orientation = angle + angle_noises[2*i]
@@ -261,6 +263,10 @@ def compute_deformation(interpolator, deformation_coords):
 		print "Error: outside of convex hull!"
 		raise ValueError
 
+#########################
+# Particle Filter Setup #
+#########################
+
 class Particle():
 	def __init__(self, xy=None, deformation=None):
 		if xy is None:
@@ -282,3 +288,11 @@ class Particle():
 
 	def project_up(self):
 		self.state_vec = compute_deformation(interpolator, self.deformation)
+
+def shape_weight(shape):
+	ious = []
+	for circle in scene_circles:
+		ious.append(intersection_over_union(shape, circle))
+	for rectangle in scene_rectangles:
+		ious.append(intersection_over_union(shape, rectangle))
+	return np.max(ious)
