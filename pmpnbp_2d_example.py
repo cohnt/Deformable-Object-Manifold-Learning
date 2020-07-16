@@ -410,4 +410,4 @@ except KeyboardInterrupt:
 	pass
 
 import os
-os.system('ffmpeg -f image2 -r 1/0.1 -i iteration\%03d.png -c:v libx264 -pix_fmt yuv420p out.mp4')
+os.system('ffmpeg -f image2 -r 1/0.5 -i iteration\%03d.png -c:v libx264 -pix_fmt yuv420p out.mp4')
