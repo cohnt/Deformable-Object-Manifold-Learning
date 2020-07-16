@@ -338,61 +338,67 @@ def particle_weight(particle):
 particles = [Particle() for _ in range(n_particles)]
 iter_num = 0
 
-while True:
-	iter_num = iter_num + 1
-	print "Iteration %d" % iter_num
+try:
+	while True:
+		iter_num = iter_num + 1
+		print "Iteration %d" % iter_num
 
-	# Weight particles
-	weights = []
-	for p in particles:
-		p.raw_weight = particle_weight(p)
-		weights.append(p.raw_weight)
-	weights = np.asarray(weights)
-	normalization_factor = 1.0 / np.sum(weights)
-	normalized_weights = []
-	for p in particles:
-		w = p.raw_weight * normalization_factor
-		p.normalized_weight = w
-		normalized_weights.append(w)
-	max_normalized_weight = np.max(normalized_weights)
-	max_normalized_weight_ind = np.argmax(normalized_weights)
+		# Weight particles
+		weights = []
+		for p in particles:
+			p.raw_weight = particle_weight(p)
+			weights.append(p.raw_weight)
+		weights = np.asarray(weights)
+		normalization_factor = 1.0 / np.sum(weights)
+		normalized_weights = []
+		for p in particles:
+			w = p.raw_weight * normalization_factor
+			p.normalized_weight = w
+			normalized_weights.append(w)
+		max_normalized_weight = np.max(normalized_weights)
+		max_normalized_weight_ind = np.argmax(normalized_weights)
 
-	# Display
-	clear(ax)
-	draw_scene(ax)
-	for p in particles:
-		p.draw(ax)
-	ax.scatter([particles[max_normalized_weight_ind].circle.position[0]], [particles[max_normalized_weight_ind].circle.position[1]], color="red", zorder=2)
-	for rectangle in particles[max_normalized_weight_ind].rectangles:
-		ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="red", zorder=2)
-	plt.draw()
-	plt.pause(0.001)
-	plt.savefig("iteration%03d.png" % iter_num)
+		# Display
+		clear(ax)
+		draw_scene(ax)
+		for p in particles:
+			p.draw(ax)
+		ax.scatter([particles[max_normalized_weight_ind].circle.position[0]], [particles[max_normalized_weight_ind].circle.position[1]], color="red", zorder=2)
+		for rectangle in particles[max_normalized_weight_ind].rectangles:
+			ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="red", zorder=2)
+		plt.draw()
+		plt.pause(0.001)
+		plt.savefig("iteration%03d.png" % iter_num)
 
-	# Resample
-	newParticles = []
-	cs = np.cumsum(normalized_weights)
-	step = 1/float((n_particles * (1-exploration_factor))+1)
-	chkVal = step
-	chkIdx = 0
-	for i in range(int(np.ceil(n_particles * (1-exploration_factor)))):
-		while cs[chkIdx] < chkVal:
-			chkIdx = chkIdx + 1
-		chkVal = chkVal + step
-		newParticles.append(Particle(position=particles[chkIdx].position,
-		                             deformation=particles[chkIdx].deformation))
-	for i in range(len(newParticles), n_particles):
-		newParticles.append(Particle())
+		# Resample
+		newParticles = []
+		cs = np.cumsum(normalized_weights)
+		step = 1/float((n_particles * (1-exploration_factor))+1)
+		chkVal = step
+		chkIdx = 0
+		for i in range(int(np.ceil(n_particles * (1-exploration_factor)))):
+			while cs[chkIdx] < chkVal:
+				chkIdx = chkIdx + 1
+			chkVal = chkVal + step
+			newParticles.append(Particle(position=particles[chkIdx].position,
+			                             deformation=particles[chkIdx].deformation))
+		for i in range(len(newParticles), n_particles):
+			newParticles.append(Particle())
 
-	# Add noise
-	particles = newParticles
-	for p in particles:
-		p.position = p.position + np.random.multivariate_normal(np.zeros(2), position_var*np.eye(2))
+		# Add noise
+		particles = newParticles
+		for p in particles:
+			p.position = p.position + np.random.multivariate_normal(np.zeros(2), position_var*np.eye(2))
 
-		while True:
-			delta = np.random.multivariate_normal(np.zeros(target_dim), deformation_var*np.eye(target_dim))
-			if interpolator.find_simplex(p.deformation + delta) != -1:
-				p.deformation = p.deformation + delta
-				break
+			while True:
+				delta = np.random.multivariate_normal(np.zeros(target_dim), deformation_var*np.eye(target_dim))
+				if interpolator.find_simplex(p.deformation + delta) != -1:
+					p.deformation = p.deformation + delta
+					break
 
-		p.project_up()
+			p.project_up()
+except KeyboardInterrupt:
+	pass
+
+import os
+os.system('ffmpeg -f image2 -r 1/0.1 -i iteration\%03d.png -c:v libx264 -pix_fmt yuv420p out.mp4')
