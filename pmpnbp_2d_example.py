@@ -270,8 +270,7 @@ def compute_deformation(interpolator, deformation_coords):
 class Particle():
 	def __init__(self, position=None, deformation=None):
 		if position is None:
-			self.position = (np.random.randint(0, dims[0]),
-			                 np.random.randint(0, dims[1]))
+			self.position = np.random.uniform([0, 0], dims)
 		else:
 			self.position = position
 
