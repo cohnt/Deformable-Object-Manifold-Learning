@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 ##############
 
 # Scene setup
-dims = np.array([10, 10])
+dims = np.array([20, 20])
 circle_radius = 0.5
-circle_noise_var = 0.1
-n_circles = 8
+circle_noise_var = 0.05
+n_circles = 15
 rectangle_dims = np.array([1.25, 0.25])
-rectangle_noise_cov = np.array([[0.1, 0], [0, 0.05]])
-n_rectangles = 20
+rectangle_noise_cov = np.array([[0.05, 0], [0, 0.025]])
+n_rectangles = 60
 
 #########
 # Types #
@@ -73,6 +73,7 @@ for _ in range(n_rectangles):
 fig, ax = plt.subplots(1, 1)
 ax.set_xlim((0, dims[0]))
 ax.set_ylim((0, dims[1]))
+ax.set_aspect('equal')
 ax.set_facecolor("black")
 for circle in circles:
 	circle.draw(ax)
