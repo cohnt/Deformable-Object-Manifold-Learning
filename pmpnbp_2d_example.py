@@ -93,12 +93,12 @@ class Rectangle():
 ####################
 
 # Make the noisy observations
-circles = []
-rectangles = []
+scene_circles = []
+scene_rectangles = []
 for _ in range(n_circles):
-	circles.append(Circle())
+	scene_circles.append(Circle())
 for _ in range(n_rectangles):
-	rectangles.append(Rectangle())
+	scene_rectangles.append(Rectangle())
 
 # Construct ground truth
 def make_ground_truth(angle_noises=None):
@@ -123,6 +123,9 @@ def make_ground_truth(angle_noises=None):
 	return gt_circle, gt_rectangles
 
 gt_circle, gt_rectangles = make_ground_truth()
+scene_circles.append(gt_circle)
+for rectangle in gt_rectangles:
+	scene_rectangles.append(rectangle)
 
 def gt_to_state_vec(gt_circle, gt_rectangles):
 	angles = np.array([r.orientation for r in gt_rectangles])
@@ -144,9 +147,9 @@ ax.set_facecolor("black")
 mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 
-for circle in circles:
+for circle in scene_circles:
 	circle.draw(ax, color="grey")
-for rectangle in rectangles:
+for rectangle in scene_rectangles:
 	rectangle.draw(ax, color="grey")
 
 gt_circle.draw(ax)
