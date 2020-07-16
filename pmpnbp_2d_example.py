@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 dims = np.array([20, 20])
 circle_radius = 0.5
 circle_noise_var = 0.05
-n_circles = 15
+n_circles = 25
 rectangle_dims = np.array([1.25, 0.25])
 rectangle_noise_cov = np.array([[0.05, 0], [0, 0.025]])
-n_rectangles = 60
+n_rectangles = 100
 
 # Ground truth rules
 gt_inner_dist = circle_radius + 1.0
@@ -102,9 +102,9 @@ ax.set_aspect('equal')
 ax.set_facecolor("black")
 
 for circle in circles:
-	circle.draw(ax)
+	circle.draw(ax, color="grey")
 for rectangle in rectangles:
-	rectangle.draw(ax)
+	rectangle.draw(ax, color="grey")
 
 gt_circle.draw(ax)
 for rectangle in gt_rectangles:
