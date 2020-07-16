@@ -33,10 +33,12 @@ target_dim = 4
 neighbors_k = 12
 
 # Particle filter parameters
-n_particles = 10
+n_particles = 200
 exploration_factor = 0.0
-position_var = 0.1
+position_var = 0.25
 deformation_var = 0.1
+
+matplotlib.rcParams.update({'font.size': 22})
 
 #########
 # Types #
@@ -365,6 +367,7 @@ while True:
 		ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="red", zorder=2)
 	plt.draw()
 	plt.pause(0.001)
+	plt.savefig("iteration%03d.png" % iter_num)
 
 	# Resample
 	newParticles = []
