@@ -306,7 +306,7 @@ class Particle():
 		self.state_vec = compute_deformation(interpolator, self.deformation)
 		self.circle, self.rectangles = make_thingy(angle_noises=self.state_vec, position=self.position)
 
-	def draw(self, ax, alpha=0.1):
+	def draw(self, ax, alpha=0.25):
 		color = plt.cm.Spectral(1.0 - self.raw_weight)
 		self.circle.draw(ax, color, alpha)
 		for rectangle in self.rectangles:
