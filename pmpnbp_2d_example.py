@@ -84,11 +84,13 @@ def make_ground_truth():
 	gt_rectangles = []
 	# Inner layer
 	for angle in gt_cardinal_direction_angles:
-		orientation = angle + np.random.normal(loc=0, scale=gt_angle_var)
+		angle_noise = np.random.normal(loc=0, scale=gt_angle_var)
+
+		orientation = angle + angle_noise
 		position = gt_circle.position + np.array([gt_inner_dist * np.cos(orientation), gt_inner_dist * np.sin(orientation)])
 		gt_rectangles.append(Rectangle(position=position, orientation=orientation, size=rectangle_dims))
 
-		orientation = orientation + np.random.normal(loc=0, scale=gt_angle_var)
+		orientation = angle + 2 * angle_noise
 		position = position + np.array([gt_outer_dist * np.cos(orientation), gt_outer_dist * np.sin(orientation)])
 		gt_rectangles.append(Rectangle(position=position, orientation=orientation, size=rectangle_dims))
 
