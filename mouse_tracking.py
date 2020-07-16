@@ -12,10 +12,11 @@ filepath = "./data/mouse_dataset/"
 
 # Subset
 n_train = 400
-n_test = 526
+n_test = 519
 # train_inds = np.random.choice(n_train_max, n_train, replace=False)
 train_inds = range(n_train)
 test_inds = range(n_test)
+test_start_ind = 14
 
 # Camera Parameters
 d1, d2 = 500, 1000
@@ -27,14 +28,13 @@ image_dims = (640, 480)
 gaussian_filter_sigma = 3
 n_passes = 10
 disp_thresh = 0.9
-test_start_ind = 150
 
 # Particle Filter Parameters
 n_particles = 200
 exploration_factor = 0.25
-xy_var = 20
-theta_var = np.pi/8
-deformation_var = 5
+xy_var = 10
+theta_var = np.pi/16
+deformation_var = 10
 
 matplotlib.rcParams.update({'font.size': 22})
 
@@ -276,7 +276,7 @@ axes[1,1].set_xlim((0,image_dims[0]))
 axes[1,1].set_ylim((0,image_dims[1]))
 mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
-fig.tight_layout()
+fig.subplots_adjust(wspace=0.1, hspace=0.1)
 
 from sklearn.decomposition import PCA
 
@@ -349,8 +349,18 @@ try:
 		
 		axes[0,1].plot(p.points.T[:,0], p.points.T[:,1], c="red", linewidth=3)
 
+		# mean_xy = np.mean([p.xy for p in particles], axis=0)
+		# mean_theta = np.mean([p.theta for p in particles])
+		# mean_deformation = np.mean([p.deformation for p in particles], axis=0)
+		# mean_particle = Particle(xy=mean_xy, theta=mean_theta, deformation=mean_deformation)
+		# axes[1,1].plot(mean_particle.points.T[:,0], mean_particle.points.T[:,1], c="red", linewidth=3)
+
 		x_vals = np.array([p.points.T[:,0] for p in particles]).reshape(n_particles, n_tracked_points)
 		y_vals = np.array([p.points.T[:,1] for p in particles]).reshape(n_particles, n_tracked_points)
+		for i in range(len(particles)):
+			if x_vals[i,0] > x_vals[i,1]:
+				x_vals[i] = x_vals[i,::-1]
+				y_vals[i] = y_vals[i,::-1]
 		x_avg = np.average(x_vals, axis=0, weights=normalized_weights)
 		y_avg = np.average(y_vals, axis=0, weights=normalized_weights)
 		axes[1,1].plot(x_avg.flatten(), y_avg.flatten(), c="red", linewidth=3)
