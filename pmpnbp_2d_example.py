@@ -296,3 +296,11 @@ def shape_weight(shape):
 	for rectangle in scene_rectangles:
 		ious.append(intersection_over_union(shape, rectangle))
 	return np.max(ious)
+
+def particle_weight(particle):
+	particle_circle, particle_rectangles = make_ground_truth(angle_noises=particle.state_vec, position=particle.xy)
+	weights = []
+	weights.append(shape_weight(particle_circle))
+	for rectangle in particle_rectangles:
+		weights.append(shape_weight(rectangle))
+	return np.prod(weights)
