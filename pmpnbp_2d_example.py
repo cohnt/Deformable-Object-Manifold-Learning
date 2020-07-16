@@ -32,6 +32,9 @@ restrict_deformations = True
 target_dim = 4
 neighbors_k = 12
 
+# Particle filter parameters
+n_particles = 10
+
 #########
 # Types #
 #########
@@ -51,8 +54,8 @@ class Circle():
 		else:
 			self.radius = radius
 
-	def draw(self, ax, color="white"):
-		circle = plt.Circle(self.position, radius=self.radius, color=color)
+	def draw(self, ax, color="white", alpha=1.0):
+		circle = plt.Circle(self.position, radius=self.radius, color=color, alpha=alpha)
 		ax.add_patch(circle)
 
 class Rectangle():
@@ -72,9 +75,9 @@ class Rectangle():
 		else:
 			self.size = size
 
-	def draw(self, ax, color="white"):
+	def draw(self, ax, color="white", alpha=1.0):
 		points = self.get_vertices()
-		ax.fill(points[:,0], points[:,1], color=color)
+		ax.fill(points[:,0], points[:,1], color=color, alpha=alpha)
 
 	def get_vertices(self):
 		base_corner = self.position - (np.array([self.size[1] * np.cos(self.orientation + np.pi/2), self.size[1] * np.sin(self.orientation + np.pi/2)]) / 2)
@@ -297,11 +300,11 @@ class Particle():
 		self.state_vec = compute_deformation(interpolator, self.deformation)
 		self.circle, self.rectangles = make_ground_truth(angle_noises=self.state_vec, position=self.position)
 
-	def draw(self, ax):
-		color = plt.cm.cool(self.raw_weight)
-		self.circle.draw(ax, color)
+	def draw(self, ax, alpha=0.1):
+		color = plt.cm.Spectral(1.0 - self.raw_weight)
+		self.circle.draw(ax, color, alpha)
 		for rectangle in self.rectangles:
-			rectangle.draw(ax, color)
+			rectangle.draw(ax, color, alpha)
 
 def shape_weight(shape):
 	ious = []
@@ -317,3 +320,9 @@ def particle_weight(particle):
 	for rectangle in particle.rectangles:
 		weights.append(shape_weight(rectangle))
 	return np.prod(weights)
+
+particles = [Particle() for _ in range(n_particles)]
+for p in particles:
+	p.raw_weight = particle_weight(p)
+	p.draw(ax)
+plt.show()
