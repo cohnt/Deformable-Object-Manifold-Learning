@@ -94,13 +94,13 @@ for _ in range(n_rectangles):
 	rectangles.append(Rectangle())
 
 # Construct ground truth
-def make_ground_truth():
+def make_ground_truth(angle_noises=None):
+	if angle_noises is None:
+		angle_noises = np.random.normal(loc=0, scale=gt_angle_var, size=len(gt_cardinal_direction_angles))
 	gt_circle = Circle(position=dims/2, radius=circle_radius)
 	gt_rectangles = []
 	# Inner layer
-	for angle in gt_cardinal_direction_angles:
-		angle_noise = np.random.normal(loc=0, scale=gt_angle_var)
-
+	for angle, angle_noise in zip(gt_cardinal_direction_angles, angle_noises):
 		orientation = angle + angle_noise
 		position = gt_circle.position + np.array([gt_inner_dist * np.cos(orientation), gt_inner_dist * np.sin(orientation)])
 		gt_rectangles.append(Rectangle(position=position, orientation=orientation, size=rectangle_dims))
@@ -112,6 +112,21 @@ def make_ground_truth():
 	return gt_circle, gt_rectangles
 
 gt_circle, gt_rectangles = make_ground_truth()
+
+def gt_to_state_vec(gt_circle, gt_rectangles):
+	angles = np.array([
+		gt_rectangles[0].orientation,
+		gt_rectangles[2].orientation,
+		gt_rectangles[4].orientation,
+		gt_rectangles[6].orientation
+	])
+	state_vec = angles - gt_cardinal_direction_angles
+	return state_vec
+
+def state_vec_to_gt(state_vec):
+	return make_ground_truth(angle_noises=state_vec)
+
+gt_circle, gt_rectangles = state_vec_to_gt([0, 0, 0, 0])
 
 #####################
 # Display the Scene #
@@ -135,7 +150,8 @@ for rectangle in gt_rectangles:
 	rectangle.draw(ax)
 
 plt.draw()
-plt.pause(0.001)
+# plt.pause(0.001)
+plt.show()
 
 #######################
 # Shape IOU Functions #
