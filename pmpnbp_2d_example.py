@@ -100,6 +100,8 @@ ax.set_xlim((0, dims[0]))
 ax.set_ylim((0, dims[1]))
 ax.set_aspect('equal')
 ax.set_facecolor("black")
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
 
 for circle in circles:
 	circle.draw(ax, color="grey")
