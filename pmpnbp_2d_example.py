@@ -33,7 +33,7 @@ target_dim = 4
 neighbors_k = 12
 
 # Particle filter parameters
-n_particles = 200
+n_particles = 100
 exploration_factor = 0.0
 position_var = 0.25
 deformation_var = 0.1
@@ -363,9 +363,14 @@ try:
 		draw_scene(ax)
 		for p in particles:
 			p.draw(ax)
+
 		ax.scatter([particles[max_normalized_weight_ind].circle.position[0]], [particles[max_normalized_weight_ind].circle.position[1]], color="red", zorder=2)
 		for rectangle in particles[max_normalized_weight_ind].rectangles:
 			ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="red", zorder=2)
+		ax.scatter([gt_circle.position[0]], [gt_circle.position[1]], color="green", zorder=2)
+		for rectangle in gt_rectangles:
+			ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="green", zorder=2)
+
 		plt.draw()
 		plt.pause(0.001)
 		plt.savefig("iteration%03d.png" % iter_num)
