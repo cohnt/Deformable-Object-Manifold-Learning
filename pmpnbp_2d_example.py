@@ -211,9 +211,9 @@ def iou_rectangle_rectangle(rectangle1, rectangle2):
 	union = rectangle_area(rectangle1) + rectangle_area(rectangle2) - intersection
 	return intersection / union
 
-######################
-# Make Training Data #
-######################
+#################
+# Preprocessing #
+#################
 
 train = []
 for _ in range(n_train):
@@ -257,3 +257,25 @@ def compute_deformation(interpolator, deformation_coords):
 	else:
 		print "Error: outside of convex hull!"
 		raise ValueError
+
+class Particle():
+	def __init__(self, xy=None, deformation=None):
+		if xy is None:
+			self.xy = (np.random.randint(0, dims[0]),
+			           np.random.randint(0, dims[1]))
+		else:
+			self.xy = xy
+
+		if deformation is None:
+			deformation_ind = np.random.randint(0, len(embedding))
+			self.deformation = embedding[deformation_ind]
+		else:
+			self.deformation = deformation
+
+		self.project_up()
+
+		self.raw_weight = None
+		self.normalized_weight = None
+
+	def project_up(self):
+		self.state_vec = compute_deformation(interpolator, self.deformation)
