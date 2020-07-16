@@ -65,14 +65,15 @@ class Rectangle():
 			self.size = size
 
 	def draw(self, ax, color="white"):
-		render_offset = np.array([0, rectangle_dims[1]/2])
+		render_offset = np.zeros(2)
 		rectangle = plt.Rectangle(self.position-render_offset, self.size[0], self.size[1], angle=rad2deg(self.orientation), facecolor=color)
 		ax.add_patch(rectangle)
+		ax.scatter(np.array(self.get_vertices())[:,0], np.array(self.get_vertices())[:,1])
 
 	def get_vertices(self):
-		base_corner = self.position - np.array([0, rectangle_dims[1]/2])
-		vec1 = np.array([self.size[0] * np.cos(self.orientation), self.size[1] * np.sin(self.orientation)])
-		vec2 = np.array([self.size[0] * np.cos(self.orientation + np.pi/2), self.size[1] * np.sin(self.orientation + np.pi/2)])
+		base_corner = self.position
+		vec1 = np.array([self.size[0] * np.cos(self.orientation), self.size[0] * np.sin(self.orientation)])
+		vec2 = np.array([self.size[1] * np.cos(self.orientation + np.pi/2), self.size[1] * np.sin(self.orientation + np.pi/2)])
 		vertices = [
 			base_corner,
 			base_corner + vec1,
