@@ -104,7 +104,7 @@ for _ in range(n_rectangles):
 	scene_rectangles.append(Rectangle())
 
 # Construct ground truth
-def make_ground_truth(angle_noises=None, position=None):
+def make_thingy(angle_noises=None, position=None):
 	if angle_noises is None:
 		angle_noises = np.random.normal(loc=0, scale=gt_angle_var, size=2*len(gt_cardinal_direction_angles))
 		if restrict_deformations:
@@ -113,32 +113,32 @@ def make_ground_truth(angle_noises=None, position=None):
 	if position is None:
 		position = dims/2
 
-	gt_circle = Circle(position=position, radius=circle_radius)
-	gt_rectangles = []
+	circle = Circle(position=position, radius=circle_radius)
+	rectangles = []
 	for i in range(len(gt_cardinal_direction_angles)):
 		angle = gt_cardinal_direction_angles[i]
 		orientation = angle + angle_noises[2*i]
-		position = gt_circle.position + np.array([gt_inner_dist * np.cos(orientation), gt_inner_dist * np.sin(orientation)])
-		gt_rectangles.append(Rectangle(position=position, orientation=orientation, size=rectangle_dims))
+		position = circle.position + np.array([gt_inner_dist * np.cos(orientation), gt_inner_dist * np.sin(orientation)])
+		rectangles.append(Rectangle(position=position, orientation=orientation, size=rectangle_dims))
 
 		orientation = angle + angle_noises[2*i] + angle_noises[2*i+1]
 		position = position + np.array([gt_outer_dist * np.cos(orientation), gt_outer_dist * np.sin(orientation)])
-		gt_rectangles.append(Rectangle(position=position, orientation=orientation, size=rectangle_dims))
+		rectangles.append(Rectangle(position=position, orientation=orientation, size=rectangle_dims))
 
-	return gt_circle, gt_rectangles
+	return circle, rectangles
 
-gt_circle, gt_rectangles = make_ground_truth()
+gt_circle, gt_rectangles = make_thingy()
 scene_circles.append(gt_circle)
 for rectangle in gt_rectangles:
 	scene_rectangles.append(rectangle)
 
-def gt_to_state_vec(gt_circle, gt_rectangles):
-	angles = np.array([r.orientation for r in gt_rectangles])
+def thingy_to_state_vec(circle, rectangles):
+	angles = np.array([r.orientation for r in rectangles])
 	state_vec = angles - np.vstack((gt_cardinal_direction_angles, gt_cardinal_direction_angles)).flatten("F")
 	return state_vec
 
-def state_vec_to_gt(state_vec):
-	return make_ground_truth(angle_noises=state_vec)
+def state_vec_to_thingy(state_vec):
+	return make_thingy(angle_noises=state_vec)
 
 #####################
 # Display the Scene #
@@ -239,8 +239,8 @@ def iou_rectangle_rectangle(rectangle1, rectangle2):
 
 train = []
 for _ in range(n_train):
-	gt_circle, gt_rectangles = make_ground_truth()
-	train.append(gt_to_state_vec(gt_circle, gt_rectangles))
+	circle, rectangles = make_thingy()
+	train.append(thingy_to_state_vec(circle, rectangles))
 
 # Compute the Isomap embedding
 from sklearn.manifold import Isomap
@@ -304,7 +304,7 @@ class Particle():
 
 	def project_up(self):
 		self.state_vec = compute_deformation(interpolator, self.deformation)
-		self.circle, self.rectangles = make_ground_truth(angle_noises=self.state_vec, position=self.position)
+		self.circle, self.rectangles = make_thingy(angle_noises=self.state_vec, position=self.position)
 
 	def draw(self, ax, alpha=0.1):
 		color = plt.cm.Spectral(1.0 - self.raw_weight)
