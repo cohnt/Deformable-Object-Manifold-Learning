@@ -343,6 +343,9 @@ try:
 		iter_num = iter_num + 1
 		print "Iteration %d" % iter_num
 
+		if iter_num > 100:
+			break
+
 		# Weight particles
 		weights = []
 		for p in particles:
