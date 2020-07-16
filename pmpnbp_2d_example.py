@@ -200,6 +200,14 @@ def iou_circle_circle(circle1, circle2):
 	union = circle_area(circle1) + circle_area(circle2) - intersection
 	return intersection / union
 
+def iou_circle_circle(circle1, circle2):
+	shapely_circle1 = Point(circle1.position).buffer(circle1.radius)
+	shapely_circle2 = Point(circle2.position).buffer(circle2.radius)
+
+	intersection = shapely_circle1.intersection(shapely_circle2).area
+	union = circle_area(circle1) + circle_area(circle2) - intersection
+	return intersection / union
+
 def iou_circle_rectangle(circle, rectangle):
 	shapely_rectangle = Polygon(rectangle.get_vertices())
 	shapely_circle = Point(circle.position).buffer(circle.radius)
