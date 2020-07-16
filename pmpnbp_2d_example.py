@@ -79,17 +79,22 @@ for _ in range(n_rectangles):
 	rectangles.append(Rectangle())
 
 # Construct ground truth
-gt_circle = Circle(position=dims/2, radius=circle_radius)
-gt_rectangles = []
-# Inner layer
-for angle in gt_cardinal_direction_angles:
-	orientation = angle + np.random.normal(loc=0, scale=gt_angle_var)
-	position = gt_circle.position + np.array([gt_inner_dist * np.cos(orientation), gt_inner_dist * np.sin(orientation)])
-	gt_rectangles.append(Rectangle(position=position, orientation=orientation, size=rectangle_dims))
+def make_ground_truth():
+	gt_circle = Circle(position=dims/2, radius=circle_radius)
+	gt_rectangles = []
+	# Inner layer
+	for angle in gt_cardinal_direction_angles:
+		orientation = angle + np.random.normal(loc=0, scale=gt_angle_var)
+		position = gt_circle.position + np.array([gt_inner_dist * np.cos(orientation), gt_inner_dist * np.sin(orientation)])
+		gt_rectangles.append(Rectangle(position=position, orientation=orientation, size=rectangle_dims))
 
-	orientation = orientation + np.random.normal(loc=0, scale=gt_angle_var)
-	position = position + np.array([gt_outer_dist * np.cos(orientation), gt_outer_dist * np.sin(orientation)])
-	gt_rectangles.append(Rectangle(position=position, orientation=orientation, size=rectangle_dims))
+		orientation = orientation + np.random.normal(loc=0, scale=gt_angle_var)
+		position = position + np.array([gt_outer_dist * np.cos(orientation), gt_outer_dist * np.sin(orientation)])
+		gt_rectangles.append(Rectangle(position=position, orientation=orientation, size=rectangle_dims))
+
+	return gt_circle, gt_rectangles
+
+gt_circle, gt_rectangles = make_ground_truth()
 
 #####################
 # Display the Scene #
