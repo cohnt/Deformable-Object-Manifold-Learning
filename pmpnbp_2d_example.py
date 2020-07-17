@@ -18,7 +18,7 @@ n_circles = 25
 rectangle_dims = np.array([1.25, 0.25])
 rectangle_noise_cov = np.array([[0.05, 0], [0, 0.025]])
 n_rectangles = 100
-include_center = True
+include_center = False
 
 # Ground truth rules
 gt_inner_dist = circle_radius + 1.0
