@@ -370,18 +370,27 @@ try:
 
 		ax.scatter([particles[max_normalized_weight_ind].circle.position[0]], [particles[max_normalized_weight_ind].circle.position[1]], color="red", zorder=2, label="MLE")
 		for rectangle in particles[max_normalized_weight_ind].rectangles:
-			ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="red", zorder=2)
+			coords = rectangle.get_vertices()
+			coords = np.vstack((coords, coords[0]))
+			ax.scatter(coords[:,0], coords[:,1], color="red", zorder=2)
+			ax.plot(coords[:,0], coords[:,1], color="red", zorder=2)
 
 		positions = [p.position for p in particles]
 		deformations = [p.deformation for p in particles]
 		mean_particle = Particle(position=np.mean(positions, axis=0), deformation=np.mean(deformations, axis=0))
 		ax.scatter([mean_particle.circle.position[0]], [mean_particle.circle.position[1]], color="yellow", zorder=2, label="Mean")
 		for rectangle in mean_particle.rectangles:
-			ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="yellow", zorder=2)
+			coords = rectangle.get_vertices()
+			coords = np.vstack((coords, coords[0]))
+			ax.scatter(coords[:,0], coords[:,1], color="yellow", zorder=2)
+			ax.plot(coords[:,0], coords[:,1], color="yellow", zorder=2)
 
 		ax.scatter([gt_circle.position[0]], [gt_circle.position[1]], color="green", zorder=2, label="Ground Truth")
 		for rectangle in gt_rectangles:
-			ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="green", zorder=2)
+			coords = rectangle.get_vertices()
+			coords = np.vstack((coords, coords[0]))
+			ax.scatter(coords[:,0], coords[:,1], color="green", zorder=2)
+			ax.plot(coords[:,0], coords[:,1], color="green", zorder=2)
 
 		ax.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left', fontsize="large")
 		plt.tight_layout()
