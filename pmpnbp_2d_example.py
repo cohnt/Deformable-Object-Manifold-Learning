@@ -18,7 +18,7 @@ n_circles = 25
 rectangle_dims = np.array([1.25, 0.25])
 rectangle_noise_cov = np.array([[0.05, 0], [0, 0.025]])
 n_rectangles = 100
-include_center = False
+include_center = True
 
 # Ground truth rules
 gt_inner_dist = circle_radius + 1.0
@@ -31,7 +31,7 @@ n_train = 200
 restrict_deformations = True
 
 # Manifold learning parameters
-target_dim = 4
+target_dim = 2
 neighbors_k = 12
 
 # Particle filter parameters
