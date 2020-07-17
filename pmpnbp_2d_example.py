@@ -18,17 +18,17 @@ n_circles = 25
 rectangle_dims = np.array([1.25, 0.25])
 rectangle_noise_cov = np.array([[0.05, 0], [0, 0.025]])
 n_rectangles = 100
-include_center = True
+include_center = False
 
 # Ground truth rules
 gt_inner_dist = circle_radius + 1.0
 gt_outer_dist = rectangle_dims[0] + 1.0
 gt_cardinal_direction_angles = [0, np.pi/2, np.pi, 3*np.pi/2]
-gt_angle_var = np.pi / 24
+gt_angle_var = np.pi / 16
 
 # Dataset parameters
 n_train = 200
-restrict_deformations = False
+restrict_deformations = True
 
 # Manifold learning parameters
 target_dim = 4
