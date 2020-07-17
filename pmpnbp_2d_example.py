@@ -369,6 +369,8 @@ try:
 			p.draw(ax)
 
 		ax.scatter([particles[max_normalized_weight_ind].circle.position[0]], [particles[max_normalized_weight_ind].circle.position[1]], color="red", zorder=2, label="MLE")
+		circle = plt.Circle(particles[max_normalized_weight_ind].circle.position, radius=particles[max_normalized_weight_ind].circle.radius, color="red", fill=False)
+		ax.add_patch(circle)
 		for rectangle in particles[max_normalized_weight_ind].rectangles:
 			coords = rectangle.get_vertices()
 			coords = np.vstack((coords, coords[0]))
@@ -379,6 +381,8 @@ try:
 		deformations = [p.deformation for p in particles]
 		mean_particle = Particle(position=np.mean(positions, axis=0), deformation=np.mean(deformations, axis=0))
 		ax.scatter([mean_particle.circle.position[0]], [mean_particle.circle.position[1]], color="yellow", zorder=2, label="Mean")
+		circle = plt.Circle(mean_particle.circle.position, radius=mean_particle.circle.radius, color="yellow", fill=False)
+		ax.add_patch(circle)
 		for rectangle in mean_particle.rectangles:
 			coords = rectangle.get_vertices()
 			coords = np.vstack((coords, coords[0]))
@@ -386,6 +390,8 @@ try:
 			ax.plot(coords[:,0], coords[:,1], color="yellow", zorder=2)
 
 		ax.scatter([gt_circle.position[0]], [gt_circle.position[1]], color="green", zorder=2, label="Ground Truth")
+		circle = plt.Circle(gt_circle.position, radius=gt_circle.radius, color="green", fill=False)
+		ax.add_patch(circle)
 		for rectangle in gt_rectangles:
 			coords = rectangle.get_vertices()
 			coords = np.vstack((coords, coords[0]))
