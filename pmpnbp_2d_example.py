@@ -33,8 +33,8 @@ target_dim = 4
 neighbors_k = 12
 
 # Particle filter parameters
-n_particles = 25
-exploration_factor = 0.0
+n_particles = 100
+exploration_factor = 0.1
 position_var = 0.25
 deformation_var = 0.1
 noise_decrease_factor = 0.9
