@@ -34,7 +34,7 @@ neighbors_k = 12
 
 # Particle filter parameters
 n_particles = 100
-exploration_factor = 0.0
+exploration_factor = 0.1
 position_var = 0.25
 deformation_var = 0.1
 noise_decrease_factor = 0.9
@@ -368,12 +368,38 @@ try:
 		for p in particles:
 			p.draw(ax)
 
-		ax.scatter([particles[max_normalized_weight_ind].circle.position[0]], [particles[max_normalized_weight_ind].circle.position[1]], color="red", zorder=2)
+		ax.scatter([particles[max_normalized_weight_ind].circle.position[0]], [particles[max_normalized_weight_ind].circle.position[1]], color="red", zorder=2, label="MLE")
+		circle = plt.Circle(particles[max_normalized_weight_ind].circle.position, radius=particles[max_normalized_weight_ind].circle.radius, color="red", fill=False)
+		ax.add_patch(circle)
 		for rectangle in particles[max_normalized_weight_ind].rectangles:
-			ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="red", zorder=2)
-		ax.scatter([gt_circle.position[0]], [gt_circle.position[1]], color="green", zorder=2)
+			coords = rectangle.get_vertices()
+			coords = np.vstack((coords, coords[0]))
+			ax.scatter(coords[:,0], coords[:,1], color="red", zorder=2)
+			ax.plot(coords[:,0], coords[:,1], color="red", zorder=2)
+
+		positions = [p.position for p in particles]
+		deformations = [p.deformation for p in particles]
+		mean_particle = Particle(position=np.mean(positions, axis=0), deformation=np.mean(deformations, axis=0))
+		ax.scatter([mean_particle.circle.position[0]], [mean_particle.circle.position[1]], color="yellow", zorder=2, label="Mean")
+		circle = plt.Circle(mean_particle.circle.position, radius=mean_particle.circle.radius, color="yellow", fill=False)
+		ax.add_patch(circle)
+		for rectangle in mean_particle.rectangles:
+			coords = rectangle.get_vertices()
+			coords = np.vstack((coords, coords[0]))
+			ax.scatter(coords[:,0], coords[:,1], color="yellow", zorder=2)
+			ax.plot(coords[:,0], coords[:,1], color="yellow", zorder=2)
+
+		ax.scatter([gt_circle.position[0]], [gt_circle.position[1]], color="green", zorder=2, label="Ground Truth")
+		circle = plt.Circle(gt_circle.position, radius=gt_circle.radius, color="green", fill=False)
+		ax.add_patch(circle)
 		for rectangle in gt_rectangles:
-			ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="green", zorder=2)
+			coords = rectangle.get_vertices()
+			coords = np.vstack((coords, coords[0]))
+			ax.scatter(coords[:,0], coords[:,1], color="green", zorder=2)
+			ax.plot(coords[:,0], coords[:,1], color="green", zorder=2)
+
+		ax.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left', fontsize="large")
+		plt.tight_layout()
 
 		plt.draw()
 		plt.pause(0.001)
