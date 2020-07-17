@@ -304,8 +304,12 @@ class Particle():
 			self.position = position
 
 		if deformation is None:
-			deformation_ind = np.random.randint(0, len(embedding))
-			self.deformation = embedding[deformation_ind]
+			while True:
+				deformation_ind = np.random.randint(0, len(embedding))
+				deformation = embedding[deformation_ind]
+				if interpolator.find_simplex(deformation) != -1:
+					self.deformation = deformation
+					break
 		else:
 			self.deformation = deformation
 
