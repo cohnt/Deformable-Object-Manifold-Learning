@@ -37,6 +37,7 @@ n_particles = 100
 exploration_factor = 0.0
 position_var = 0.25
 deformation_var = 0.1
+noise_decrease_factor = 0.9
 
 matplotlib.rcParams.update({'font.size': 22})
 
@@ -397,10 +398,10 @@ try:
 		# Add noise
 		particles = newParticles
 		for p in particles:
-			p.position = p.position + np.random.multivariate_normal(np.zeros(2), position_var*np.eye(2))
+			p.position = p.position + np.random.multivariate_normal(np.zeros(2), position_var*(noise_decrease_factor**iter_num)*np.eye(2))
 
 			while True:
-				delta = np.random.multivariate_normal(np.zeros(target_dim), deformation_var*np.eye(target_dim))
+				delta = np.random.multivariate_normal(np.zeros(target_dim), deformation_var*(noise_decrease_factor**iter_num)*np.eye(target_dim))
 				if interpolator.find_simplex(p.deformation + delta) != -1:
 					p.deformation = p.deformation + delta
 					break
