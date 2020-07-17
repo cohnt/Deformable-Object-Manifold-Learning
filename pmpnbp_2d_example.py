@@ -33,7 +33,7 @@ target_dim = 4
 neighbors_k = 12
 
 # Particle filter parameters
-n_particles = 100
+n_particles = 25
 exploration_factor = 0.0
 position_var = 0.25
 deformation_var = 0.1
@@ -368,12 +368,23 @@ try:
 		for p in particles:
 			p.draw(ax)
 
-		ax.scatter([particles[max_normalized_weight_ind].circle.position[0]], [particles[max_normalized_weight_ind].circle.position[1]], color="red", zorder=2)
+		ax.scatter([particles[max_normalized_weight_ind].circle.position[0]], [particles[max_normalized_weight_ind].circle.position[1]], color="red", zorder=2, label="MLE")
 		for rectangle in particles[max_normalized_weight_ind].rectangles:
 			ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="red", zorder=2)
-		ax.scatter([gt_circle.position[0]], [gt_circle.position[1]], color="green", zorder=2)
+
+		positions = [p.position for p in particles]
+		deformations = [p.deformation for p in particles]
+		mean_particle = Particle(position=np.mean(positions, axis=0), deformation=np.mean(deformations, axis=0))
+		ax.scatter([mean_particle.circle.position[0]], [mean_particle.circle.position[1]], color="yellow", zorder=2, label="Mean")
+		for rectangle in mean_particle.rectangles:
+			ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="yellow", zorder=2)
+
+		ax.scatter([gt_circle.position[0]], [gt_circle.position[1]], color="green", zorder=2, label="Ground Truth")
 		for rectangle in gt_rectangles:
 			ax.scatter(rectangle.get_vertices()[:,0], rectangle.get_vertices()[:,1], color="green", zorder=2)
+
+		ax.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left', fontsize="large")
+		plt.tight_layout()
 
 		plt.draw()
 		plt.pause(0.001)
