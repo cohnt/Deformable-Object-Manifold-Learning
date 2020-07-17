@@ -24,7 +24,7 @@ include_center = False
 gt_inner_dist = circle_radius + 1.0
 gt_outer_dist = rectangle_dims[0] + 1.0
 gt_cardinal_direction_angles = [0, np.pi/2, np.pi, 3*np.pi/2]
-gt_angle_var = np.pi / 24
+gt_angle_var = np.pi / 16
 
 # Dataset parameters
 n_train = 200
@@ -40,6 +40,7 @@ exploration_factor = 0.1
 position_var = 0.25
 deformation_var = 0.1
 noise_decrease_factor = 0.9
+max_iters = 50
 
 matplotlib.rcParams.update({'font.size': 22})
 
@@ -352,7 +353,7 @@ try:
 		iter_num = iter_num + 1
 		print "Iteration %d" % iter_num
 
-		if iter_num > 100:
+		if iter_num > max_iters:
 			break
 
 		# Weight particles
