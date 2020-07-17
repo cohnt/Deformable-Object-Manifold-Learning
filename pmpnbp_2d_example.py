@@ -37,9 +37,9 @@ neighbors_k = 12
 # Particle filter parameters
 n_particles = 100
 exploration_factor = 0.1
-position_var = 0.5
-deformation_var = 0.25
-noise_decrease_factor = 0.95
+position_var = 0.25
+deformation_var = 0.1
+noise_decrease_factor = 0.9
 
 matplotlib.rcParams.update({'font.size': 22})
 
