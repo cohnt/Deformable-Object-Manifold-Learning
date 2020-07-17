@@ -13,10 +13,12 @@ from shapely.geometry import Polygon
 dims = np.array([20, 20])
 circle_radius = 0.5
 circle_noise_var = 0.05
+gt_position = np.array([13, 7])
 n_circles = 25
 rectangle_dims = np.array([1.25, 0.25])
 rectangle_noise_cov = np.array([[0.05, 0], [0, 0.025]])
 n_rectangles = 100
+include_center = False
 
 # Ground truth rules
 gt_inner_dist = circle_radius + 1.0
@@ -133,8 +135,9 @@ def make_thingy(angle_noises=None, position=None):
 
 	return circle, rectangles
 
-gt_circle, gt_rectangles = make_thingy()
-scene_circles.append(gt_circle)
+gt_circle, gt_rectangles = make_thingy(position=gt_position)
+if include_center:
+	scene_circles.append(gt_circle)
 for rectangle in gt_rectangles:
 	scene_rectangles.append(rectangle)
 
@@ -156,7 +159,8 @@ def draw_scene(ax):
 	for rectangle in scene_rectangles:
 		rectangle.draw(ax, color="grey")
 
-	gt_circle.draw(ax)
+	if include_center:
+		gt_circle.draw(ax)
 	for rectangle in gt_rectangles:
 		rectangle.draw(ax)
 
@@ -301,8 +305,12 @@ class Particle():
 			self.position = position
 
 		if deformation is None:
-			deformation_ind = np.random.randint(0, len(embedding))
-			self.deformation = embedding[deformation_ind]
+			while True:
+				deformation_ind = np.random.randint(0, len(embedding))
+				deformation = embedding[deformation_ind]
+				if interpolator.find_simplex(deformation) != -1:
+					self.deformation = deformation
+					break
 		else:
 			self.deformation = deformation
 
