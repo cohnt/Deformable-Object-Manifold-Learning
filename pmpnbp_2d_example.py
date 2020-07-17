@@ -13,6 +13,7 @@ from shapely.geometry import Polygon
 dims = np.array([20, 20])
 circle_radius = 0.5
 circle_noise_var = 0.05
+gt_position = np.array([13, 7])
 n_circles = 25
 rectangle_dims = np.array([1.25, 0.25])
 rectangle_noise_cov = np.array([[0.05, 0], [0, 0.025]])
@@ -134,7 +135,7 @@ def make_thingy(angle_noises=None, position=None):
 
 	return circle, rectangles
 
-gt_circle, gt_rectangles = make_thingy()
+gt_circle, gt_rectangles = make_thingy(position=gt_position)
 if include_center:
 	scene_circles.append(gt_circle)
 for rectangle in gt_rectangles:
