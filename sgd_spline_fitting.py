@@ -44,7 +44,7 @@ class CatmullRomSplineSegment():
 		self.t_length = self.t2 - self.t1
 
 	def __call__(self, T):
-		# T should be in [0, 1], where 0 maps to P1 and 1 maps to P2
+		T = T.reshape(-1, 1)
 		t = ((self.t2 - self.t1) * T) + self.t1
 		A1 = (self.t1-t)/(self.t1-self.t0)*self.P0 + (t-self.t0)/(self.t1-self.t0)*self.P1
 		A2 = (self.t2-t)/(self.t2-self.t1)*self.P1 + (t-self.t1)/(self.t2-self.t1)*self.P2
@@ -70,13 +70,11 @@ class CatmullRomSpline():
 		self.total_length = self.t_benchmarks[-1]
 
 	def __call__(self, T):
-		T = np.asarray(T).reshape(-1, 1)
-		# T should be in [0, 1], where both 0 and 1 map to self.points[0]
+		T = T.reshape(-1, 1)
 		overall_t = T * self.total_length
 		segment_idx = np.argmin(self.t_benchmarks < overall_t, axis=1)
 		local_t = (overall_t - self.t_benchmarks[segment_idx].reshape(-1, 1)) / self.t_lengths[segment_idx].reshape(-1, 1)
 		output = np.array([segment(t) for segment, t, in zip(self.segments[segment_idx], local_t)])
-		print output.shape
 		return output
 
 # control_points = np.array([[0, 1], [1, 0], [2, 0], [3, 1]])
@@ -89,8 +87,15 @@ class CatmullRomSpline():
 
 control_points = np.array([[0, 0], [1, 0], [2, 1], [1, 2], [0, 1]])
 cms = CatmullRomSpline(control_points)
-Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
-points = cms(Tvals)
-plt.plot(points[:,0], points[:,1])
-plt.scatter(control_points[:,0], control_points[:,1])
-plt.show()
+# Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
+# points = cms(Tvals)
+# plt.plot(points[:,0], points[:,1])
+# plt.scatter(control_points[:,0], control_points[:,1])
+# plt.show()
+
+for i in range(len(control_points)):
+	Tvals = np.linspace(0, 1, 100)
+	points = cms.segments[i](Tvals)
+	plt.plot(points[:,0], points[:,1])
+	plt.scatter(control_points[:,0], control_points[:,1])
+	plt.show()
