@@ -41,10 +41,15 @@ blob = np.array([
 	[0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0],
 ])
 blob_size = blob.shape
-mask[10:10+blob_size[0], 10:10+blob_size[1]] = blob
+blob_min_x = 10
+blob_max_x = blob_min_x + blob.shape[0] + 1
+blob_min_y = 10
+blob_max_y = blob_min_y + blob.shape[1] + 1
+mask[blob_min_x:blob_min_x+blob.shape[0], blob_min_y:blob_min_y+blob_size[1]] = blob
+blob_points = np.flip(np.transpose(blob.nonzero()), axis=1) +  [blob_min_x, blob_min_y]
 
 spline_n_points = 8
-spline_init_radius = 5
+spline_init_radius = 10
 centroid = np.flip(np.array(center_of_mass(mask)))
 angles = np.linspace(0, 2*np.pi, spline_n_points+1)[0:-1]
 control_points = (spline_init_radius * np.vstack((np.cos(angles), np.sin(angles))).T) + centroid
@@ -129,8 +134,20 @@ points = cms(Tvals)
 plt.imshow(mask)
 plt.plot(points[:,0], points[:,1])
 plt.scatter(control_points[:,0], control_points[:,1])
-points = cms.rasterize()
+points = cms.points
 plt.scatter(points[:,0], points[:,1])
+
+def iou(spline):
+	intersection = 0.
+	for p1 in blob_points:
+		for p2 in spline.points:
+			if (p1 == p2).all():
+				print p1, p2
+				intersection = intersection + 1
+	union = len(blob_points) + len(spline.points) - intersection
+	return intersection / union
+
+print iou(cms)
 
 mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
