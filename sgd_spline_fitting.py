@@ -113,12 +113,12 @@ class CatmullRomSpline():
 
 	def rasterize(self, t_resolution=1000):
 		Tvals = np.linspace(0, 1, t_resolution)
-		points = np.rint(self(Tvals)).astype(int)
+		points = self(Tvals)
 		polygon = Polygon(points)
-		self.min_x = np.min(points[:,0])
-		self.max_x = np.max(points[:,0])
-		self.min_y = np.min(points[:,1])
-		self.max_y = np.max(points[:,1])
+		self.min_x = int(np.floor(np.min(points[:,0])))
+		self.max_x = int(np.ceil(np.max(points[:,0])))
+		self.min_y = int(np.floor(np.min(points[:,1])))
+		self.max_y = int(np.ceil(np.max(points[:,1])))
 		points = []
 		for x in range(self.min_x, self.max_x+1):
 			for y in range(self.min_y, self.max_y+1):
@@ -137,18 +137,50 @@ plt.scatter(control_points[:,0], control_points[:,1])
 points = cms.points
 plt.scatter(points[:,0], points[:,1])
 
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
+plt.draw()
+plt.pause(0.001)
+
 def iou(spline):
 	intersection = 0.
 	for p1 in blob_points:
 		for p2 in spline.points:
 			if (p1 == p2).all():
-				print p1, p2
 				intersection = intersection + 1
 	union = len(blob_points) + len(spline.points) - intersection
 	return intersection / union
 
-print iou(cms)
+# Gradient Descent
+learning_rate = 100
+grad_eps = 1
+num_iters = 10
+for iter_num in range(1, num_iters+1):
+	print "Iteration %d" % iter_num
 
-mng = plt.get_current_fig_manager()
-mng.resize(*mng.window.maxsize())
-plt.show()
+	# Compute gradient
+	grad = np.zeros(control_points.shape)
+	for i in range(grad.shape[0]):
+		for j in range(grad.shape[1]):
+			c1 = control_points
+			c2 = control_points.copy()
+			c2[i,j] = c2[i,j] + grad_eps
+			s1 = CatmullRomSpline(c1)
+			s2 = CatmullRomSpline(c2)
+			grad[i,j] = (iou(s2) - iou(s1)) / grad_eps
+	print grad
+
+	# Update control_points
+	control_points = control_points + (learning_rate * grad)
+	current_spline = CatmullRomSpline(control_points)
+
+	# Draw
+	plt.cla()
+	Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
+	edge_points = current_spline(Tvals)
+	plt.imshow(mask)
+	plt.plot(edge_points[:,0], edge_points[:,1])
+	plt.scatter(control_points[:,0], control_points[:,1])
+	plt.scatter(current_spline.points[:,0], current_spline.points[:,1])
+	plt.draw()
+	plt.pause(0.001)
