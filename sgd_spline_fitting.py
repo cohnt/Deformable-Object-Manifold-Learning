@@ -41,6 +41,7 @@ class CatmullRomSplineSegment():
 		self.t1 = tj(self.t0, self.P0, self.P1)
 		self.t2 = tj(self.t1, self.P1, self.P2)
 		self.t3 = tj(self.t2, self.P2, self.P3)
+		self.t_length = self.t2 - self.t1
 
 	def __call__(self, T):
 		# T should be in [0, 1], where 0 maps to P1 and 1 maps to P2
@@ -55,15 +56,39 @@ class CatmullRomSplineSegment():
 
 class CatmullRomSpline():
 	def __init__(self, points):
+		self.points = points
 		self.segments = []
 		self.segments.append(CatmullRomSplineSegment(points[-1], points[0], points[1], points[2]))
 		for i in range(len(points) - 3):
 			self.segments.append(CatmullRomSplineSegment(points[i], points[i+1], points[i+2], points[i+3]))
 		self.segments.append(CatmullRomSplineSegment(points[-3], points[-2], points[-1], points[0]))
 		self.segments.append(CatmullRomSplineSegment(points[-2], points[-1], points[0], points[1]))
+		self.segments = np.array(self.segments)
 
-control_points = np.array([[0, 1], [1, 0], [2, 0], [3, 1]])
-cms = CatmullRomSplineSegment(control_points[0], control_points[1], control_points[2], control_points[3])
+		self.t_lengths = np.array([segment.t_length for segment in self.segments])
+		self.t_benchmarks = np.cumsum(self.t_lengths)
+		self.total_length = self.t_benchmarks[-1]
+
+	def __call__(self, T):
+		T = np.asarray(T).reshape(-1, 1)
+		# T should be in [0, 1], where both 0 and 1 map to self.points[0]
+		overall_t = T * self.total_length
+		segment_idx = np.argmin(self.t_benchmarks < overall_t, axis=1)
+		local_t = (overall_t - self.t_benchmarks[segment_idx].reshape(-1, 1)) / self.t_lengths[segment_idx].reshape(-1, 1)
+		output = np.array([segment(t) for segment, t, in zip(self.segments[segment_idx], local_t)])
+		print output.shape
+		return output
+
+# control_points = np.array([[0, 1], [1, 0], [2, 0], [3, 1]])
+# cms = CatmullRomSplineSegment(control_points[0], control_points[1], control_points[2], control_points[3])
+# Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
+# points = cms(Tvals)
+# plt.plot(points[:,0], points[:,1])
+# plt.scatter(control_points[:,0], control_points[:,1])
+# plt.show()
+
+control_points = np.array([[0, 0], [1, 0], [2, 1], [1, 2], [0, 1]])
+cms = CatmullRomSpline(control_points)
 Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
 points = cms(Tvals)
 plt.plot(points[:,0], points[:,1])
