@@ -26,10 +26,10 @@ control_points = np.vstack((np.cos(angles), np.sin(angles))).T
 
 class CatmulRomSplineSegment():
 	def __init__(self, P0, P1, P2, P3, alpha=0.5):
-		self.P0 = P0
-		self.P1 = P1
-		self.P2 = P2
-		self.P3 = P3
+		self.P0 = np.asarray(P0)
+		self.P1 = np.asarray(P1)
+		self.P2 = np.asarray(P2)
+		self.P3 = np.asarray(P3)
 		self.alpha = alpha
 
 		def tj(ti, Pi, Pj):
@@ -61,3 +61,11 @@ class CatmulRomSpline():
 			self.segments.append(CatmulRomSplineSegment(points[i], points[i+1], points[i+2], points[i+3]))
 		self.segments.append(CatmulRomSplineSegment(points[-3], points[-2], points[-1], points[0]))
 		self.segments.append(CatmulRomSplineSegment(points[-2], points[-1], points[0], points[1]))
+
+control_points = np.array([[0, 0], [2, 0], [3, 1], [3, 3]])
+cms = CatmulRomSplineSegment(control_points[0], control_points[1], control_points[2], control_points[3])
+Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
+points = cms(Tvals)
+plt.plot(points[:,0], points[:,1])
+plt.scatter(control_points[:,0], control_points[:,1])
+plt.show()
