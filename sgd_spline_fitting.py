@@ -104,8 +104,8 @@ class CatmullRomSpline():
 # plt.scatter(control_points[:,0], control_points[:,1])
 # plt.show()
 
-control_points = np.array([[0, 0], [10, 0], [20, 10], [10, 20], [0, 10]])
-control_points = control_points + np.array([10, 10])
+control_points = np.array([[0, 0], [1, 0], [2, 1], [1, 2], [0, 1]])
+control_points = 10*control_points + np.array([10, 10])
 cms = CatmullRomSpline(control_points)
 
 # for i in range(len(control_points)):
