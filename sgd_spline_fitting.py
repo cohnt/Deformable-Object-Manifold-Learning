@@ -124,13 +124,6 @@ class CatmullRomSpline():
 
 cms = CatmullRomSpline(control_points)
 
-# for i in range(len(control_points)):
-# 	Tvals = np.linspace(0, 1, 100)
-# 	points = cms.segments[i](Tvals)
-# 	plt.plot(points[:,0], points[:,1])
-# 	plt.scatter(control_points[:,0], control_points[:,1])
-	# plt.show()
-
 Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
 points = cms(Tvals)
 plt.imshow(mask)
@@ -138,4 +131,7 @@ plt.plot(points[:,0], points[:,1])
 plt.scatter(control_points[:,0], control_points[:,1])
 points = cms.rasterize()
 plt.scatter(points[:,0], points[:,1])
+
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
 plt.show()
