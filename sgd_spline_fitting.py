@@ -68,12 +68,14 @@ class CatmullRomSpline():
 		self.t_lengths = np.array([segment.t_length for segment in self.segments])
 		self.t_benchmarks = np.cumsum(self.t_lengths)
 		self.total_length = self.t_benchmarks[-1]
+		self.t_benchmarks = np.append(self.t_benchmarks, [0])
+		# Having a 0 at the end makes sure that accessing the -1 element returns a 0 offset.
 
 	def __call__(self, T):
 		T = np.asarray(T).reshape(-1, 1)
 		overall_t = T * self.total_length
 		segment_idx = np.argmin(self.t_benchmarks < overall_t, axis=1)
-		local_t = (overall_t - self.t_benchmarks[segment_idx].reshape(-1, 1)) / self.t_lengths[segment_idx].reshape(-1, 1)
+		local_t = (overall_t - self.t_benchmarks[segment_idx-1].reshape(-1, 1)) / self.t_lengths[segment_idx].reshape(-1, 1)
 		output = np.array([segment(t) for segment, t, in zip(self.segments[segment_idx], local_t)])
 		return output.reshape(-1, 2)
 
