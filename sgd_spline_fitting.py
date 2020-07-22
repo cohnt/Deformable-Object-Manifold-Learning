@@ -79,6 +79,17 @@ class CatmullRomSpline():
 		output = np.array([segment(t) for segment, t, in zip(self.segments[segment_idx], local_t)])
 		return output.reshape(-1, 2)
 
+	def rasterize(self, t_resolution=1000):
+		Tvals = np.linspace(0, 1, t_resolution)
+		points = np.rint(self(Tvals)).astype(int)
+		filtered_points = np.unique(points, axis=0)
+		# min_x = np.min(points[:,0])
+		# max_x = np.max(points[:,0])
+		# for x in range(min_x, max_x+1):
+		# 	y_points = np.unique(points[points[:,0] == x], axis=0)
+		return filtered_points
+
+
 # control_points = np.array([[0, 1], [1, 0], [2, 0], [3, 1]])
 # cms = CatmullRomSplineSegment(control_points[0], control_points[1], control_points[2], control_points[3])
 # Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
@@ -87,18 +98,21 @@ class CatmullRomSpline():
 # plt.scatter(control_points[:,0], control_points[:,1])
 # plt.show()
 
-control_points = np.array([[0, 0], [1, 0], [2, 1], [1, 2], [0, 1]])
+control_points = np.array([[0, 0], [10, 0], [20, 10], [10, 20], [0, 10]])
+control_points = control_points + np.array([10, 10])
 cms = CatmullRomSpline(control_points)
 
-for i in range(len(control_points)):
-	Tvals = np.linspace(0, 1, 100)
-	points = cms.segments[i](Tvals)
-	plt.plot(points[:,0], points[:,1])
-	plt.scatter(control_points[:,0], control_points[:,1])
-	plt.show()
+# for i in range(len(control_points)):
+# 	Tvals = np.linspace(0, 1, 100)
+# 	points = cms.segments[i](Tvals)
+# 	plt.plot(points[:,0], points[:,1])
+# 	plt.scatter(control_points[:,0], control_points[:,1])
+# 	plt.show()
 
 Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
 points = cms(Tvals)
 plt.plot(points[:,0], points[:,1])
 plt.scatter(control_points[:,0], control_points[:,1])
+points = cms.rasterize()
+plt.scatter(points[:,0], points[:,1])
 plt.show()
