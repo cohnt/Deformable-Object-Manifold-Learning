@@ -62,7 +62,7 @@ class CatmullRomSpline():
 		self.segments.append(CatmullRomSplineSegment(points[-3], points[-2], points[-1], points[0]))
 		self.segments.append(CatmullRomSplineSegment(points[-2], points[-1], points[0], points[1]))
 
-control_points = np.array([[0, 0], [2, 0], [3, 1], [3, 3]])
+control_points = np.array([[0, 1], [1, 0], [2, 0], [3, 1]])
 cms = CatmullRomSplineSegment(control_points[0], control_points[1], control_points[2], control_points[3])
 Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
 points = cms(Tvals)
