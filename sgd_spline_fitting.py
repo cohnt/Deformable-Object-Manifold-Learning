@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from scipy.ndimage.measurements import center_of_mass
+from shapely.geometry import Polygon, Point
 
 img_size = (100, 100)
 mask = np.zeros(img_size)
@@ -82,13 +83,18 @@ class CatmullRomSpline():
 	def rasterize(self, t_resolution=1000):
 		Tvals = np.linspace(0, 1, t_resolution)
 		points = np.rint(self(Tvals)).astype(int)
-		filtered_points = np.unique(points, axis=0)
-		# min_x = np.min(points[:,0])
-		# max_x = np.max(points[:,0])
-		# for x in range(min_x, max_x+1):
-		# 	y_points = np.unique(points[points[:,0] == x], axis=0)
-		return filtered_points
-
+		polygon = Polygon(points)
+		min_x = np.min(points[:,0])
+		max_x = np.max(points[:,0])
+		min_y = np.min(points[:,1])
+		max_y = np.max(points[:,1])
+		points = []
+		for x in range(min_x, max_x+1):
+			for y in range(min_y, max_y+1):
+				point = Point(x, y)
+				if polygon.contains(point):
+					points.append([x, y])
+		return np.array(points)
 
 # control_points = np.array([[0, 1], [1, 0], [2, 0], [3, 1]])
 # cms = CatmullRomSplineSegment(control_points[0], control_points[1], control_points[2], control_points[3])
