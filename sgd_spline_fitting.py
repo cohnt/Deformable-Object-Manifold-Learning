@@ -1,4 +1,3 @@
-import torch
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -9,21 +8,51 @@ img_size = (100, 100)
 mask = np.zeros(img_size)
 blob = np.array([
 	[0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0],
+	[0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0],
+	[0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0],
+	[0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
 	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
 	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
 	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
 	[0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0],
-	[0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0]
+	[0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0],
+	[0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0],
+	[0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0],
+	[0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0],
+	[0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0],
+	[0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0],
+	[0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0],
 ])
 blob_size = blob.shape
-mask[10:10+blob_size[0], 10:10+blob_size[1]] = blob
+blob_min_x = 10
+blob_max_x = blob_min_x + blob.shape[0] + 1
+blob_min_y = 10
+blob_max_y = blob_min_y + blob.shape[1] + 1
+mask[blob_min_x:blob_min_x+blob.shape[0], blob_min_y:blob_min_y+blob_size[1]] = blob
+blob_points = np.flip(np.transpose(blob.nonzero()), axis=1) +  [blob_min_x, blob_min_y]
 
 spline_n_points = 8
-centroid = np.array(center_of_mass(mask))
+spline_init_radius = 10
+centroid = np.flip(np.array(center_of_mass(mask)))
 angles = np.linspace(0, 2*np.pi, spline_n_points+1)[0:-1]
-control_points = np.vstack((np.cos(angles), np.sin(angles))).T
+control_points = (spline_init_radius * np.vstack((np.cos(angles), np.sin(angles))).T) + centroid
 
 class CatmullRomSplineSegment():
 	def __init__(self, P0, P1, P2, P3, alpha=0.5):
@@ -72,6 +101,8 @@ class CatmullRomSpline():
 		self.t_benchmarks = np.append(self.t_benchmarks, [0])
 		# Having a 0 at the end makes sure that accessing the -1 element returns a 0 offset.
 
+		self.points = self.rasterize()
+
 	def __call__(self, T):
 		T = np.asarray(T).reshape(-1, 1)
 		overall_t = T * self.total_length
@@ -82,43 +113,74 @@ class CatmullRomSpline():
 
 	def rasterize(self, t_resolution=1000):
 		Tvals = np.linspace(0, 1, t_resolution)
-		points = np.rint(self(Tvals)).astype(int)
+		points = self(Tvals)
 		polygon = Polygon(points)
-		min_x = np.min(points[:,0])
-		max_x = np.max(points[:,0])
-		min_y = np.min(points[:,1])
-		max_y = np.max(points[:,1])
+		self.min_x = int(np.floor(np.min(points[:,0])))
+		self.max_x = int(np.ceil(np.max(points[:,0])))
+		self.min_y = int(np.floor(np.min(points[:,1])))
+		self.max_y = int(np.ceil(np.max(points[:,1])))
 		points = []
-		for x in range(min_x, max_x+1):
-			for y in range(min_y, max_y+1):
+		for x in range(self.min_x, self.max_x+1):
+			for y in range(self.min_y, self.max_y+1):
 				point = Point(x, y)
 				if polygon.contains(point):
 					points.append([x, y])
 		return np.array(points)
 
-# control_points = np.array([[0, 1], [1, 0], [2, 0], [3, 1]])
-# cms = CatmullRomSplineSegment(control_points[0], control_points[1], control_points[2], control_points[3])
-# Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
-# points = cms(Tvals)
-# plt.plot(points[:,0], points[:,1])
-# plt.scatter(control_points[:,0], control_points[:,1])
-# plt.show()
-
-control_points = np.array([[0, 0], [1, 0], [2, 1], [1, 2], [0, 1]])
-control_points = 10*control_points + np.array([10, 10])
 cms = CatmullRomSpline(control_points)
-
-# for i in range(len(control_points)):
-# 	Tvals = np.linspace(0, 1, 100)
-# 	points = cms.segments[i](Tvals)
-# 	plt.plot(points[:,0], points[:,1])
-# 	plt.scatter(control_points[:,0], control_points[:,1])
-# 	plt.show()
 
 Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
 points = cms(Tvals)
+plt.imshow(mask)
 plt.plot(points[:,0], points[:,1])
 plt.scatter(control_points[:,0], control_points[:,1])
-points = cms.rasterize()
+points = cms.points
 plt.scatter(points[:,0], points[:,1])
-plt.show()
+
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
+plt.draw()
+plt.pause(0.001)
+
+def iou(spline):
+	intersection = 0.
+	for p1 in blob_points:
+		for p2 in spline.points:
+			if (p1 == p2).all():
+				intersection = intersection + 1
+	union = len(blob_points) + len(spline.points) - intersection
+	return intersection / union
+
+# Gradient Descent
+learning_rate = 100
+grad_eps = 1
+num_iters = 10
+for iter_num in range(1, num_iters+1):
+	print "Iteration %d" % iter_num
+
+	# Compute gradient
+	grad = np.zeros(control_points.shape)
+	for i in range(grad.shape[0]):
+		for j in range(grad.shape[1]):
+			c1 = control_points
+			c2 = control_points.copy()
+			c2[i,j] = c2[i,j] + grad_eps
+			s1 = CatmullRomSpline(c1)
+			s2 = CatmullRomSpline(c2)
+			grad[i,j] = (iou(s2) - iou(s1)) / grad_eps
+	print grad
+
+	# Update control_points
+	control_points = control_points + (learning_rate * grad)
+	current_spline = CatmullRomSpline(control_points)
+
+	# Draw
+	plt.cla()
+	Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
+	edge_points = current_spline(Tvals)
+	plt.imshow(mask)
+	plt.plot(edge_points[:,0], edge_points[:,1])
+	plt.scatter(control_points[:,0], control_points[:,1])
+	plt.scatter(current_spline.points[:,0], current_spline.points[:,1])
+	plt.draw()
+	plt.pause(0.001)
