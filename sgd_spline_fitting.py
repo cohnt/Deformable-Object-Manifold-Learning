@@ -1,4 +1,3 @@
-import torch
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -9,21 +8,46 @@ img_size = (100, 100)
 mask = np.zeros(img_size)
 blob = np.array([
 	[0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0],
+	[0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0],
+	[0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0],
+	[0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
 	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
 	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
 	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
 	[0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0],
-	[0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0]
+	[0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0],
+	[0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0],
+	[0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0],
+	[0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0],
+	[0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0],
+	[0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0],
+	[0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0],
 ])
 blob_size = blob.shape
 mask[10:10+blob_size[0], 10:10+blob_size[1]] = blob
 
 spline_n_points = 8
-centroid = np.array(center_of_mass(mask))
+spline_init_radius = 5
+centroid = np.flip(np.array(center_of_mass(mask)))
 angles = np.linspace(0, 2*np.pi, spline_n_points+1)[0:-1]
-control_points = np.vstack((np.cos(angles), np.sin(angles))).T
+control_points = (spline_init_radius * np.vstack((np.cos(angles), np.sin(angles))).T) + centroid
 
 class CatmullRomSplineSegment():
 	def __init__(self, P0, P1, P2, P3, alpha=0.5):
@@ -72,6 +96,8 @@ class CatmullRomSpline():
 		self.t_benchmarks = np.append(self.t_benchmarks, [0])
 		# Having a 0 at the end makes sure that accessing the -1 element returns a 0 offset.
 
+		self.points = self.rasterize()
+
 	def __call__(self, T):
 		T = np.asarray(T).reshape(-1, 1)
 		overall_t = T * self.total_length
@@ -84,29 +110,18 @@ class CatmullRomSpline():
 		Tvals = np.linspace(0, 1, t_resolution)
 		points = np.rint(self(Tvals)).astype(int)
 		polygon = Polygon(points)
-		min_x = np.min(points[:,0])
-		max_x = np.max(points[:,0])
-		min_y = np.min(points[:,1])
-		max_y = np.max(points[:,1])
+		self.min_x = np.min(points[:,0])
+		self.max_x = np.max(points[:,0])
+		self.min_y = np.min(points[:,1])
+		self.max_y = np.max(points[:,1])
 		points = []
-		for x in range(min_x, max_x+1):
-			for y in range(min_y, max_y+1):
+		for x in range(self.min_x, self.max_x+1):
+			for y in range(self.min_y, self.max_y+1):
 				point = Point(x, y)
 				if polygon.contains(point):
 					points.append([x, y])
 		return np.array(points)
 
-# control_points = np.array([[0, 1], [1, 0], [2, 0], [3, 1]])
-# cms = CatmullRomSplineSegment(control_points[0], control_points[1], control_points[2], control_points[3])
-# Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
-# points = cms(Tvals)
-# plt.plot(points[:,0], points[:,1])
-# plt.scatter(control_points[:,0], control_points[:,1])
-# plt.show()
-
-# control_points = np.array([[0, 0], [1, 0], [2, 1], [1, 2], [0, 1]])
-control_points = np.array([[0, 0], [1, 0], [0, 1], [1, 1]])
-control_points = 10*control_points + np.array([10, 10])
 cms = CatmullRomSpline(control_points)
 
 # for i in range(len(control_points)):
@@ -114,10 +129,11 @@ cms = CatmullRomSpline(control_points)
 # 	points = cms.segments[i](Tvals)
 # 	plt.plot(points[:,0], points[:,1])
 # 	plt.scatter(control_points[:,0], control_points[:,1])
-# 	plt.show()
+	# plt.show()
 
 Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
 points = cms(Tvals)
+plt.imshow(mask)
 plt.plot(points[:,0], points[:,1])
 plt.scatter(control_points[:,0], control_points[:,1])
 points = cms.rasterize()
