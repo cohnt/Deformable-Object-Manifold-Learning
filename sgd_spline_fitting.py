@@ -153,7 +153,7 @@ def iou(spline):
 	return intersection / union
 
 # Gradient Descent
-learning_rate = 100
+learning_rate = 25
 grad_eps = 1
 max_iters = 50
 stopping_thresh = 0.01
