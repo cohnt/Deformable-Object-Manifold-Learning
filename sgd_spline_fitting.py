@@ -19,4 +19,7 @@ blob = np.array([
 blob_size = blob.shape
 mask[10:10+blob_size[0], 10:10+blob_size[1]] = blob
 
+spline_n_points = 8
 centroid = np.array(center_of_mass(mask))
+angles = np.linspace(0, 2*np.pi, spline_n_points+1)[0:-1]
+control_points = np.vstack((np.cos(angles), np.sin(angles))).T
