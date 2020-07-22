@@ -141,6 +141,7 @@ mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 plt.draw()
 plt.pause(0.001)
+plt.savefig("iteration%03d.png" % 0)
 
 def iou(spline):
 	intersection = 0.
@@ -154,33 +155,47 @@ def iou(spline):
 # Gradient Descent
 learning_rate = 100
 grad_eps = 1
-num_iters = 10
-for iter_num in range(1, num_iters+1):
-	print "Iteration %d" % iter_num
+max_iters = 50
+stopping_thresh = 0.01
+iter_num = 0
+try:
+	while True:
+		iter_num = iter_num + 1
+		print "Iteration %d" % iter_num
 
-	# Compute gradient
-	grad = np.zeros(control_points.shape)
-	for i in range(grad.shape[0]):
-		for j in range(grad.shape[1]):
-			c1 = control_points
-			c2 = control_points.copy()
-			c2[i,j] = c2[i,j] + grad_eps
-			s1 = CatmullRomSpline(c1)
-			s2 = CatmullRomSpline(c2)
-			grad[i,j] = (iou(s2) - iou(s1)) / grad_eps
-	print grad
+		# Compute gradient
+		grad = np.zeros(control_points.shape)
+		for i in range(grad.shape[0]):
+			for j in range(grad.shape[1]):
+				c1 = control_points
+				c2 = control_points.copy()
+				c2[i,j] = c2[i,j] + grad_eps
+				s1 = CatmullRomSpline(c1)
+				s2 = CatmullRomSpline(c2)
+				grad[i,j] = (iou(s2) - iou(s1)) / grad_eps
+		print grad
+		print np.linalg.norm(grad, ord="fro")
 
-	# Update control_points
-	control_points = control_points + (learning_rate * grad)
-	current_spline = CatmullRomSpline(control_points)
+		# Update control_points
+		control_points = control_points + (learning_rate * grad)
+		current_spline = CatmullRomSpline(control_points)
 
-	# Draw
-	plt.cla()
-	Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
-	edge_points = current_spline(Tvals)
-	plt.imshow(mask)
-	plt.plot(edge_points[:,0], edge_points[:,1])
-	plt.scatter(control_points[:,0], control_points[:,1])
-	plt.scatter(current_spline.points[:,0], current_spline.points[:,1])
-	plt.draw()
-	plt.pause(0.001)
+		# Draw
+		plt.cla()
+		Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
+		edge_points = current_spline(Tvals)
+		plt.imshow(mask)
+		plt.plot(edge_points[:,0], edge_points[:,1])
+		plt.scatter(control_points[:,0], control_points[:,1])
+		plt.scatter(current_spline.points[:,0], current_spline.points[:,1])
+		plt.draw()
+		plt.pause(0.001)
+		plt.savefig("iteration%03d.png" % iter_num)
+
+		if iter_num == max_iters or np.linalg.norm(grad, ord="fro") < stopping_thresh:
+			break
+except KeyboardInterrupt:
+	pass
+
+import os
+os.system('ffmpeg -f image2 -r 1/0.5 -i iteration\%03d.png -c:v libx264 -pix_fmt yuv420p out.mp4')
