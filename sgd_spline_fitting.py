@@ -158,6 +158,7 @@ grad_eps = 2
 max_iters = 50
 stopping_thresh = 0.01
 iter_num = 0
+current_spline = None
 try:
 	while True:
 		iter_num = iter_num + 1
@@ -170,7 +171,10 @@ try:
 				c1 = control_points
 				c2 = control_points.copy()
 				c2[i,j] = c2[i,j] + grad_eps
-				s1 = CatmullRomSpline(c1)
+				if current_spline is None:
+					s1 = CatmullRomSpline(c1)
+				else:
+					s1 = current_spline
 				s2 = CatmullRomSpline(c2)
 				grad[i,j] = (iou(s2) - iou(s1)) / grad_eps
 		print grad
