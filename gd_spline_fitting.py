@@ -57,6 +57,7 @@ control_points = (spline_init_radius * np.vstack((np.cos(angles), np.sin(angles)
 compute_both_ways = True
 spline_mode = "centripetal" # uniform, centripetal, or chordal
 spline_alpha = 0 if spline_mode == "uniform" else (0.5 if spline_mode == "centripetal" else 1)
+regularization = True
 
 class CatmullRomSplineSegment():
 	def __init__(self, P0, P1, P2, P3, alpha=spline_alpha):
@@ -105,7 +106,7 @@ class CatmullRomSpline():
 		self.t_benchmarks = np.append(self.t_benchmarks, [0])
 		# Having a 0 at the end makes sure that accessing the -1 element returns a 0 offset.
 
-		self.points = self.rasterize()
+		self.interior_points = self.rasterize()
 
 	def __call__(self, T):
 		T = np.asarray(T).reshape(-1, 1)
@@ -138,7 +139,7 @@ points = cms(Tvals)
 plt.imshow(mask)
 plt.plot(points[:,0], points[:,1])
 plt.scatter(control_points[:,0], control_points[:,1])
-points = cms.points
+points = cms.interior_points
 plt.scatter(points[:,0], points[:,1])
 
 mng = plt.get_current_fig_manager()
@@ -150,11 +151,24 @@ plt.savefig("iteration%03d.png" % 0)
 def iou(spline):
 	intersection = 0.
 	for p1 in blob_points:
-		for p2 in spline.points:
+		for p2 in spline.interior_points:
 			if (p1 == p2).all():
 				intersection = intersection + 1
-	union = len(blob_points) + len(spline.points) - intersection
+	union = len(blob_points) + len(spline.interior_points) - intersection
 	return intersection / union
+
+def loss(spline):
+	if regularization:
+		return iou(spline) * (1.0 + distances_variance(spline))
+	else:
+		return iou(spline)
+
+def distances_variance(spline):
+	dists = []
+	for i in range(len(spline.points) - 1):
+		dists.append(np.linalg.norm(spline.points[i] - spline.points[i+1]))
+	dists.append(np.linalg.norm(spline.points[-1] - spline.points[0]))
+	return np.var(dists)
 
 # Gradient Descent
 learning_rate = 50
@@ -183,8 +197,8 @@ try:
 					s1 = current_spline
 				s2 = CatmullRomSpline(c2)
 				s3 = CatmullRomSpline(c3)
-				temp1 = (iou(s2) - iou(s1)) / grad_eps
-				temp2 = (iou(s1) - iou(s3)) / grad_eps
+				temp1 = (loss(s2) - loss(s1)) / grad_eps
+				temp2 = (loss(s1) - loss(s3)) / grad_eps
 				grad[i,j] = (temp1 + temp2) / 2
 		print grad
 		print np.linalg.norm(grad, ord="fro")
@@ -200,7 +214,7 @@ try:
 		plt.imshow(mask)
 		plt.plot(edge_points[:,0], edge_points[:,1])
 		plt.scatter(control_points[:,0], control_points[:,1])
-		plt.scatter(current_spline.points[:,0], current_spline.points[:,1])
+		plt.scatter(current_spline.interior_points[:,0], current_spline.interior_points[:,1])
 		plt.draw()
 		plt.pause(0.001)
 		plt.savefig("iteration%03d.png" % iter_num)
