@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.ndimage.measurements import center_of_mass
 from shapely.geometry import Polygon, Point
 
-img_size = (100, 100)
+img_size = (50, 50)
 mask = np.zeros(img_size)
 blob = np.array([
 	[0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0],
