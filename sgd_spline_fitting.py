@@ -111,7 +111,7 @@ class CatmullRomSpline():
 		output = np.array([segment(t) for segment, t, in zip(self.segments[segment_idx], local_t)])
 		return output.reshape(-1, 2)
 
-	def rasterize(self, t_resolution=1000):
+	def rasterize(self, t_resolution=100):
 		Tvals = np.linspace(0, 1, t_resolution)
 		points = self(Tvals)
 		polygon = Polygon(points)
@@ -153,9 +153,9 @@ def iou(spline):
 	return intersection / union
 
 # Gradient Descent
-learning_rate = 25
-grad_eps = 2
-max_iters = 50
+learning_rate = 50
+grad_eps = 1
+max_iters = 100
 stopping_thresh = 0.01
 iter_num = 0
 current_spline = None
@@ -195,6 +195,8 @@ try:
 		plt.draw()
 		plt.pause(0.001)
 		plt.savefig("iteration%03d.png" % iter_num)
+
+		learning_rate = learning_rate * 0.98
 
 		if iter_num == max_iters or np.linalg.norm(grad, ord="fro") < stopping_thresh:
 			break
