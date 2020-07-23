@@ -54,8 +54,12 @@ centroid = np.flip(np.array(center_of_mass(mask)))
 angles = np.linspace(0, 2*np.pi, spline_n_points+1)[0:-1]
 control_points = (spline_init_radius * np.vstack((np.cos(angles), np.sin(angles))).T) + centroid
 
+compute_both_ways = True
+spline_mode = "centripetal" # uniform, centripetal, or chordal
+spline_alpha = 0 if spline_mode == "uniform" else (0.5 if spline_mode == "centripetal" else 1)
+
 class CatmullRomSplineSegment():
-	def __init__(self, P0, P1, P2, P3, alpha=0.5):
+	def __init__(self, P0, P1, P2, P3, alpha=spline_alpha):
 		self.P0 = np.asarray(P0)
 		self.P1 = np.asarray(P1)
 		self.P2 = np.asarray(P2)
