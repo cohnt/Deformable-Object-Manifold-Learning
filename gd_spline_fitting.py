@@ -48,7 +48,7 @@ blob_max_y = blob_min_y + blob.shape[1] + 1
 mask[blob_min_x:blob_min_x+blob.shape[0], blob_min_y:blob_min_y+blob_size[1]] = blob
 blob_points = np.flip(np.transpose(blob.nonzero()), axis=1) +  [blob_min_x, blob_min_y]
 
-spline_n_points = 15
+spline_n_points = 25
 spline_init_radius = 10
 centroid = np.flip(np.array(center_of_mass(mask)))
 angles = np.linspace(0, 2*np.pi, spline_n_points+1)[0:-1]
@@ -57,7 +57,7 @@ control_points = (spline_init_radius * np.vstack((np.cos(angles), np.sin(angles)
 compute_both_ways = True
 spline_mode = "centripetal" # uniform, centripetal, or chordal
 spline_alpha = 0 if spline_mode == "uniform" else (0.5 if spline_mode == "centripetal" else 1)
-regularization = False
+regularization_mode = "curvature" # none, variance, or curvature
 
 class CatmullRomSplineSegment():
 	def __init__(self, P0, P1, P2, P3, alpha=spline_alpha):
@@ -158,8 +158,10 @@ def iou(spline):
 	return intersection / union
 
 def loss(spline):
-	if regularization:
+	if regularization_mode == "variance":
 		return iou(spline) - 0.01*distances_variance(spline)
+	elif regularization_mode == "curvature":
+		return iou(spline) + curvature_penalty(spline)
 	else:
 		return iou(spline)
 
@@ -169,6 +171,29 @@ def distances_variance(spline):
 		dists.append(np.linalg.norm(spline.points[i] - spline.points[i+1]))
 	dists.append(np.linalg.norm(spline.points[-1] - spline.points[0]))
 	return np.var(dists)
+
+def curvature_penalty(spline):
+	smooths = np.zeros(len(spline.points))
+	for i in range(1, len(spline.points)-1):
+		v1 = spline.points[i] - spline.points[i-1]
+		v2 = spline.points[i+1] - spline.points[i]
+		angle = np.arccos(np.dot(v1, v2) / (np.sqrt(np.dot(v1, v1) * np.dot(v2, v2))))
+		smoothness = np.abs(angle - (np.pi / 2)) / (np.pi / 2)
+		smooths[i] = 1 - smoothness
+
+	v1 = spline.points[0] - spline.points[-1]
+	v2 = spline.points[1] - spline.points[0]
+	angle = np.arccos(np.dot(v1, v2) / (np.sqrt(np.dot(v1, v1) * np.dot(v2, v2))))
+	smoothness = np.abs(angle - (np.pi / 2)) / (np.pi / 2)
+	smooths[0] = 1 - smoothness
+
+	v1 = spline.points[-1] - spline.points[-2]
+	v2 = spline.points[0] - spline.points[-1]
+	angle = np.arccos(np.dot(v1, v2) / (np.sqrt(np.dot(v1, v1) * np.dot(v2, v2))))
+	smoothness = np.abs(angle - (np.pi / 2)) / (np.pi / 2)
+	smooths[-1] = 1 - smoothness
+
+	return np.mean(smooths)
 
 # Gradient Descent
 learning_rate = 50
