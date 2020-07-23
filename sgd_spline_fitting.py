@@ -170,13 +170,18 @@ try:
 			for j in range(grad.shape[1]):
 				c1 = control_points
 				c2 = control_points.copy()
+				c3 = control_points.copy()
 				c2[i,j] = c2[i,j] + grad_eps
+				c3[i,j] = c3[i,j] - grad_eps
 				if current_spline is None:
 					s1 = CatmullRomSpline(c1)
 				else:
 					s1 = current_spline
 				s2 = CatmullRomSpline(c2)
-				grad[i,j] = (iou(s2) - iou(s1)) / grad_eps
+				s3 = CatmullRomSpline(c3)
+				temp1 = (iou(s2) - iou(s1)) / grad_eps
+				temp2 = (iou(s3) - iou(s1)) / grad_eps
+				grad[i,j] = (temp1 + temp2) / 2
 		print grad
 		print np.linalg.norm(grad, ord="fro")
 
