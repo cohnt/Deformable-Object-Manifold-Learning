@@ -184,7 +184,7 @@ try:
 				s2 = CatmullRomSpline(c2)
 				s3 = CatmullRomSpline(c3)
 				temp1 = (iou(s2) - iou(s1)) / grad_eps
-				temp2 = (iou(s3) - iou(s1)) / grad_eps
+				temp2 = (iou(s1) - iou(s3)) / grad_eps
 				grad[i,j] = (temp1 + temp2) / 2
 		print grad
 		print np.linalg.norm(grad, ord="fro")
