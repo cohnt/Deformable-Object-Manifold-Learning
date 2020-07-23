@@ -57,7 +57,7 @@ control_points = (spline_init_radius * np.vstack((np.cos(angles), np.sin(angles)
 compute_both_ways = True
 spline_mode = "centripetal" # uniform, centripetal, or chordal
 spline_alpha = 0 if spline_mode == "uniform" else (0.5 if spline_mode == "centripetal" else 1)
-regularization_mode = "curvature" # none, variance, or curvature
+regularization_mode = "none" # none, variance, or curvature
 
 class CatmullRomSplineSegment():
 	def __init__(self, P0, P1, P2, P3, alpha=spline_alpha):
