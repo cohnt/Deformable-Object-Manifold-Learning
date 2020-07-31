@@ -265,7 +265,16 @@ try:
 			elif smallest_diff > diff:
 				smallest_diff = diff
 				best_idx = i
-		chunk = np.random.randint(len(splines[best_idx].points))
+		valid_choices = []
+		for i in range(len(splines[best_idx].points) - 1):
+			if np.linalg.norm(splines[best_idx].points[i] - splines[best_idx].points[i+1]) > 1:
+				valid_choices.append(i)
+		if np.linalg.norm(splines[best_idx].points[0] - splines[best_idx].points[-1] > 1):
+			valid_choices.append(len(splines[best_idx].points))
+		while True:
+			chunk = np.random.randint(len(splines[best_idx].points))
+			if chunk in valid_choices:
+				break
 		new_point = splines[best_idx].segments[chunk](0.5)
 		control_points = np.insert(splines[best_idx].points, chunk + 1, new_point, axis=0)
 		current_spline = CatmullRomSpline(control_points)
