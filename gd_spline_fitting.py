@@ -196,7 +196,7 @@ def curvature_penalty(spline):
 	return np.mean(smooths)
 
 # Gradient Descent
-learning_rate = 50
+learning_rate = 100
 grad_eps = 1
 max_iters = 100
 stopping_thresh = 0.01
@@ -245,19 +245,20 @@ try:
 		plt.savefig("iteration%03d_pre.png" % iter_num)
 
 		# Remove weakest control point
-		best_loss = None
+		smallest_diff = None
+		current_loss = loss(current_spline)
 		best_idx = None
 		splines = []
 		for i in range(len(control_points)):
 			modified_points = control_points[np.arange(len(control_points)) != i]
 			modified_spline = CatmullRomSpline(modified_points)
 			splines.append(modified_spline)
-			lval = loss(modified_spline)
-			if best_loss is None:
-				best_loss = lval
+			diff = np.abs(loss(modified_spline) - current_loss)
+			if smallest_diff is None:
+				smallest_diff = diff
 				best_idx = i
-			elif best_loss < lval:
-				best_loss = lval
+			elif smallest_diff > diff:
+				smallest_diff = diff
 				best_idx = i
 		chunk = np.random.randint(len(splines[best_idx].points))
 		new_point = splines[best_idx].segments[chunk](0.5)
