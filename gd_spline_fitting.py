@@ -260,8 +260,7 @@ try:
 				best_loss = lval
 				best_idx = i
 		chunk = np.random.randint(len(splines[best_idx].points))
-		chunk_param = np.random.rand()
-		new_point = splines[best_idx].segments[chunk](chunk_param)
+		new_point = splines[best_idx].segments[chunk](0.5)
 		control_points = np.insert(splines[best_idx].points, chunk + 1, new_point, axis=0)
 		current_spline = CatmullRomSpline(control_points)
 
