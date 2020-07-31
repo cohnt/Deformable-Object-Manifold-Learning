@@ -230,6 +230,27 @@ try:
 
 		# Update control_points
 		control_points = control_points + (learning_rate * grad)
+		# current_spline = CatmullRomSpline(control_points)
+
+		# Remove weakest control point
+		best_loss = None
+		best_idx = None
+		splines = []
+		for i in range(len(control_points)):
+			modified_points = control_points[np.arange(len(control_points)) != i]
+			modified_spline = CatmullRomSpline(modified_points)
+			splines.append(modified_spline)
+			lval = loss(modified_spline)
+			if best_loss is None:
+				best_loss = lval
+				best_idx = i
+			elif best_loss < lval:
+				best_loss = lval
+				best_idx = i
+		chunk = np.random.randint(len(splines[best_idx].points))
+		chunk_param = np.random.rand()
+		new_point = splines[best_idx].segments[chunk](chunk_param)
+		control_points = np.insert(splines[best_idx].points, chunk + 1, new_point, axis=0)
 		current_spline = CatmullRomSpline(control_points)
 
 		# Draw
