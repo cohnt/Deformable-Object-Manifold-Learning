@@ -146,7 +146,7 @@ mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 plt.draw()
 plt.pause(0.001)
-plt.savefig("iteration%03d.png" % 0)
+plt.savefig("iteration%03d_post.png" % 0)
 
 def iou(spline):
 	intersection = 0.
@@ -230,7 +230,19 @@ try:
 
 		# Update control_points
 		control_points = control_points + (learning_rate * grad)
-		# current_spline = CatmullRomSpline(control_points)
+		current_spline = CatmullRomSpline(control_points)
+
+		# Draw
+		plt.cla()
+		Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
+		edge_points = current_spline(Tvals)
+		plt.imshow(mask)
+		plt.plot(edge_points[:,0], edge_points[:,1])
+		plt.scatter(control_points[:,0], control_points[:,1])
+		plt.scatter(current_spline.interior_points[:,0], current_spline.interior_points[:,1])
+		plt.draw()
+		plt.pause(0.001)
+		plt.savefig("iteration%03d_pre.png" % iter_num)
 
 		# Remove weakest control point
 		best_loss = None
@@ -263,7 +275,7 @@ try:
 		plt.scatter(current_spline.interior_points[:,0], current_spline.interior_points[:,1])
 		plt.draw()
 		plt.pause(0.001)
-		plt.savefig("iteration%03d.png" % iter_num)
+		plt.savefig("iteration%03d_post.png" % iter_num)
 
 		learning_rate = learning_rate * 0.98
 
@@ -273,4 +285,4 @@ except KeyboardInterrupt:
 	pass
 
 import os
-os.system('ffmpeg -f image2 -r 1/0.5 -i iteration\%03d.png -c:v libx264 -pix_fmt yuv420p out.mp4')
+os.system('ffmpeg -f image2 -r 1/0.5 -i iteration\%03d_post.png -c:v libx264 -pix_fmt yuv420p out.mp4')
