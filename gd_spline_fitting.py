@@ -53,6 +53,7 @@ spline_init_radius = 10
 centroid = np.flip(np.array(center_of_mass(mask)))
 angles = np.linspace(0, 2*np.pi, spline_n_points+1)[0:-1]
 control_points = (spline_init_radius * np.vstack((np.cos(angles), np.sin(angles))).T) + centroid
+render_points_per_segment = 4
 
 compute_both_ways = True
 spline_mode = "centripetal" # uniform, centripetal, or chordal
@@ -116,9 +117,13 @@ class CatmullRomSpline():
 		output = np.array([segment(t) for segment, t, in zip(self.segments[segment_idx], local_t)])
 		return output.reshape(-1, 2)
 
-	def rasterize(self, t_resolution=100):
-		Tvals = np.linspace(0, 1, t_resolution)
-		points = self(Tvals)
+	def rasterize(self, t_resolution=render_points_per_segment):
+		points = []
+		for segment in self.segments:
+			Tvals = np.linspace(0, 1, t_resolution, endpoint=False)
+			for t in Tvals:
+				points.append(segment(t))
+		points = np.array(points).reshape(-1, 2)
 		polygon = Polygon(points)
 		self.min_x = int(np.floor(np.min(points[:,0])))
 		self.max_x = int(np.ceil(np.max(points[:,0])))
