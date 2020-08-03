@@ -48,12 +48,12 @@ blob_max_y = blob_min_y + blob.shape[1] + 1
 mask[blob_min_x:blob_min_x+blob.shape[0], blob_min_y:blob_min_y+blob_size[1]] = blob
 blob_points = np.flip(np.transpose(blob.nonzero()), axis=1) +  [blob_min_x, blob_min_y]
 
-spline_n_points = 25
+spline_n_points = 50
 spline_init_radius = 10
 centroid = np.flip(np.array(center_of_mass(mask)))
 angles = np.linspace(0, 2*np.pi, spline_n_points+1)[0:-1]
 control_points = (spline_init_radius * np.vstack((np.cos(angles), np.sin(angles))).T) + centroid
-render_points_per_segment = 4
+render_points_per_segment = 2
 
 compute_both_ways = True
 spline_mode = "centripetal" # uniform, centripetal, or chordal
