@@ -59,6 +59,7 @@ compute_both_ways = True
 spline_mode = "centripetal" # uniform, centripetal, or chordal
 spline_alpha = 0 if spline_mode == "uniform" else (0.5 if spline_mode == "centripetal" else 1)
 regularization_mode = "none" # none, variance, or curvature
+reduce_learning_rate = 0.95 # 1.0 for no decrease
 
 class CatmullRomSplineSegment():
 	def __init__(self, P0, P1, P2, P3, alpha=spline_alpha):
@@ -201,9 +202,9 @@ def curvature_penalty(spline):
 	return np.mean(smooths)
 
 # Gradient Descent
-learning_rate = 100
+learning_rate = 250
 grad_eps = 1
-max_iters = 100
+max_iters = 25
 stopping_thresh = 0.01
 iter_num = 0
 current_spline = None
@@ -234,7 +235,7 @@ try:
 		print np.linalg.norm(grad, ord="fro")
 
 		# Update control_points
-		control_points = control_points + (learning_rate * grad)
+		control_points = control_points + (learning_rate * reduce_learning_rate**(iter_num - 1) * grad)
 		current_spline = CatmullRomSpline(control_points)
 
 		# Draw
