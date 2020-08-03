@@ -60,6 +60,7 @@ spline_mode = "centripetal" # uniform, centripetal, or chordal
 spline_alpha = 0 if spline_mode == "uniform" else (0.5 if spline_mode == "centripetal" else 1)
 regularization_mode = "none" # none, variance, or curvature
 reduce_learning_rate = 0.95 # 1.0 for no decrease
+move_point = False
 
 class CatmullRomSplineSegment():
 	def __init__(self, P0, P1, P2, P3, alpha=spline_alpha):
@@ -250,49 +251,48 @@ try:
 		plt.pause(0.001)
 		plt.savefig("iteration%03d_pre.png" % iter_num)
 
-		# Remove weakest control point
-		smallest_diff = None
-		current_loss = loss(current_spline)
-		best_idx = None
-		splines = []
-		for i in range(len(control_points)):
-			modified_points = control_points[np.arange(len(control_points)) != i]
-			modified_spline = CatmullRomSpline(modified_points)
-			splines.append(modified_spline)
-			diff = np.abs(loss(modified_spline) - current_loss)
-			if smallest_diff is None:
-				smallest_diff = diff
-				best_idx = i
-			elif smallest_diff > diff:
-				smallest_diff = diff
-				best_idx = i
-		valid_choices = []
-		for i in range(len(splines[best_idx].points) - 1):
-			if np.linalg.norm(splines[best_idx].points[i] - splines[best_idx].points[i+1]) > 1:
-				valid_choices.append(i)
-		if np.linalg.norm(splines[best_idx].points[0] - splines[best_idx].points[-1] > 1):
-			valid_choices.append(len(splines[best_idx].points))
-		while True:
-			chunk = np.random.randint(len(splines[best_idx].points))
-			if chunk in valid_choices:
-				break
-		new_point = splines[best_idx].segments[chunk](0.5)
-		control_points = np.insert(splines[best_idx].points, chunk + 1, new_point, axis=0)
-		current_spline = CatmullRomSpline(control_points)
+		if move_point:
+			# Remove weakest control point
+			smallest_diff = None
+			current_loss = loss(current_spline)
+			best_idx = None
+			splines = []
+			for i in range(len(control_points)):
+				modified_points = control_points[np.arange(len(control_points)) != i]
+				modified_spline = CatmullRomSpline(modified_points)
+				splines.append(modified_spline)
+				diff = np.abs(loss(modified_spline) - current_loss)
+				if smallest_diff is None:
+					smallest_diff = diff
+					best_idx = i
+				elif smallest_diff > diff:
+					smallest_diff = diff
+					best_idx = i
+			valid_choices = []
+			for i in range(len(splines[best_idx].points) - 1):
+				if np.linalg.norm(splines[best_idx].points[i] - splines[best_idx].points[i+1]) > 1:
+					valid_choices.append(i)
+			if np.linalg.norm(splines[best_idx].points[0] - splines[best_idx].points[-1] > 1):
+				valid_choices.append(len(splines[best_idx].points))
+			while True:
+				chunk = np.random.randint(len(splines[best_idx].points))
+				if chunk in valid_choices:
+					break
+			new_point = splines[best_idx].segments[chunk](0.5)
+			control_points = np.insert(splines[best_idx].points, chunk + 1, new_point, axis=0)
+			current_spline = CatmullRomSpline(control_points)
 
-		# Draw
-		plt.cla()
-		Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
-		edge_points = current_spline(Tvals)
-		plt.imshow(mask)
-		plt.plot(edge_points[:,0], edge_points[:,1])
-		plt.scatter(control_points[:,0], control_points[:,1])
-		plt.scatter(current_spline.interior_points[:,0], current_spline.interior_points[:,1])
-		plt.draw()
-		plt.pause(0.001)
-		plt.savefig("iteration%03d_post.png" % iter_num)
-
-		learning_rate = learning_rate * 0.98
+			# Draw
+			plt.cla()
+			Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
+			edge_points = current_spline(Tvals)
+			plt.imshow(mask)
+			plt.plot(edge_points[:,0], edge_points[:,1])
+			plt.scatter(control_points[:,0], control_points[:,1])
+			plt.scatter(current_spline.interior_points[:,0], current_spline.interior_points[:,1])
+			plt.draw()
+			plt.pause(0.001)
+			plt.savefig("iteration%03d_post.png" % iter_num)
 
 		if iter_num == max_iters or np.linalg.norm(grad, ord="fro") < stopping_thresh:
 			break
