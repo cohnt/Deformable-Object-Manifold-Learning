@@ -300,4 +300,7 @@ except KeyboardInterrupt:
 	pass
 
 import os
-os.system('ffmpeg -f image2 -r 1/0.5 -i iteration\%03d_post.png -c:v libx264 -pix_fmt yuv420p out.mp4')
+if move_point:
+	os.system('ffmpeg -f image2 -r 1/0.5 -i iteration\%03d_post.png -c:v libx264 -pix_fmt yuv420p out.mp4')
+else:
+	os.system('ffmpeg -f image2 -r 1/0.5 -i iteration\%03d_pre.png -c:v libx264 -pix_fmt yuv420p out.mp4')
