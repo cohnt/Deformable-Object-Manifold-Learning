@@ -153,6 +153,7 @@ mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 plt.draw()
 plt.pause(0.001)
+plt.savefig("iteration%03d_pre.png" % 0)
 plt.savefig("iteration%03d_post.png" % 0)
 
 def iou(spline):
