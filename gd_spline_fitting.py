@@ -167,9 +167,9 @@ def iou(spline):
 
 def loss(spline):
 	if regularization_mode == "variance":
-		return iou(spline) - 0.01*distances_variance(spline)
+		return iou(spline) - 0.01 * distances_variance(spline)
 	elif regularization_mode == "distance":
-		return iou(spline) + distance_regularization_penalty(spline)
+		return iou(spline) + 0.01 * distance_regularization_penalty(spline)
 	elif regularization_mode == "curvature":
 		return iou(spline) + curvature_penalty(spline)
 	else:
