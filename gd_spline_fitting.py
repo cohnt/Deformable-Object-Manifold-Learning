@@ -48,16 +48,20 @@ blob_max_y = blob_min_y + blob.shape[1] + 1
 mask[blob_min_x:blob_min_x+blob.shape[0], blob_min_y:blob_min_y+blob_size[1]] = blob
 blob_points = np.flip(np.transpose(blob.nonzero()), axis=1) +  [blob_min_x, blob_min_y]
 
-spline_n_points = 25
+spline_n_points = 40
 spline_init_radius = 10
 centroid = np.flip(np.array(center_of_mass(mask)))
 angles = np.linspace(0, 2*np.pi, spline_n_points+1)[0:-1]
 control_points = (spline_init_radius * np.vstack((np.cos(angles), np.sin(angles))).T) + centroid
+render_points_per_segment = 2
 
 compute_both_ways = True
 spline_mode = "centripetal" # uniform, centripetal, or chordal
 spline_alpha = 0 if spline_mode == "uniform" else (0.5 if spline_mode == "centripetal" else 1)
-regularization_mode = "none" # none, variance, or curvature
+regularization_mode = "distance" # none, variance, distance, or curvature
+reduce_learning_rate = 1.0 # 1.0 for no decrease
+move_point = True
+deterministic_move_point = move_point and True
 
 class CatmullRomSplineSegment():
 	def __init__(self, P0, P1, P2, P3, alpha=spline_alpha):
@@ -116,9 +120,13 @@ class CatmullRomSpline():
 		output = np.array([segment(t) for segment, t, in zip(self.segments[segment_idx], local_t)])
 		return output.reshape(-1, 2)
 
-	def rasterize(self, t_resolution=100):
-		Tvals = np.linspace(0, 1, t_resolution)
-		points = self(Tvals)
+	def rasterize(self, t_resolution=render_points_per_segment):
+		points = []
+		for segment in self.segments:
+			Tvals = np.linspace(0, 1, t_resolution, endpoint=False)
+			for t in Tvals:
+				points.append(segment(t))
+		points = np.array(points).reshape(-1, 2)
 		polygon = Polygon(points)
 		self.min_x = int(np.floor(np.min(points[:,0])))
 		self.max_x = int(np.ceil(np.max(points[:,0])))
@@ -146,7 +154,8 @@ mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 plt.draw()
 plt.pause(0.001)
-plt.savefig("iteration%03d.png" % 0)
+plt.savefig("iteration%03d_pre.png" % 0)
+plt.savefig("iteration%03d_post.png" % 0)
 
 def iou(spline):
 	intersection = 0.
@@ -159,7 +168,9 @@ def iou(spline):
 
 def loss(spline):
 	if regularization_mode == "variance":
-		return iou(spline) - 0.01*distances_variance(spline)
+		return iou(spline) - 0.01 * distances_variance(spline)
+	elif regularization_mode == "distance":
+		return iou(spline) + 0.01 * distance_regularization_penalty(spline)
 	elif regularization_mode == "curvature":
 		return iou(spline) + curvature_penalty(spline)
 	else:
@@ -195,10 +206,19 @@ def curvature_penalty(spline):
 
 	return np.mean(smooths)
 
+def distance_regularization_penalty(spline):
+	dists = []
+	for i in range(len(spline.points) - 1):
+		dists.append(np.linalg.norm(spline.points[i] - spline.points[i+1]))
+	dists.append(np.linalg.norm(spline.points[-1] - spline.points[0]))
+	dists = np.array(dists, dtype=float)
+	dists[dists > 1] = 1
+	return np.sum(dists)
+
 # Gradient Descent
 learning_rate = 50
 grad_eps = 1
-max_iters = 100
+max_iters = 50
 stopping_thresh = 0.01
 iter_num = 0
 current_spline = None
@@ -229,7 +249,7 @@ try:
 		print np.linalg.norm(grad, ord="fro")
 
 		# Update control_points
-		control_points = control_points + (learning_rate * grad)
+		control_points = control_points + (learning_rate * reduce_learning_rate**(iter_num - 1) * grad)
 		current_spline = CatmullRomSpline(control_points)
 
 		# Draw
@@ -242,9 +262,58 @@ try:
 		plt.scatter(current_spline.interior_points[:,0], current_spline.interior_points[:,1])
 		plt.draw()
 		plt.pause(0.001)
-		plt.savefig("iteration%03d.png" % iter_num)
+		plt.savefig("iteration%03d_pre.png" % iter_num)
 
-		learning_rate = learning_rate * 0.98
+		if move_point:
+			# Remove weakest control point
+			smallest_diff = None
+			current_loss = loss(current_spline)
+			best_idx = None
+			splines = []
+			for i in range(len(control_points)):
+				modified_points = control_points[np.arange(len(control_points)) != i]
+				modified_spline = CatmullRomSpline(modified_points)
+				splines.append(modified_spline)
+				diff = np.abs(loss(modified_spline) - current_loss)
+				if smallest_diff is None:
+					smallest_diff = diff
+					best_idx = i
+				elif smallest_diff > diff:
+					smallest_diff = diff
+					best_idx = i
+			if deterministic_move_point:
+				dists = []
+				for i in range(len(splines[best_idx].points) - 1):
+					dists.append(np.linalg.norm(splines[best_idx].points[i] - splines[best_idx].points[i+1]))
+				dists.append(np.linalg.norm(splines[best_idx].points[-1] - splines[best_idx].points[0]))
+				dists = np.array(dists, dtype=float)
+				chunk = np.argmax(dists)
+			else:
+				valid_choices = []
+				for i in range(len(splines[best_idx].points) - 1):
+					if np.linalg.norm(splines[best_idx].points[i] - splines[best_idx].points[i+1]) > 1:
+						valid_choices.append(i)
+				if np.linalg.norm(splines[best_idx].points[0] - splines[best_idx].points[-1] > 1):
+					valid_choices.append(len(splines[best_idx].points))
+				while True:
+					chunk = np.random.randint(len(splines[best_idx].points))
+					if chunk in valid_choices:
+						break
+			new_point = splines[best_idx].segments[chunk](0.5)
+			control_points = np.insert(splines[best_idx].points, chunk + 1, new_point, axis=0)
+			current_spline = CatmullRomSpline(control_points)
+
+			# Draw
+			plt.cla()
+			Tvals = np.linspace(0, 1, 100).reshape(-1, 1)
+			edge_points = current_spline(Tvals)
+			plt.imshow(mask)
+			plt.plot(edge_points[:,0], edge_points[:,1])
+			plt.scatter(control_points[:,0], control_points[:,1])
+			plt.scatter(current_spline.interior_points[:,0], current_spline.interior_points[:,1])
+			plt.draw()
+			plt.pause(0.001)
+			plt.savefig("iteration%03d_post.png" % iter_num)
 
 		if iter_num == max_iters or np.linalg.norm(grad, ord="fro") < stopping_thresh:
 			break
@@ -252,4 +321,7 @@ except KeyboardInterrupt:
 	pass
 
 import os
-os.system('ffmpeg -f image2 -r 1/0.5 -i iteration\%03d.png -c:v libx264 -pix_fmt yuv420p out.mp4')
+if move_point:
+	os.system('ffmpeg -f image2 -r 1/0.5 -i iteration\%03d_post.png -c:v libx264 -pix_fmt yuv420p out.mp4')
+else:
+	os.system('ffmpeg -f image2 -r 1/0.5 -i iteration\%03d_pre.png -c:v libx264 -pix_fmt yuv420p out.mp4')
