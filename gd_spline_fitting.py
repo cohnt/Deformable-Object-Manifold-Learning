@@ -48,7 +48,7 @@ blob_max_y = blob_min_y + blob.shape[1] + 1
 mask[blob_min_x:blob_min_x+blob.shape[0], blob_min_y:blob_min_y+blob_size[1]] = blob
 blob_points = np.flip(np.transpose(blob.nonzero()), axis=1) +  [blob_min_x, blob_min_y]
 
-spline_n_points = 50
+spline_n_points = 20
 spline_init_radius = 10
 centroid = np.flip(np.array(center_of_mass(mask)))
 angles = np.linspace(0, 2*np.pi, spline_n_points+1)[0:-1]
@@ -58,7 +58,7 @@ render_points_per_segment = 2
 compute_both_ways = True
 spline_mode = "centripetal" # uniform, centripetal, or chordal
 spline_alpha = 0 if spline_mode == "uniform" else (0.5 if spline_mode == "centripetal" else 1)
-regularization_mode = "none" # none, variance, or curvature
+regularization_mode = "distance" # none, variance, distance, or curvature
 reduce_learning_rate = 0.95 # 1.0 for no decrease
 move_point = False
 
@@ -167,6 +167,8 @@ def iou(spline):
 def loss(spline):
 	if regularization_mode == "variance":
 		return iou(spline) - 0.01*distances_variance(spline)
+	elif regularization_mode == "distance":
+		return iou(spline) + distance_regularization_penalty(spline)
 	elif regularization_mode == "curvature":
 		return iou(spline) + curvature_penalty(spline)
 	else:
@@ -201,6 +203,15 @@ def curvature_penalty(spline):
 	smooths[-1] = 1 - smoothness
 
 	return np.mean(smooths)
+
+def distance_regularization_penalty(spline):
+	dists = []
+	for i in range(len(spline.points) - 1):
+		dists.append(np.linalg.norm(spline.points[i] - spline.points[i+1]))
+	dists.append(np.linalg.norm(spline.points[-1] - spline.points[0]))
+	dists = np.array(dists, dtype=float)
+	dists[dists > 1] = 1
+	return np.sum(dists)
 
 # Gradient Descent
 learning_rate = 250
