@@ -48,7 +48,7 @@ blob_max_y = blob_min_y + blob.shape[1] + 1
 mask[blob_min_x:blob_min_x+blob.shape[0], blob_min_y:blob_min_y+blob_size[1]] = blob
 blob_points = np.flip(np.transpose(blob.nonzero()), axis=1) +  [blob_min_x, blob_min_y]
 
-spline_n_points = 20
+spline_n_points = 35
 spline_init_radius = 10
 centroid = np.flip(np.array(center_of_mass(mask)))
 angles = np.linspace(0, 2*np.pi, spline_n_points+1)[0:-1]
@@ -59,8 +59,9 @@ compute_both_ways = True
 spline_mode = "centripetal" # uniform, centripetal, or chordal
 spline_alpha = 0 if spline_mode == "uniform" else (0.5 if spline_mode == "centripetal" else 1)
 regularization_mode = "distance" # none, variance, distance, or curvature
-reduce_learning_rate = 0.95 # 1.0 for no decrease
-move_point = False
+reduce_learning_rate = 1.0 # 1.0 for no decrease
+move_point = True
+deterministic_move_point = move_point and True
 
 class CatmullRomSplineSegment():
 	def __init__(self, P0, P1, P2, P3, alpha=spline_alpha):
@@ -215,9 +216,9 @@ def distance_regularization_penalty(spline):
 	return np.sum(dists)
 
 # Gradient Descent
-learning_rate = 250
+learning_rate = 100
 grad_eps = 1
-max_iters = 25
+max_iters = 50
 stopping_thresh = 0.01
 iter_num = 0
 current_spline = None
@@ -280,16 +281,24 @@ try:
 				elif smallest_diff > diff:
 					smallest_diff = diff
 					best_idx = i
-			valid_choices = []
-			for i in range(len(splines[best_idx].points) - 1):
-				if np.linalg.norm(splines[best_idx].points[i] - splines[best_idx].points[i+1]) > 1:
-					valid_choices.append(i)
-			if np.linalg.norm(splines[best_idx].points[0] - splines[best_idx].points[-1] > 1):
-				valid_choices.append(len(splines[best_idx].points))
-			while True:
-				chunk = np.random.randint(len(splines[best_idx].points))
-				if chunk in valid_choices:
-					break
+			if deterministic_move_point:
+				dists = []
+				for i in range(len(splines[best_idx].points) - 1):
+					dists.append(np.linalg.norm(splines[best_idx].points[i] - splines[best_idx].points[i+1]))
+				dists.append(np.linalg.norm(splines[best_idx].points[-1] - splines[best_idx].points[0]))
+				dists = np.array(dists, dtype=float)
+				chunk = np.argmax(dists)
+			else:
+				valid_choices = []
+				for i in range(len(splines[best_idx].points) - 1):
+					if np.linalg.norm(splines[best_idx].points[i] - splines[best_idx].points[i+1]) > 1:
+						valid_choices.append(i)
+				if np.linalg.norm(splines[best_idx].points[0] - splines[best_idx].points[-1] > 1):
+					valid_choices.append(len(splines[best_idx].points))
+				while True:
+					chunk = np.random.randint(len(splines[best_idx].points))
+					if chunk in valid_choices:
+						break
 			new_point = splines[best_idx].segments[chunk](0.5)
 			control_points = np.insert(splines[best_idx].points, chunk + 1, new_point, axis=0)
 			current_spline = CatmullRomSpline(control_points)
