@@ -153,7 +153,12 @@ def hover(event):
 		curve = np.sum(np.matmul(np.diag(mult_vec), train_uvd_flattened), axis=0).reshape(-1,3)
 		# print "curve", curve
 		axes[1].clear()
-		axes[1].plot(curve[:,0], curve[:,1])
+		axes[1].plot(curve[0:6,0], curve[0:6,1])
+		axes[1].plot(curve[6:12,0], curve[6:12,1])
+		axes[1].plot(curve[12:18,0], curve[12:18,1])
+		axes[1].plot(curve[18:24,0], curve[18:24,1])
+		axes[1].plot(curve[24:30,0], curve[24:30,1])
+		axes[1].scatter(curve[30:,0], curve[30:,1])
 		axes[1].set_xlim(mfd_xlims)
 		axes[1].set_ylim(mfd_ylims)
 
