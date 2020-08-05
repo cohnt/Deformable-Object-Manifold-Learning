@@ -98,3 +98,7 @@ for i in range(len(train_uvd_centered)):
 	R = np.eye(3) + vx + np.dot(vx, vx)*(1 / (1+c))
 	for j in range(len(train_uvd_centered[i])):
 		train_uvd_rotated[i,j,:] = np.matmul(R, train_uvd_centered[i,j,:])
+
+train_uvd_flattened = train_uvd_rotated.reshape(n_train, -1)
+embedding = Isomap(n_neighbors=12, n_components=2).fit_transform(train_uvd_flattened)
+interpolator = Delaunay(embedding, qhull_options="QJ")
