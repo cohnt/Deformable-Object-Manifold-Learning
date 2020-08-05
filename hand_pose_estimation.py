@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import mpl_toolkits.mplot3d.axes3d as p3
 import scipy.io as sio
 import os
 
@@ -109,7 +110,7 @@ interpolator = Delaunay(embedding, qhull_options="QJ")
 
 fig = plt.figure()
 ax0 = fig.add_subplot(1, 2, 1)
-ax1 = fig.add_subplot(1, 2, 2)
+ax1 = fig.add_subplot(1, 2, 2, projection="3d")
 axes = [ax0, ax1]
 
 points = axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
@@ -153,14 +154,16 @@ def hover(event):
 		curve = np.sum(np.matmul(np.diag(mult_vec), train_uvd_flattened), axis=0).reshape(-1,3)
 		# print "curve", curve
 		axes[1].clear()
-		axes[1].plot(curve[0:6,0], curve[0:6,1])
-		axes[1].plot(curve[6:12,0], curve[6:12,1])
-		axes[1].plot(curve[12:18,0], curve[12:18,1])
-		axes[1].plot(curve[18:24,0], curve[18:24,1])
-		axes[1].plot(curve[24:29,0], curve[24:29,1])
-		axes[1].scatter(curve[29:,0], curve[29:,1])
+		axes[1].view_init(30, 225)
+		axes[1].plot(curve[0:6,0], curve[0:6,1], curve[0:6,2])
+		axes[1].plot(curve[6:12,0], curve[6:12,1], curve[6:12,2])
+		axes[1].plot(curve[12:18,0], curve[12:18,1], curve[12:18,2])
+		axes[1].plot(curve[18:24,0], curve[18:24,1], curve[18:24,2])
+		axes[1].plot(curve[24:29,0], curve[24:29,1], curve[24:29,2])
+		axes[1].scatter(curve[29:,0], curve[29:,1], curve[29:,2])
 		axes[1].set_xlim(mfd_xlims)
 		axes[1].set_ylim(mfd_ylims)
+		axes[1].set_zlim(mfd_zlims)
 
 		fig.canvas.draw_idle()
 
