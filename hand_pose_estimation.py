@@ -37,8 +37,8 @@ train_joints = train_joints[0]
 test_joints = test_joints[0]
 
 # Subset the training data
-train_indexes = np.random.choice(train_joints.shape[0], n_train, replace=False)
-train_joints = train_joints[train_indexes]
+train_image_indexes = np.random.choice(train_joints.shape[0], n_train, replace=False)
+train_joints = train_joints[train_image_indexes]
 
 print "Train shape", train_joints.shape
 print "Test shape", test_joints.shape
@@ -70,9 +70,9 @@ def parse_16_bit_depth(image):
 # print "Displaying example"
 # fig = plt.figure()
 # ax = fig.add_subplot(111)
-# idxes = np.random.choice(train_joints.shape[0], 10, replace=False)
+# idxes = np.random.choice(train_image_indexes.shape[0], 10, replace=False)
 # for idx in idxes:
-# 	depth_image = matplotlib._png.read_png_int(os.path.join(train_data_dir, ("depth_1_%07d.png" % (idx+1))))
+# 	depth_image = matplotlib._png.read_png_int(os.path.join(train_data_dir, ("depth_1_%07d.png" % (train_image_indexes[idx]))))
 # 	depth = parse_16_bit_depth(depth_image)
 # 	ax.cla()
 # 	ax.imshow(depth, cmap="gray")
