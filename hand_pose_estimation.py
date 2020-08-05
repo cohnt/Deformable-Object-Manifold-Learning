@@ -56,11 +56,15 @@ def xyz_to_uvd(xyz):
 	uvd[:,:,2] = xyz[:,:,2]
 	return uvd
 
+def parse_16_bit_depth(image):
+	return image[:,:,2] + np.left_shift(np.uint16(image[:,:,1]), np.uint16(8))
+
 print "Displaying example"
 idx = 43
-depth_image = matplotlib.image.imread(os.path.join(train_data_dir, ("depth_1_%07d.png" % idx)))
+depth_image = matplotlib._png.read_png_int(os.path.join(train_data_dir, ("depth_1_%07d.png" % idx)))
+depth = parse_16_bit_depth(depth_image)
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.imshow(depth_image)
+ax.imshow(depth, cmap="gray")
 ax.scatter(train_joints[idx,:,0], train_joints[idx,:,1])
 plt.show()
