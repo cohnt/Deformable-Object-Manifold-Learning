@@ -23,3 +23,14 @@ test_joints = test_joints[0]
 
 print "Train shape", train_joints.shape
 print "Test shape", test_joints.shape
+
+def depth_to_uvd(depth):
+	V, U = np.meshgrid(range(depth.shape[1]), range(depth.shape[0]))
+	uvd = np.stack((U, V, depth), axis=2)
+	return uvd
+
+def uvd_to_xyz(uvd):
+	pass
+
+def xyz_to_uvd(xyz):
+	pass
