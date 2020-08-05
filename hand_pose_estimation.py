@@ -157,8 +157,8 @@ def hover(event):
 		axes[1].plot(curve[6:12,0], curve[6:12,1])
 		axes[1].plot(curve[12:18,0], curve[12:18,1])
 		axes[1].plot(curve[18:24,0], curve[18:24,1])
-		axes[1].plot(curve[24:30,0], curve[24:30,1])
-		axes[1].scatter(curve[30:,0], curve[30:,1])
+		axes[1].plot(curve[24:29,0], curve[24:29,1])
+		axes[1].scatter(curve[29:,0], curve[29:,1])
 		axes[1].set_xlim(mfd_xlims)
 		axes[1].set_ylim(mfd_ylims)
 
