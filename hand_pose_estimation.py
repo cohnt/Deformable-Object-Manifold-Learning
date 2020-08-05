@@ -3,6 +3,12 @@ import matplotlib.pyplot as plt
 import scipy.io as sio
 import os
 
+# Dataset Parameters
+xRes = 640
+yRes = 480
+xzFactor = 1.08836710
+yzFactor = 0.817612648
+
 print "Loading dataset..."
 
 train_data_dir = os.path.join(os.getcwd(), "data", "nyu_hand_dataset", "train")
@@ -30,7 +36,13 @@ def depth_to_uvd(depth):
 	return uvd
 
 def uvd_to_xyz(uvd):
-	pass
+	normalizedX = (uvd[:,:,0] / xRes) - 0.5
+	normalizedY = 0.5 - (uvd[:,:,0] / yRes)
+	xyz = np.zeros(uvd.shape, dtype=float)
+	xyz[:,:,2] = uvd[:,:,2]
+	xyz[:,:,0] = np.multiply(normalizedX, xyz[:,:,2]) * xzFactor
+	xyz[:,:,1] = np.multiply(normalizedY, xyz[:,:,2]) * yzFactor
+	return xyz
 
 def xyz_to_uvd(xyz):
 	pass
