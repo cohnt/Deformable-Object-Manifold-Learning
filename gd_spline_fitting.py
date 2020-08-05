@@ -217,9 +217,9 @@ def distance_regularization_penalty(spline):
 
 # Gradient Descent
 learning_rate = 50
-grad_eps = 1
+grad_eps = 2
 max_iters = 50
-stopping_thresh = 0.01
+stopping_thresh = 0.005
 iter_num = 0
 current_spline = None
 try:
