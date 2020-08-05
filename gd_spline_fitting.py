@@ -61,7 +61,7 @@ spline_alpha = 0 if spline_mode == "uniform" else (0.5 if spline_mode == "centri
 regularization_mode = "distance" # none, variance, distance, or curvature
 reduce_learning_rate = 1.0 # 1.0 for no decrease
 move_point = True
-deterministic_move_point = move_point and False
+deterministic_move_point = move_point and True
 
 class CatmullRomSplineSegment():
 	def __init__(self, P0, P1, P2, P3, alpha=spline_alpha):
