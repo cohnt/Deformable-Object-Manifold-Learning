@@ -20,7 +20,7 @@ train_data_dir = os.path.join(os.getcwd(), "data", "nyu_hand_dataset", "train")
 test_data_dir = os.path.join(os.getcwd(), "data", "nyu_hand_dataset", "test")
 
 train_joints_fname = os.path.join(train_data_dir, "joint_data.mat")
-test_joints_fname = os.path.join(train_data_dir, "joint_data.mat")
+test_joints_fname = os.path.join(test_data_dir, "joint_data.mat")
 
 train_joints_mat = sio.loadmat(train_joints_fname)
 test_joints_mat = sio.loadmat(test_joints_fname)
