@@ -8,6 +8,10 @@ xRes = 640
 yRes = 480
 xzFactor = 1.08836710
 yzFactor = 0.817612648
+halfResX = xRes/2
+halfResY = yRes/2
+coeffX = 588.036865
+coeffY = 587.075073
 
 print "Loading dataset..."
 
@@ -45,4 +49,8 @@ def uvd_to_xyz(uvd):
 	return xyz
 
 def xyz_to_uvd(xyz):
-	pass
+	uvd = np.zeros(xyz.shape)
+	uvd[:,:,0] = np.divide(coeffX * xyz[:,:,0], xyz[:,:,2] + halfResX)
+	uvd[:,:,1] = np.divide(halfResY - (coeffY * xyz[:,:,1]), xyz[:,:,2])
+	uvd[:,:,2] = xyz[:,:,2]
+	return uvd
