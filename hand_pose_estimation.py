@@ -64,6 +64,12 @@ def xyz_to_uvd(xyz):
 def parse_16_bit_depth(image):
 	return image[:,:,2] + np.left_shift(np.uint16(image[:,:,1]), np.uint16(8))
 
+def pack_hand_pose(pose):
+	return pose.flatten()
+
+def unpack_hand_pose(vec):
+	return vec.reshape(36, 3)
+
 # print "Displaying example"
 # fig = plt.figure()
 # ax = fig.add_subplot(111)
