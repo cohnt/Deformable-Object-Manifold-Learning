@@ -62,7 +62,8 @@ def parse_16_bit_depth(image):
 print "Displaying example"
 fig = plt.figure()
 ax = fig.add_subplot(111)
-for idx in range(43):
+idxes = np.random.choice(train_joints.shape[0], 10, replace=False)
+for idx in idxes:
 	depth_image = matplotlib._png.read_png_int(os.path.join(train_data_dir, ("depth_1_%07d.png" % (idx+1))))
 	depth = parse_16_bit_depth(depth_image)
 	ax.cla()
