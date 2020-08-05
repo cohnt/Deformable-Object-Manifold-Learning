@@ -48,7 +48,7 @@ blob_max_y = blob_min_y + blob.shape[1] + 1
 mask[blob_min_x:blob_min_x+blob.shape[0], blob_min_y:blob_min_y+blob_size[1]] = blob
 blob_points = np.flip(np.transpose(blob.nonzero()), axis=1) +  [blob_min_x, blob_min_y]
 
-spline_n_points = 40
+spline_n_points = 10
 spline_init_radius = 10
 centroid = np.flip(np.array(center_of_mass(mask)))
 angles = np.linspace(0, 2*np.pi, spline_n_points+1)[0:-1]
@@ -61,7 +61,7 @@ spline_alpha = 0 if spline_mode == "uniform" else (0.5 if spline_mode == "centri
 regularization_mode = "distance" # none, variance, distance, or curvature
 reduce_learning_rate = 1.0 # 1.0 for no decrease
 move_point = True
-deterministic_move_point = move_point and True
+deterministic_move_point = move_point and False
 
 class CatmullRomSplineSegment():
 	def __init__(self, P0, P1, P2, P3, alpha=spline_alpha):
