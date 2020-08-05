@@ -13,6 +13,7 @@ halfResX = xRes/2
 halfResY = yRes/2
 coeffX = 588.036865
 coeffY = 587.075073
+n_train = 500
 
 print "Loading dataset..."
 
@@ -31,6 +32,10 @@ test_joints = test_joints_mat["joint_uvd"]
 # Only use the first kinect
 train_joints = train_joints[0]
 test_joints = test_joints[0]
+
+# Subset the training data
+train_indexes = np.random.choice(train_joints.shape[0], n_train, replace=False)
+train_joints = train_joints[train_indexes]
 
 print "Train shape", train_joints.shape
 print "Test shape", test_joints.shape
@@ -59,15 +64,15 @@ def xyz_to_uvd(xyz):
 def parse_16_bit_depth(image):
 	return image[:,:,2] + np.left_shift(np.uint16(image[:,:,1]), np.uint16(8))
 
-print "Displaying example"
-fig = plt.figure()
-ax = fig.add_subplot(111)
-idxes = np.random.choice(train_joints.shape[0], 10, replace=False)
-for idx in idxes:
-	depth_image = matplotlib._png.read_png_int(os.path.join(train_data_dir, ("depth_1_%07d.png" % (idx+1))))
-	depth = parse_16_bit_depth(depth_image)
-	ax.cla()
-	ax.imshow(depth, cmap="gray")
-	ax.scatter(train_joints[idx,:,0], train_joints[idx,:,1])
-	plt.draw()
-	plt.pause(1)
+# print "Displaying example"
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# idxes = np.random.choice(train_joints.shape[0], 10, replace=False)
+# for idx in idxes:
+# 	depth_image = matplotlib._png.read_png_int(os.path.join(train_data_dir, ("depth_1_%07d.png" % (idx+1))))
+# 	depth = parse_16_bit_depth(depth_image)
+# 	ax.cla()
+# 	ax.imshow(depth, cmap="gray")
+# 	ax.scatter(train_joints[idx,:,0], train_joints[idx,:,1])
+# 	plt.draw()
+# 	plt.pause(1)
