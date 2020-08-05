@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 import scipy.io as sio
 import os
 
+from sklearn.manifold import Isomap
+from scipy.spatial import Delaunay
+
 # Dataset Parameters
 xRes = 640
 yRes = 480
@@ -64,12 +67,6 @@ def xyz_to_uvd(xyz):
 def parse_16_bit_depth(image):
 	return image[:,:,2] + np.left_shift(np.uint16(image[:,:,1]), np.uint16(8))
 
-def pack_hand_pose(pose):
-	return pose.flatten()
-
-def unpack_hand_pose(vec):
-	return vec.reshape(36, 3)
-
 # print "Displaying example"
 # fig = plt.figure()
 # ax = fig.add_subplot(111)
@@ -82,3 +79,22 @@ def unpack_hand_pose(vec):
 # 	ax.scatter(train_joints[idx,:,0], train_joints[idx,:,1])
 # 	plt.draw()
 # 	plt.pause(1)
+
+# Center and rotate the data, in preparation for manifold learning
+train_uvd_centered = train_joints[:,:,:] - np.repeat(train_joints[:,0,:].reshape(train_joints.shape[0], 1, train_joints.shape[2]), train_joints.shape[1], axis=1)
+train_uvd_rotated = np.zeros(train_uvd_centered.shape)
+for i in range(len(train_uvd_centered)):
+	# https://math.stackexchange.com/a/476311
+	a = train_uvd_centered[i,-1,:] / np.linalg.norm(train_uvd_centered[i,-1,:])
+	b = np.array([1, 0, 0])
+	v = np.cross(a, b)
+	s = np.linalg.norm(v)
+	c = np.dot(a, b)
+	vx = np.array([
+		[0, -v[2], v[1]],
+		[v[2], 0, -v[0]],
+		[-v[1], v[0], 0]
+	])
+	R = np.eye(3) + vx + np.dot(vx, vx)*(1 / (1+c))
+	for j in range(len(train_uvd_centered[i])):
+		train_uvd_rotated[i,j,:] = np.matmul(R, train_uvd_centered[i,j,:])
