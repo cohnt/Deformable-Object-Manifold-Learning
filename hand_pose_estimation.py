@@ -140,13 +140,13 @@ ylim = axes[0].get_ylim()
 
 # Make the interactive plot
 
-def draw_pose(ax, pose, color, label=False):
-	ax.plot(pose[0:6,0], pose[0:6,1], pose[0:6,2], color=color)
-	ax.plot(pose[6:12,0], pose[6:12,1], pose[6:12,2], color=color)
-	ax.plot(pose[12:18,0], pose[12:18,1], pose[12:18,2], color=color)
-	ax.plot(pose[18:24,0], pose[18:24,1], pose[18:24,2], color=color)
-	ax.plot(pose[24:29,0], pose[24:29,1], pose[24:29,2], color=color)
-	ax.scatter(pose[29:,0], pose[29:,1], pose[29:,2], color=color)
+def draw_pose(ax, pose, color=None, size=1, label=False):
+	ax.plot(pose[0:6,0], pose[0:6,1], pose[0:6,2], color=color, linewidth=size)
+	ax.plot(pose[6:12,0], pose[6:12,1], pose[6:12,2], color=color, linewidth=size)
+	ax.plot(pose[12:18,0], pose[12:18,1], pose[12:18,2], color=color, linewidth=size)
+	ax.plot(pose[18:24,0], pose[18:24,1], pose[18:24,2], color=color, linewidth=size)
+	ax.plot(pose[24:29,0], pose[24:29,1], pose[24:29,2], color=color, linewidth=size)
+	ax.scatter(pose[29:,0], pose[29:,1], pose[29:,2], color=color, s=size**2)
 	if label:
 		for i in range(pose.shape[0]):
 			ax.text(pose[i,0], pose[i,1], pose[i,2], i)
@@ -252,29 +252,29 @@ for i in range(heatmap_shape[0]):
 			heatmap[i, j, k] = 1 / (1 + np.min(dists))
 
 # Verify that the heatmap is good
-fig = plt.figure()
-ax = fig.add_subplot(111, projection="3d")
-draw_pose(ax, test_joints[frame], color="black", label=True)
-ax.set_xlim((x_min, x_max))
-ax.set_ylim((y_min, y_max))
-ax.set_zlim((z_min, z_max))
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection="3d")
+# draw_pose(ax, test_joints[frame], color="black", label=True)
+# ax.set_xlim((x_min, x_max))
+# ax.set_ylim((y_min, y_max))
+# ax.set_zlim((z_min, z_max))
 
-points = []
-for i in range(heatmap_shape[0]):
-	for j in range(heatmap_shape[1]):
-		for k in range(heatmap_shape[2]):
-			if i % 5 == 0 and j % 5 == 0 and k % 5 == 0:
-				if heatmap[i,j,k] > 0.1:
-					x = x_min + (i * heatmap_resolution)
-					y = y_min + (j * heatmap_resolution)
-					z = z_min + (k * heatmap_resolution)
-					points.append([x, y, z])
-points = np.array(points)
-ax.scatter(points[:,0], points[:,1], points[:,2])
+# points = []
+# for i in range(heatmap_shape[0]):
+# 	for j in range(heatmap_shape[1]):
+# 		for k in range(heatmap_shape[2]):
+# 			if i % 5 == 0 and j % 5 == 0 and k % 5 == 0:
+# 				if heatmap[i,j,k] > 0.1:
+# 					x = x_min + (i * heatmap_resolution)
+# 					y = y_min + (j * heatmap_resolution)
+# 					z = z_min + (k * heatmap_resolution)
+# 					points.append([x, y, z])
+# points = np.array(points)
+# ax.scatter(points[:,0], points[:,1], points[:,2])
 
-mng = plt.get_current_fig_manager()
-mng.resize(*mng.window.maxsize())
-plt.show()
+# mng = plt.get_current_fig_manager()
+# mng.resize(*mng.window.maxsize())
+# plt.show()
 
 class Particle():
 	def __init__(self, xyz=None, orien=None, deformation=None):
@@ -306,11 +306,11 @@ class Particle():
 		raw_points = compute_deformation(interpolator, self.deformation)
 		rotated_points = np.matmul(self.orien, raw_points.T)
 		self.points = rotated_points + np.asarray(self.xyz).reshape(-1, 1)
+		self.points = self.points.T
 
 	def compute_raw_weight(self, heatmap):
 		running_total = 0.0
-		for i in range(self.num_points):
-			point = self.points[:,i]
+		for point in self.points:
 			heatmap_coords = np.round((point - np.array([x_min, y_min, z_min])) / heatmap_resolution)
 			heatmap_index = np.asarray(heatmap_coords, dtype=int)
 
@@ -320,10 +320,10 @@ class Particle():
 		self.raw_weight = running_total
 		return self.raw_weight
 
-	def draw(self, ax, color):
-		draw_pose(ax, self.points, color)
+	def draw(self, ax, color, size=1):
+		draw_pose(ax, self.points, color, size)
 
-num_particles = 2000
+num_particles = 250
 exploration_factor = 0.1
 particles = [Particle() for i in range(num_particles)]
 iter_num = 0
@@ -349,4 +349,90 @@ mng.resize(*mng.window.maxsize())
 plt.draw()
 plt.pause(0.001)
 
-plt.show()
+while True:
+	iter_num = iter_num + 1
+	print "Iteration %d" % iter_num
+
+	# Weight particles
+	normalization_factor = 0
+	weights = []
+	for p in particles:
+		w = p.compute_raw_weight(heatmap)
+		weights.append(w)
+		normalization_factor = normalization_factor + w
+	weights = np.asarray(weights)
+	# min_weight = np.min(weights[weights > 0])
+	normalized_weights = []
+	for p in particles:
+		# w = (p.raw_weight - min_weight) / (max_weight - min_weight)
+		w = p.raw_weight / normalization_factor
+		p.normalized_weight = w
+		normalized_weights.append(w)
+	max_normalized_weight = np.max(normalized_weights)
+	max_normalized_weight_ind = np.argmax(normalized_weights)
+
+	if iter_num > -1:
+		ax.clear()
+		for p in particles:
+			p.draw(ax, plt.cm.cool(p.normalized_weight / max_normalized_weight))
+		draw_pose(ax, test_joints[frame], "black", size=5)
+		particles[max_normalized_weight_ind].draw(ax, "red", size=5)
+		ax.set_xlim(x_min, x_max)
+		ax.set_ylim(y_min, y_max)
+		ax.set_zlim(z_min, z_max)
+		ax.set_xlabel('X axis')
+		ax.set_ylabel('Y axis')
+		ax.set_zlabel('Z axis')
+		plt.draw()
+		plt.pause(0.001)
+		plt.savefig("iteration%02d.png" % iter_num)
+
+		if iter_num >= 50:
+			for idx, angle in enumerate(np.arange(-60+10, 300+360, 10)):
+				ax.view_init(30, angle)
+				plt.draw()
+				plt.pause(.001)
+				plt.savefig("iteration%02d.png" % (iter_num + idx + 1))
+			break
+		# plt.close(fig)
+		# plt.show()
+
+	# Resample
+	newParticles = []
+	cs = np.cumsum(normalized_weights)
+	step = 1/float((num_particles * (1-exploration_factor))+1)
+	chkVal = step
+	chkIdx = 0
+	newParticles.append(particles[max_normalized_weight_ind])
+	for i in range(1, int(np.ceil(num_particles * (1-exploration_factor)))):
+		while cs[chkIdx] < chkVal:
+			chkIdx = chkIdx + 1
+		chkVal = chkVal + step
+		newParticles.append(Particle(xyz=particles[chkIdx].xyz,
+		                             orien=particles[chkIdx].orien,
+		                             deformation=particles[chkIdx].deformation))
+	for i in range(len(newParticles), num_particles):
+		newParticles.append(Particle())
+
+	# Add noise
+	particles = newParticles
+	for i in range(1, len(particles)):
+		p = particles[i]
+		xyz_var = 0.1
+		p.xyz = p.xyz + np.random.multivariate_normal(np.zeros(3), xyz_var*np.eye(3))
+
+		orien_var = 5
+		rot = random_small_rotation(3, orien_var)
+		p.orien = np.matmul(rot, p.orien)
+
+		deformation_var = 0.1
+		while True:
+			delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
+			if interpolator.find_simplex(p.deformation + delta) != -1:
+				p.deformation = p.deformation + delta
+				break
+
+		p.compute_points()
+
+import os
+os.system('ffmpeg -f image2 -r 1/0.1 -i iteration\%02d.png -c:v libx264 -pix_fmt yuv420p out.mp4')
