@@ -290,3 +290,11 @@ class Particle():
 
 		self.raw_weight = running_total
 		return self.raw_weight
+
+	def draw(self, ax, color):
+		ax.plot(self.points[0,0:6], self.points[1,0:6], self.points[2,0:6], color=color)
+		ax.plot(self.points[0,6:12], self.points[1,6:12], self.points[2,6:12], color=color)
+		ax.plot(self.points[0,12:18], self.points[1,12:18], self.points[2,12:18], color=color)
+		ax.plot(self.points[0,18:24], self.points[1,18:24], self.points[2,18:24], color=color)
+		ax.plot(self.points[0,24:29], self.points[1,24:29], self.points[2,24:29], color=color)
+		ax.scatter(self.points[0,29:], self.points[1,29:], self.points[2,29:], color=color)
