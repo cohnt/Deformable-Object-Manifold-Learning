@@ -7,6 +7,7 @@ import os
 
 from sklearn.manifold import Isomap
 from scipy.spatial import Delaunay
+from scipy.stats import special_ortho_group
 
 # Dataset Parameters
 xRes = 640
@@ -245,3 +246,47 @@ ax.scatter(points[:,0], points[:,1], points[:,2])
 mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 plt.show()
+
+class Particle():
+	def __init__(self, xyz=None, orien=None, deformation=None):
+		if xyz is None:
+			self.xyz = (np.random.uniform(x_min, x_max),
+			            np.random.uniform(y_min, y_max),
+			            np.random.uniform(z_min, z_max))
+		else:
+			self.xyz = xyz
+
+		if orien is None:
+			self.orien = special_ortho_group.rvs(3)
+		else:
+			self.orien = orien
+		
+		if deformation is None:
+			deformation_ind = np.random.randint(0, len(train_joints))
+			self.deformation = embedding[deformation_ind]
+		else:
+			self.deformation = deformation
+
+		self.num_points = num_points_to_track
+		self.compute_points()
+
+		self.raw_weight = None
+		self.normalized_weight = None
+
+	def compute_points(self):
+		raw_points = compute_deformation(interpolator, self.deformation)
+		rotated_points = np.matmul(self.orien, raw_points.T)
+		self.points = rotated_points + np.asarray(self.xyz).reshape(-1, 1)
+
+	def compute_raw_weight(self, heatmap):
+		running_total = 0.0
+		for i in range(self.num_points):
+			point = self.points[:,i]
+			heatmap_coords = np.round((point - np.array([x_min, y_min, z_min])) / heatmap_resolution)
+			heatmap_index = np.asarray(heatmap_coords, dtype=int)
+
+			if (0 <= heatmap_index).all() and (heatmap_index < heatmap_shape).all():
+				running_total += heatmap[tuple(heatmap_index)]
+
+		self.raw_weight = running_total
+		return self.raw_weight
