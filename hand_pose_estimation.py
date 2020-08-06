@@ -186,9 +186,9 @@ def compute_deformation(interpolator, deformation_coords):
 		b = np.asarray(b_coords).flatten()
 
 		# Interpolate the deformation
-		mult_vec = np.zeros(len(train))
+		mult_vec = np.zeros(len(train_uvd_flattened))
 		mult_vec[simplex_indices] = b
-		curve = np.sum(np.matmul(np.diag(mult_vec), train), axis=0).reshape(-1,3)
+		curve = np.sum(np.matmul(np.diag(mult_vec), train_uvd_flattened), axis=0).reshape(-1,3)
 		return curve
 	else:
 		print "Error: outside of convex hull!"
