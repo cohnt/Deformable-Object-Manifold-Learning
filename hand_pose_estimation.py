@@ -324,8 +324,8 @@ class Particle():
 	def draw(self, ax, color, size=2):
 		draw_pose(ax, self.points, color, size)
 
-num_particles = 250
-exploration_factor = 0.1
+num_particles = 1000
+exploration_factor = 0.25
 particles = [Particle() for i in range(num_particles)]
 iter_num = 0
 
@@ -349,6 +349,11 @@ mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 plt.draw()
 plt.pause(0.001)
+
+
+xyz_var = 10
+orien_var = 5
+deformation_var = 10
 
 while True:
 	iter_num = iter_num + 1
@@ -419,14 +424,11 @@ while True:
 	particles = newParticles
 	for i in range(1, len(particles)):
 		p = particles[i]
-		xyz_var = 0.1
 		p.xyz = p.xyz + np.random.multivariate_normal(np.zeros(3), xyz_var*np.eye(3))
 
-		orien_var = 5
 		rot = random_small_rotation(3, orien_var)
 		p.orien = np.matmul(rot, p.orien)
 
-		deformation_var = 0.1
 		while True:
 			delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
 			if interpolator.find_simplex(p.deformation + delta) != -1:
