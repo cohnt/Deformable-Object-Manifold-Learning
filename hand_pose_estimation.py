@@ -292,9 +292,40 @@ class Particle():
 		return self.raw_weight
 
 	def draw(self, ax, color):
-		ax.plot(self.points[0,0:6], self.points[1,0:6], self.points[2,0:6], color=color)
-		ax.plot(self.points[0,6:12], self.points[1,6:12], self.points[2,6:12], color=color)
-		ax.plot(self.points[0,12:18], self.points[1,12:18], self.points[2,12:18], color=color)
-		ax.plot(self.points[0,18:24], self.points[1,18:24], self.points[2,18:24], color=color)
-		ax.plot(self.points[0,24:29], self.points[1,24:29], self.points[2,24:29], color=color)
-		ax.scatter(self.points[0,29:], self.points[1,29:], self.points[2,29:], color=color)
+		draw_pose(ax, self.points, color)
+
+def draw_pose(ax, pose, color):
+	ax.plot(pose[0:6,0], pose[0:6,1], pose[0:6,2], color=color)
+	ax.plot(pose[6:12,0], pose[6:12,1], pose[6:12,2], color=color)
+	ax.plot(pose[12:18,0], pose[12:18,1], pose[12:18,2], color=color)
+	ax.plot(pose[18:24,0], pose[18:24,1], pose[18:24,2], color=color)
+	ax.plot(pose[24:29,0], pose[24:29,1], pose[24:29,2], color=color)
+	ax.scatter(pose[29:,0], pose[29:,1], pose[29:,2], color=color)
+
+num_particles = 2000
+exploration_factor = 0.1
+particles = [Particle() for i in range(num_particles)]
+iter_num = 0
+
+def random_small_rotation(dimension, variance=None):
+	if variance is None:
+		variance = 0.05 * dimension * 180.0 / np.pi
+	theta = np.random.normal(0, variance) * np.pi / 180.0
+	rotMat = np.eye(dimension)
+	rotMat[0,0] = np.cos(theta)
+	rotMat[0,1] = -np.sin(theta)
+	rotMat[1,0] = np.sin(theta)
+	rotMat[1,1] = np.cos(theta)
+	basis = special_ortho_group.rvs(dimension)
+	basis_inv = basis.transpose()
+	return basis.dot(rotMat).dot(basis_inv)
+
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1, projection="3d")
+draw_pose(ax, test_joints[frame], "black")
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
+plt.draw()
+plt.pause(0.001)
+
+plt.show()
