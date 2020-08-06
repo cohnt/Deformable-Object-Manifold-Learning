@@ -321,8 +321,8 @@ class Particle():
 		self.raw_weight = running_total
 		return self.raw_weight
 
-	def draw(self, ax, color, size=2):
-		draw_pose(ax, self.points, color, size)
+	def draw(self, ax, color, size=2, label=False):
+		draw_pose(ax, self.points, color, size, label=label)
 
 num_particles = 100
 exploration_factor = 0.25
@@ -381,8 +381,8 @@ while True:
 		ax.clear()
 		for p in particles:
 			p.draw(ax, plt.cm.cool(p.normalized_weight / max_normalized_weight))
-		draw_pose(ax, test_joints[frame], "black", size=10)
-		particles[max_normalized_weight_ind].draw(ax, "red", size=10)
+		draw_pose(ax, test_joints[frame], "black", size=10, label=True)
+		particles[max_normalized_weight_ind].draw(ax, "red", size=10, label=True)
 		ax.set_xlim(x_min, x_max)
 		ax.set_ylim(y_min, y_max)
 		ax.set_zlim(z_min, z_max)
