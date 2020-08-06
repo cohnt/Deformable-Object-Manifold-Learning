@@ -140,7 +140,7 @@ ylim = axes[0].get_ylim()
 
 # Make the interactive plot
 
-def draw_pose(ax, pose, color=None, size=1, label=False):
+def draw_pose(ax, pose, color=None, size=2, label=False):
 	ax.plot(pose[0:6,0], pose[0:6,1], pose[0:6,2], color=color, linewidth=size)
 	ax.plot(pose[6:12,0], pose[6:12,1], pose[6:12,2], color=color, linewidth=size)
 	ax.plot(pose[12:18,0], pose[12:18,1], pose[12:18,2], color=color, linewidth=size)
@@ -320,7 +320,7 @@ class Particle():
 		self.raw_weight = running_total
 		return self.raw_weight
 
-	def draw(self, ax, color, size=1):
+	def draw(self, ax, color, size=2):
 		draw_pose(ax, self.points, color, size)
 
 num_particles = 250
@@ -375,8 +375,8 @@ while True:
 		ax.clear()
 		for p in particles:
 			p.draw(ax, plt.cm.cool(p.normalized_weight / max_normalized_weight))
-		draw_pose(ax, test_joints[frame], "black", size=5)
-		particles[max_normalized_weight_ind].draw(ax, "red", size=5)
+		draw_pose(ax, test_joints[frame], "black", size=10)
+		particles[max_normalized_weight_ind].draw(ax, "red", size=10)
 		ax.set_xlim(x_min, x_max)
 		ax.set_ylim(y_min, y_max)
 		ax.set_zlim(z_min, z_max)
