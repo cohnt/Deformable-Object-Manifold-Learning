@@ -23,6 +23,8 @@ base_joint = 35
 dir_joint_1 = 32
 dir_joint_2 = 33
 
+embedding_target_dim = 5
+
 print "Loading dataset..."
 
 train_data_dir = os.path.join(os.getcwd(), "data", "nyu_hand_dataset", "train")
@@ -126,19 +128,8 @@ mfd_ylims = (np.min(train_uvd_rotated[:,:,1]), np.max(train_uvd_rotated[:,:,1]))
 mfd_zlims = (np.min(train_uvd_rotated[:,:,2]), np.max(train_uvd_rotated[:,:,2]))
 
 train_uvd_flattened = train_uvd_rotated.reshape(n_train, -1)
-embedding = Isomap(n_neighbors=12, n_components=2).fit_transform(train_uvd_flattened)
+embedding = Isomap(n_neighbors=12, n_components=embedding_target_dim).fit_transform(train_uvd_flattened)
 interpolator = Delaunay(embedding, qhull_options="QJ")
-
-fig = plt.figure()
-ax0 = fig.add_subplot(1, 2, 1)
-ax1 = fig.add_subplot(1, 2, 2, projection="3d")
-axes = [ax0, ax1]
-
-points = axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
-xlim = axes[0].get_xlim()
-ylim = axes[0].get_ylim()
-
-# Make the interactive plot
 
 def draw_pose(ax, pose, color=None, size=2, label=False):
 	ax.plot(pose[0:6,0], pose[0:6,1], pose[0:6,2], color=color, linewidth=size)
@@ -151,56 +142,67 @@ def draw_pose(ax, pose, color=None, size=2, label=False):
 		for i in range(pose.shape[0]):
 			ax.text(pose[i,0], pose[i,1], pose[i,2], i)
 
-def hover(event):
-	xy = np.array([event.xdata, event.ydata])
+# fig = plt.figure()
+# ax0 = fig.add_subplot(1, 2, 1)
+# ax1 = fig.add_subplot(1, 2, 2, projection="3d")
+# axes = [ax0, ax1]
 
-	# Check if xy is in the convex hull
-	simplex_num = interpolator.find_simplex(xy)
-	# print "xy", xy, "\tsimplex_num", simplex_num
-	if simplex_num != -1:
-		# Get the simplex
-		simplex_indices = interpolator.simplices[simplex_num]
-		# print "simplex_indices", simplex_indices
-		simplex = interpolator.points[simplex_indices]
-		# print "simplex", simplex
+# points = axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
+# xlim = axes[0].get_xlim()
+# ylim = axes[0].get_ylim()
 
-		# Display the simplex vertices
-		axes[0].clear()
-		axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
-		axes[0].scatter(embedding[simplex_indices,0], embedding[simplex_indices,1], c="blue", s=20**2)
-		axes[0].plot(embedding[simplex_indices[[0,1]],0], embedding[simplex_indices[[0,1]],1], c="blue", linewidth=3)
-		axes[0].plot(embedding[simplex_indices[[1,2]],0], embedding[simplex_indices[[1,2]],1], c="blue", linewidth=3)
-		axes[0].plot(embedding[simplex_indices[[0,2]],0], embedding[simplex_indices[[0,2]],1], c="blue", linewidth=3)
-		axes[0].set_xlim(xlim)
-		axes[0].set_ylim(ylim)
+# Make the interactive plot
 
-		# Compute barycentric coordinates
-		A = np.vstack((simplex.T, np.ones((1, 3))))
-		b = np.vstack((xy.reshape(-1, 1), np.ones((1, 1))))
-		b_coords = np.linalg.solve(A, b)
-		b = np.asarray(b_coords).flatten()
-		# print "b_coords", b, np.sum(b_coords)
+# def hover(event):
+# 	xy = np.array([event.xdata, event.ydata])
 
-		# Interpolate the deformation
-		mult_vec = np.zeros(len(train_uvd_flattened))
-		mult_vec[simplex_indices] = b
-		curve = np.sum(np.matmul(np.diag(mult_vec), train_uvd_flattened), axis=0).reshape(-1,3)
-		print curve[dir_joint_1], curve[dir_joint_2]
-		# print "curve", curve
-		axes[1].clear()
-		# axes[1].view_init(30, 225)
-		axes[1].view_init(90, 90)
-		draw_pose(axes[1], curve, color=None, label=True)
-		axes[1].set_xlim(mfd_xlims)
-		axes[1].set_ylim(mfd_ylims)
-		axes[1].set_zlim(mfd_zlims)
+# 	# Check if xy is in the convex hull
+# 	simplex_num = interpolator.find_simplex(xy)
+# 	# print "xy", xy, "\tsimplex_num", simplex_num
+# 	if simplex_num != -1:
+# 		# Get the simplex
+# 		simplex_indices = interpolator.simplices[simplex_num]
+# 		# print "simplex_indices", simplex_indices
+# 		simplex = interpolator.points[simplex_indices]
+# 		# print "simplex", simplex
 
-		fig.canvas.draw_idle()
+# 		# Display the simplex vertices
+# 		axes[0].clear()
+# 		axes[0].scatter(embedding[:,0], embedding[:,1], c="grey", s=20**2)
+# 		axes[0].scatter(embedding[simplex_indices,0], embedding[simplex_indices,1], c="blue", s=20**2)
+# 		axes[0].plot(embedding[simplex_indices[[0,1]],0], embedding[simplex_indices[[0,1]],1], c="blue", linewidth=3)
+# 		axes[0].plot(embedding[simplex_indices[[1,2]],0], embedding[simplex_indices[[1,2]],1], c="blue", linewidth=3)
+# 		axes[0].plot(embedding[simplex_indices[[0,2]],0], embedding[simplex_indices[[0,2]],1], c="blue", linewidth=3)
+# 		axes[0].set_xlim(xlim)
+# 		axes[0].set_ylim(ylim)
 
-fig.canvas.mpl_connect('motion_notify_event', hover)
-mng = plt.get_current_fig_manager()
-mng.resize(*mng.window.maxsize())
-plt.show()
+# 		# Compute barycentric coordinates
+# 		A = np.vstack((simplex.T, np.ones((1, 3))))
+# 		b = np.vstack((xy.reshape(-1, 1), np.ones((1, 1))))
+# 		b_coords = np.linalg.solve(A, b)
+# 		b = np.asarray(b_coords).flatten()
+# 		# print "b_coords", b, np.sum(b_coords)
+
+# 		# Interpolate the deformation
+# 		mult_vec = np.zeros(len(train_uvd_flattened))
+# 		mult_vec[simplex_indices] = b
+# 		curve = np.sum(np.matmul(np.diag(mult_vec), train_uvd_flattened), axis=0).reshape(-1,3)
+# 		print curve[dir_joint_1], curve[dir_joint_2]
+# 		# print "curve", curve
+# 		axes[1].clear()
+# 		# axes[1].view_init(30, 225)
+# 		axes[1].view_init(90, 90)
+# 		draw_pose(axes[1], curve, color=None, label=True)
+# 		axes[1].set_xlim(mfd_xlims)
+# 		axes[1].set_ylim(mfd_ylims)
+# 		axes[1].set_zlim(mfd_zlims)
+
+# 		fig.canvas.draw_idle()
+
+# fig.canvas.mpl_connect('motion_notify_event', hover)
+# mng = plt.get_current_fig_manager()
+# mng.resize(*mng.window.maxsize())
+# plt.show()
 
 def compute_deformation(interpolator, deformation_coords):
 	simplex_num = interpolator.find_simplex(deformation_coords)
@@ -209,7 +211,7 @@ def compute_deformation(interpolator, deformation_coords):
 		simplex = interpolator.points[simplex_indices]
 
 		# Compute barycentric coordinates
-		A = np.vstack((simplex.T, np.ones((1, 3))))
+		A = np.vstack((simplex.T, np.ones((1, embedding_target_dim+1))))
 		b = np.vstack((deformation_coords.reshape(-1, 1), np.ones((1, 1))))
 		b_coords = np.linalg.solve(A, b)
 		b = np.asarray(b_coords).flatten()
@@ -324,8 +326,8 @@ class Particle():
 	def draw(self, ax, color, size=2, label=False):
 		draw_pose(ax, self.points, color, size, label=label)
 
-num_particles = 100
-exploration_factor = 0.25
+num_particles = 1000
+exploration_factor = 0.1
 particles = [Particle(xyz=test_joints[frame,base_joint]) for i in range(num_particles)]
 iter_num = 0
 
@@ -352,8 +354,8 @@ plt.pause(0.001)
 
 
 xyz_var = 0
-orien_var = 5
-deformation_var = 25
+orien_var = 10
+deformation_var = 50
 
 while True:
 	iter_num = iter_num + 1
@@ -430,7 +432,7 @@ while True:
 		p.orien = np.matmul(rot, p.orien)
 
 		while True:
-			delta = np.random.multivariate_normal(np.array([0, 0]), np.matrix([[deformation_var, 0], [0, deformation_var]]))
+			delta = np.random.multivariate_normal(np.zeros(embedding_target_dim), deformation_var*np.eye(embedding_target_dim))
 			if interpolator.find_simplex(p.deformation + delta) != -1:
 				p.deformation = p.deformation + delta
 				break
