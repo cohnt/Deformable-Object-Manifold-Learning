@@ -223,7 +223,8 @@ def compute_deformation(interpolator, deformation_coords):
 		print "Error: outside of convex hull!"
 		raise ValueError
 
-frame = np.random.choice(test_joints.shape[0])
+# frame = np.random.choice(test_joints.shape[0])
+frame = 0
 num_points_to_track = len(test_joints[frame])
 x_min = int(np.floor(np.min(test_joints[frame,:,0])))
 y_min = int(np.floor(np.min(test_joints[frame,:,1])))
