@@ -171,3 +171,77 @@ fig.canvas.mpl_connect('motion_notify_event', hover)
 mng = plt.get_current_fig_manager()
 mng.resize(*mng.window.maxsize())
 plt.show()
+
+def compute_deformation(interpolator, deformation_coords):
+	simplex_num = interpolator.find_simplex(deformation_coords)
+	if simplex_num != -1:
+		simplex_indices = interpolator.simplices[simplex_num]
+		simplex = interpolator.points[simplex_indices]
+
+		# Compute barycentric coordinates
+		A = np.vstack((simplex.T, np.ones((1, 3))))
+		b = np.vstack((deformation_coords.reshape(-1, 1), np.ones((1, 1))))
+		b_coords = np.linalg.solve(A, b)
+		b = np.asarray(b_coords).flatten()
+
+		# Interpolate the deformation
+		mult_vec = np.zeros(len(train))
+		mult_vec[simplex_indices] = b
+		curve = np.sum(np.matmul(np.diag(mult_vec), train), axis=0).reshape(-1,3)
+		return curve
+	else:
+		print "Error: outside of convex hull!"
+		raise ValueError
+
+frame = np.random.choice(test_joints.shape[0])
+num_points_to_track = len(test_joints[frame])
+x_min = int(np.floor(np.min(test_joints[frame,:,0])))
+y_min = int(np.floor(np.min(test_joints[frame,:,1])))
+z_min = int(np.floor(np.min(test_joints[frame,:,2])))
+x_max = int(np.ceil(np.max(test_joints[frame,:,0])))
+y_max = int(np.ceil(np.max(test_joints[frame,:,1])))
+z_max = int(np.ceil(np.max(test_joints[frame,:,2])))
+
+print x_min, x_max
+print y_min, y_max
+print z_min, z_max
+
+heatmap_resolution = 1
+heatmap_n_decimals = int(-np.log10(heatmap_resolution))
+zero_index = -np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
+heatmap_shape = (int((x_max-x_min)/heatmap_resolution)+1, int((y_max-y_min)/heatmap_resolution)+1, int((z_max-z_min)/heatmap_resolution)+1)
+
+heatmap = np.zeros(heatmap_shape)
+for i in range(heatmap_shape[0]):
+	for j in range(heatmap_shape[1]):
+		for k in range(heatmap_shape[2]):
+			x = x_min + (i * heatmap_resolution)
+			y = y_min + (j * heatmap_resolution)
+			z = z_min + (k * heatmap_resolution)
+			dists = np.linalg.norm(test_joints[frame] - np.array([x, y, z]), axis=1)**2
+			heatmap[i, j, k] = 1 / (1 + np.min(dists))
+
+# Verify that the heatmap is good
+fig = plt.figure()
+ax = fig.add_subplot(111, projection="3d")
+ax.plot(test_joints[frame,:,0], test_joints[frame,:,1], test_joints[frame,:,2])
+ax.set_xlim((x_min, x_max))
+ax.set_ylim((y_min, y_max))
+ax.set_zlim((z_min, z_max))
+
+points = []
+for i in range(heatmap_shape[0]):
+	for j in range(heatmap_shape[1]):
+		for k in range(heatmap_shape[2]):
+			if i % 5 == 0 and j % 5 == 0 and k % 5 == 0:
+				if heatmap[i,j,k] > 0.1:
+					x = x_min + (i * heatmap_resolution)
+					y = y_min + (j * heatmap_resolution)
+					z = z_min + (k * heatmap_resolution)
+					points.append([x, y, z])
+points = np.array(points)
+ax.scatter(points[:,0], points[:,1], points[:,2])
+
+mng = plt.get_current_fig_manager()
+mng.resize(*mng.window.maxsize())
+plt.show()
