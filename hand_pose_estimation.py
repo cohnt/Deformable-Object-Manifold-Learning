@@ -252,7 +252,7 @@ for i in range(heatmap_shape[0]):
 			y = y_min + (j * heatmap_resolution)
 			z = z_min + (k * heatmap_resolution)
 			dists = np.linalg.norm(test_joints[frame] - np.array([x, y, z]), axis=1)**2
-			heatmap[i, j, k] = 1 / (1 + np.min(dists))
+			heatmap[i, j, k] = 1 / (1 + 2 * np.min(dists))
 
 # Verify that the heatmap is good
 # fig = plt.figure()
@@ -292,15 +292,16 @@ class Particle():
 			self.orien = special_ortho_group.rvs(3)
 		else:
 			self.orien = orien
-		
+
+		self.num_points = num_points_to_track
+
 		if deformation is None:
 			deformation_ind = np.random.randint(0, len(train_joints))
 			self.deformation = embedding[deformation_ind]
+			self.points = train_joints[deformation_ind]
 		else:
 			self.deformation = deformation
-
-		self.num_points = num_points_to_track
-		self.compute_points()
+			self.compute_points()
 
 		self.raw_weight = None
 		self.normalized_weight = None
