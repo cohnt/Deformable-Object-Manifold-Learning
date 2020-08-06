@@ -324,9 +324,9 @@ class Particle():
 	def draw(self, ax, color, size=2):
 		draw_pose(ax, self.points, color, size)
 
-num_particles = 1000
+num_particles = 100
 exploration_factor = 0.25
-particles = [Particle() for i in range(num_particles)]
+particles = [Particle(xyz=test_joints[frame,base_joint]) for i in range(num_particles)]
 iter_num = 0
 
 def random_small_rotation(dimension, variance=None):
@@ -351,9 +351,9 @@ plt.draw()
 plt.pause(0.001)
 
 
-xyz_var = 10
+xyz_var = 0
 orien_var = 5
-deformation_var = 10
+deformation_var = 25
 
 while True:
 	iter_num = iter_num + 1
