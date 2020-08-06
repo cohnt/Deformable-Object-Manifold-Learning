@@ -239,7 +239,7 @@ print x_min, x_max
 print y_min, y_max
 print z_min, z_max
 
-heatmap_resolution = 1
+heatmap_resolution = 0.5
 heatmap_n_decimals = int(-np.log10(heatmap_resolution))
 zero_index = -np.array([x_min/heatmap_resolution, y_min/heatmap_resolution, z_min/heatmap_resolution], dtype=int)
 heatmap_shape = (int((x_max-x_min)/heatmap_resolution)+1, int((y_max-y_min)/heatmap_resolution)+1, int((z_max-z_min)/heatmap_resolution)+1)
@@ -267,7 +267,7 @@ for i in range(heatmap_shape[0]):
 # 	for j in range(heatmap_shape[1]):
 # 		for k in range(heatmap_shape[2]):
 # 			if i % 5 == 0 and j % 5 == 0 and k % 5 == 0:
-# 				if heatmap[i,j,k] > 0.1:
+# 				if heatmap[i,j,k] > 0.05:
 # 					x = x_min + (i * heatmap_resolution)
 # 					y = y_min + (j * heatmap_resolution)
 # 					z = z_min + (k * heatmap_resolution)
