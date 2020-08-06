@@ -19,6 +19,9 @@ halfResY = yRes/2
 coeffX = 588.036865
 coeffY = 587.075073
 n_train = 500
+base_joint = 35
+dir_joint_1 = 32
+dir_joint_2 = 33
 
 print "Loading dataset..."
 
@@ -83,11 +86,12 @@ def parse_16_bit_depth(image):
 # 	plt.pause(1)
 
 # Center and rotate the data, in preparation for manifold learning
-train_uvd_centered = train_joints[:,:,:] - np.repeat(train_joints[:,0,:].reshape(train_joints.shape[0], 1, train_joints.shape[2]), train_joints.shape[1], axis=1)
+train_uvd_centered = train_joints[:,:,:] - np.repeat(train_joints[:,base_joint,:].reshape(train_joints.shape[0], 1, train_joints.shape[2]), train_joints.shape[1], axis=1)
 train_uvd_rotated = np.zeros(train_uvd_centered.shape)
 for i in range(len(train_uvd_centered)):
 	# https://math.stackexchange.com/a/476311
-	a = train_uvd_centered[i,-1,:] / np.linalg.norm(train_uvd_centered[i,-1,:])
+	dir_vec_1 = train_uvd_centered[i,dir_joint_1,:]
+	a = dir_vec_1 / np.linalg.norm(dir_vec_1)
 	b = np.array([1, 0, 0])
 	v = np.cross(a, b)
 	s = np.linalg.norm(v)
@@ -100,6 +104,22 @@ for i in range(len(train_uvd_centered)):
 	R = np.eye(3) + vx + np.dot(vx, vx)*(1 / (1+c))
 	for j in range(len(train_uvd_centered[i])):
 		train_uvd_rotated[i,j,:] = np.matmul(R, train_uvd_centered[i,j,:])
+
+	dir_vec_2 = train_uvd_rotated[i,dir_joint_2,:].copy()
+	dir_vec_2[0] = 0
+	a = dir_vec_2 / np.linalg.norm(dir_vec_2)
+	b = np.array([0, 1, 0])
+	v = np.cross(a, b)
+	s = np.linalg.norm(v)
+	c = np.dot(a, b)
+	vx = np.array([
+		[0, -v[2], v[1]],
+		[v[2], 0, -v[0]],
+		[-v[1], v[0], 0]
+	])
+	R = np.eye(3) + vx + np.dot(vx, vx)*(1 / (1+c))
+	for j in range(len(train_uvd_rotated[i])):
+		train_uvd_rotated[i,j,:] = np.matmul(R, train_uvd_rotated[i,j,:])
 
 mfd_xlims = (np.min(train_uvd_rotated[:,:,0]), np.max(train_uvd_rotated[:,:,0]))
 mfd_ylims = (np.min(train_uvd_rotated[:,:,1]), np.max(train_uvd_rotated[:,:,1]))
@@ -119,6 +139,18 @@ xlim = axes[0].get_xlim()
 ylim = axes[0].get_ylim()
 
 # Make the interactive plot
+
+def draw_pose(ax, pose, color, label=False):
+	ax.plot(pose[0:6,0], pose[0:6,1], pose[0:6,2], color=color)
+	ax.plot(pose[6:12,0], pose[6:12,1], pose[6:12,2], color=color)
+	ax.plot(pose[12:18,0], pose[12:18,1], pose[12:18,2], color=color)
+	ax.plot(pose[18:24,0], pose[18:24,1], pose[18:24,2], color=color)
+	ax.plot(pose[24:29,0], pose[24:29,1], pose[24:29,2], color=color)
+	ax.scatter(pose[29:,0], pose[29:,1], pose[29:,2], color=color)
+	if label:
+		for i in range(pose.shape[0]):
+			ax.text(pose[i,0], pose[i,1], pose[i,2], i)
+
 def hover(event):
 	xy = np.array([event.xdata, event.ydata])
 
@@ -147,21 +179,18 @@ def hover(event):
 		b = np.vstack((xy.reshape(-1, 1), np.ones((1, 1))))
 		b_coords = np.linalg.solve(A, b)
 		b = np.asarray(b_coords).flatten()
-		print "b_coords", b, np.sum(b_coords)
+		# print "b_coords", b, np.sum(b_coords)
 
 		# Interpolate the deformation
 		mult_vec = np.zeros(len(train_uvd_flattened))
 		mult_vec[simplex_indices] = b
 		curve = np.sum(np.matmul(np.diag(mult_vec), train_uvd_flattened), axis=0).reshape(-1,3)
+		print curve[dir_joint_1], curve[dir_joint_2]
 		# print "curve", curve
 		axes[1].clear()
-		axes[1].view_init(30, 225)
-		axes[1].plot(curve[0:6,0], curve[0:6,1], curve[0:6,2])
-		axes[1].plot(curve[6:12,0], curve[6:12,1], curve[6:12,2])
-		axes[1].plot(curve[12:18,0], curve[12:18,1], curve[12:18,2])
-		axes[1].plot(curve[18:24,0], curve[18:24,1], curve[18:24,2])
-		axes[1].plot(curve[24:29,0], curve[24:29,1], curve[24:29,2])
-		axes[1].scatter(curve[29:,0], curve[29:,1], curve[29:,2])
+		# axes[1].view_init(30, 225)
+		axes[1].view_init(90, 90)
+		draw_pose(axes[1], curve, color=None, label=True)
 		axes[1].set_xlim(mfd_xlims)
 		axes[1].set_ylim(mfd_ylims)
 		axes[1].set_zlim(mfd_zlims)
@@ -225,7 +254,7 @@ for i in range(heatmap_shape[0]):
 # Verify that the heatmap is good
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
-ax.plot(test_joints[frame,:,0], test_joints[frame,:,1], test_joints[frame,:,2])
+draw_pose(ax, test_joints[frame], color="black", label=True)
 ax.set_xlim((x_min, x_max))
 ax.set_ylim((y_min, y_max))
 ax.set_zlim((z_min, z_max))
@@ -293,14 +322,6 @@ class Particle():
 
 	def draw(self, ax, color):
 		draw_pose(ax, self.points, color)
-
-def draw_pose(ax, pose, color):
-	ax.plot(pose[0:6,0], pose[0:6,1], pose[0:6,2], color=color)
-	ax.plot(pose[6:12,0], pose[6:12,1], pose[6:12,2], color=color)
-	ax.plot(pose[12:18,0], pose[12:18,1], pose[12:18,2], color=color)
-	ax.plot(pose[18:24,0], pose[18:24,1], pose[18:24,2], color=color)
-	ax.plot(pose[24:29,0], pose[24:29,1], pose[24:29,2], color=color)
-	ax.scatter(pose[29:,0], pose[29:,1], pose[29:,2], color=color)
 
 num_particles = 2000
 exploration_factor = 0.1
