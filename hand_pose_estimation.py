@@ -296,9 +296,12 @@ class Particle():
 		self.num_points = num_points_to_track
 
 		if deformation is None:
-			deformation_ind = np.random.randint(0, len(train_joints))
+			deformation_ind = np.random.randint(0, len(train_uvd_flattened))
 			self.deformation = embedding[deformation_ind]
-			self.points = train_joints[deformation_ind]
+			raw_points = train_uvd_rotated[deformation_ind]
+			rotated_points = np.matmul(self.orien, raw_points.T)
+			self.points = rotated_points + np.asarray(self.xyz).reshape(-1, 1)
+			self.points = self.points.T
 		else:
 			self.deformation = deformation
 			self.compute_points()
