@@ -399,14 +399,14 @@ while True:
 		ax.set_zlabel('Z axis')
 		plt.draw()
 		plt.pause(0.001)
-		plt.savefig("iteration%02d.png" % iter_num)
+		plt.savefig("iteration%03d.png" % iter_num)
 
-		if iter_num >= 50:
+		if iter_num >= 100:
 			for idx, angle in enumerate(np.arange(-60+10, 300+360, 10)):
 				ax.view_init(30, angle)
 				plt.draw()
 				plt.pause(.001)
-				plt.savefig("iteration%02d.png" % (iter_num + idx + 1))
+				plt.savefig("iteration%03d.png" % (iter_num + idx + 1))
 			break
 		# plt.close(fig)
 		# plt.show()
@@ -456,4 +456,4 @@ while True:
 		p.compute_points()
 
 import os
-os.system('ffmpeg -f image2 -r 1/0.1 -i iteration\%02d.png -c:v libx264 -pix_fmt yuv420p out.mp4')
+os.system('ffmpeg -f image2 -r 1/0.1 -i iteration\%03d.png -c:v libx264 -pix_fmt yuv420p out.mp4')
