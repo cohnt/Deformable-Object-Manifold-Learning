@@ -252,7 +252,7 @@ for i in range(heatmap_shape[0]):
 			y = y_min + (j * heatmap_resolution)
 			z = z_min + (k * heatmap_resolution)
 			dists = np.linalg.norm(test_joints[frame] - np.array([x, y, z]), axis=1)**2
-			heatmap[i, j, k] = 1 / (1 + 2 * np.min(dists))
+			heatmap[i, j, k] = 1 / (1 + np.min(dists))
 
 # Verify that the heatmap is good
 # fig = plt.figure()
@@ -327,8 +327,8 @@ class Particle():
 	def draw(self, ax, color, size=2, label=False):
 		draw_pose(ax, self.points, color, size, label=label)
 
-num_particles = 1000
-exploration_factor = 0.1
+num_particles = 500
+exploration_factor = 0.25
 particles = [Particle(xyz=test_joints[frame,base_joint]) for i in range(num_particles)]
 iter_num = 0
 
@@ -421,7 +421,7 @@ while True:
 		                             orien=particles[chkIdx].orien,
 		                             deformation=particles[chkIdx].deformation))
 	for i in range(len(newParticles), num_particles):
-		newParticles.append(Particle())
+		newParticles.append(Particle(xyz=particles[max_normalized_weight_ind].xyz))
 
 	# Add noise
 	particles = newParticles
