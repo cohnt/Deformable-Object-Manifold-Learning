@@ -329,7 +329,7 @@ class Particle():
 
 num_particles = 500
 exploration_factor = 0.25
-particles = [Particle() for i in range(num_particles)]
+particles = [Particle(xyz=test_joints[frame,base_joint]) for i in range(num_particles)]
 iter_num = 0
 
 def random_small_rotation(dimension, variance=None):
@@ -420,12 +420,14 @@ while True:
 		newParticles.append(Particle(xyz=particles[chkIdx].xyz,
 		                             orien=particles[chkIdx].orien,
 		                             deformation=particles[chkIdx].deformation))
-	if iter_num > 10:
-		for i in range(len(newParticles), num_particles):
-			newParticles.append(Particle(xyz=particles[max_normalized_weight_ind].xyz, orien=particles[max_normalized_weight_ind].orien))
-	else:
-		for i in range(len(newParticles), num_particles):
-			newParticles.append(Particle())
+	# if iter_num > 10:
+	# 	for i in range(len(newParticles), num_particles):
+	# 		newParticles.append(Particle(xyz=particles[max_normalized_weight_ind].xyz, orien=particles[max_normalized_weight_ind].orien))
+	# else:
+	# 	for i in range(len(newParticles), num_particles):
+	# 		newParticles.append(Particle())
+	for i in range(len(newParticles), num_particles):
+		newParticles.append(Particle(xyz=particles[max_normalized_weight_ind].xyz, orien=particles[max_normalized_weight_ind].orien))
 
 	# Add noise
 	particles = newParticles
