@@ -204,7 +204,10 @@ def draw_pose(ax, pose, color=None, size=2, label=False):
 # mng.resize(*mng.window.maxsize())
 # plt.show()
 
-def compute_deformation(interpolator, deformation_coords):
+def compute_deformation(interpolator, deformation_coords, deformation_ind=None):
+	if not (deformation_ind is None):
+		return train_uvd_flattened[deformation_ind].reshape(-1,3)
+
 	simplex_num = interpolator.find_simplex(deformation_coords)
 	if simplex_num != -1:
 		simplex_indices = interpolator.simplices[simplex_num]
@@ -223,6 +226,7 @@ def compute_deformation(interpolator, deformation_coords):
 		return curve
 	else:
 		print "Error: outside of convex hull!"
+		print deformation_ind
 		raise ValueError
 
 # frame = np.random.choice(test_joints.shape[0])
@@ -280,7 +284,7 @@ for i in range(heatmap_shape[0]):
 # plt.show()
 
 class Particle():
-	def __init__(self, xyz=None, orien=None, deformation=None):
+	def __init__(self, xyz=None, orien=None, deformation=None, deformation_ind=None):
 		if xyz is None:
 			self.xyz = (np.random.uniform(x_min, x_max),
 			            np.random.uniform(y_min, y_max),
@@ -296,21 +300,17 @@ class Particle():
 		self.num_points = num_points_to_track
 
 		if deformation is None:
-			deformation_ind = np.random.randint(0, len(train_uvd_flattened))
-			self.deformation = embedding[deformation_ind]
-			raw_points = train_uvd_rotated[deformation_ind]
-			rotated_points = np.matmul(self.orien, raw_points.T)
-			self.points = rotated_points + np.asarray(self.xyz).reshape(-1, 1)
-			self.points = self.points.T
+			self.deformation_ind = np.random.randint(0, len(train_uvd_flattened))
+			self.deformation = embedding[self.deformation_ind]
 		else:
+			self.deformation_ind = deformation_ind
 			self.deformation = deformation
-			self.compute_points()
 
 		self.raw_weight = None
 		self.normalized_weight = None
 
 	def compute_points(self):
-		raw_points = compute_deformation(interpolator, self.deformation)
+		raw_points = compute_deformation(interpolator, self.deformation, self.deformation_ind)
 		rotated_points = np.matmul(self.orien, raw_points.T)
 		self.points = rotated_points + np.asarray(self.xyz).reshape(-1, 1)
 		self.points = self.points.T
@@ -358,7 +358,7 @@ plt.pause(0.001)
 
 
 xyz_var = 0
-orien_var = 10
+orien_var = 30
 deformation_var = 50
 
 while True:
@@ -366,9 +366,11 @@ while True:
 	print "Iteration %d" % iter_num
 
 	# Weight particles
+	print "\tWeighting..."
 	normalization_factor = 0
 	weights = []
 	for p in particles:
+		p.compute_points()
 		w = p.compute_raw_weight(heatmap)
 		weights.append(w)
 		normalization_factor = normalization_factor + w
@@ -410,6 +412,7 @@ while True:
 		# plt.show()
 
 	# Resample
+	print "\tResampling..."
 	newParticles = []
 	cs = np.cumsum(normalized_weights)
 	step = 1/float((num_particles * (1-exploration_factor))+1)
@@ -422,7 +425,8 @@ while True:
 		chkVal = chkVal + step
 		newParticles.append(Particle(xyz=particles[chkIdx].xyz,
 		                             orien=particles[chkIdx].orien,
-		                             deformation=particles[chkIdx].deformation))
+		                             deformation=particles[chkIdx].deformation,
+		                             deformation_ind=particles[chkIdx].deformation_ind))
 	# if iter_num > 10:
 	# 	for i in range(len(newParticles), num_particles):
 	# 		newParticles.append(Particle(xyz=particles[max_normalized_weight_ind].xyz, orien=particles[max_normalized_weight_ind].orien))
@@ -433,6 +437,7 @@ while True:
 		newParticles.append(Particle(xyz=particles[max_normalized_weight_ind].xyz, orien=particles[max_normalized_weight_ind].orien))
 
 	# Add noise
+	print "\tPropagating..."
 	particles = newParticles
 	for i in range(1, len(particles)):
 		p = particles[i]
@@ -445,6 +450,7 @@ while True:
 			delta = np.random.multivariate_normal(np.zeros(embedding_target_dim), deformation_var*np.eye(embedding_target_dim))
 			if interpolator.find_simplex(p.deformation + delta) != -1:
 				p.deformation = p.deformation + delta
+				p.deformation_ind = None
 				break
 
 		p.compute_points()
