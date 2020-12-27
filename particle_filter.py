@@ -72,7 +72,11 @@ class ParticleFilter():
 		self.particles = np.array(new_particles)
 
 	def diffuse(self):
-		for i in range(self.n_particles):
+		if self.keep_best:
+			start = 1
+		else:
+			start = 0
+		for i in range(start, self.n_particles):
 			self.particles[i] = self.Diffuser(self.particles[i])
 
 def test_particle_filter():
