@@ -30,33 +30,50 @@ cc = coordinate_chart.CoordinateChart(data, target_dim, neighbors_k)
 
 # Particle filter setup
 def likelihood(point):
-	source_dim_point = cc.inverse_mapping([point])[0]
+	source_dim_point = cc.single_inverse_mapping(point)
 	return 1 / (1 + np.linalg.norm(source_dim_point - ground_truth))
 
 def diffuser(point):
-	return point + np.random.multivariate_normal(np.zeros(target_dim), pos_var*np.eye(target_dim))
+	while True:
+		delta = np.random.multivariate_normal(np.zeros(target_dim), pos_var*np.eye(target_dim))
+		if cc.check_domain([point + delta])[0]:
+			return point + delta
 
 pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, True, cc.uniform_sample, likelihood, diffuser)
+
+# Create 3D axes for display
+x_min = y_min = z_min = -1
+x_max = y_max = z_max = 1
+fig = plt.figure()
+ax = fig.add_subplot(111, projection="3d")
+ax.set_xlim(x_min, x_max)
+ax.set_ylim(y_min, y_max)
+ax.set_zlim(z_min, z_max)
+ax.view_init(30, 285)
+plt.draw()
+plt.pause(0.1)
 
 while True:
 	pf.weight()
 	mle = pf.predict_mle()
 	mean = pf.predict_mean()
 
-	manifold_particles = 
+	manifold_particles = cc.inverse_mapping(pf.particles)
+	manifold_mle = cc.single_inverse_mapping(mle)
+	manifold_mean = cc.single_inverse_mapping(mean)
 
+	# Display
+	ax.clear()
+	ax.set_xlim(x_min, x_max)
+	ax.set_ylim(y_min, y_max)
+	ax.set_zlim(z_min, z_max)
+	ax.view_init(30, 285)
+	ax.scatter(manifold_particles[:,0], manifold_particles[:,1], manifold_particles[:,2], cmap=plt.cm.cool, c=pf.weights, s=8**2)
+	ax.scatter([manifold_mle[0]], [manifold_mle[1]], [manifold_mle[2]], color="black", marker="*", s=8**2)
+	ax.scatter([manifold_mean[0]], [manifold_mean[1]], [manifold_mean[2]], color="black", marker="x", s=8**2)
+	ax.scatter([ground_truth[0]], [ground_truth[1]], [ground_truth[2]], color="green", marker="+", s=8**2)
+	plt.draw()
+	plt.pause(0.1)
 
-
-
-		pf.weight()
-		mle = pf.predict_mle()
-		mean = pf.predict_mean()
-		plt.scatter(pf.particles[:,0], pf.particles[:,1], c=pf.weights)
-		plt.scatter([mle[0]], [mle[1]], marker="D", color="black")
-		plt.scatter([mean[0]], [mean[1]], marker="X", color="black")
-		plt.scatter([0], [0], marker="*", color="red")
-		plt.xlim(-1, 1)
-		plt.ylim(-1, 1)
-		plt.show()
-		pf.resample()
-		pf.diffuse()
+	pf.resample()
+	pf.diffuse()
