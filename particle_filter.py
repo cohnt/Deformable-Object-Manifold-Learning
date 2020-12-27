@@ -52,7 +52,7 @@ class ParticleFilter():
 		if self.keep_best:
 			n_importance_resampling = n_importance_resampling - 1
 			new_particles.append(self.particles[self.max_weight_ind].copy())
-		step_size = 1/float(n_importance_resampling)
+		step_size = 1/float(n_importance_resampling+1)
 
 		# Importance resampling
 		chkVal = step_size
