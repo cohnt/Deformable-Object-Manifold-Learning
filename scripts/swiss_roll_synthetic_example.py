@@ -1,12 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
+from scipy.stats import multivariate_normal
 
 import coordinate_chart
 import particle_filter
 
 # Parameters
-train_resolution = 0.2
+train_resolution = 0.15
 target_dim = 2
 neighbors_k = 5
 n_particles = 200
@@ -31,7 +32,7 @@ cc = coordinate_chart.CoordinateChart(data, target_dim, neighbors_k)
 # Particle filter setup
 def likelihood(point):
 	source_dim_point = cc.single_inverse_mapping(point)
-	return 1 / (1 + np.linalg.norm(source_dim_point - ground_truth))
+	return multivariate_normal.pdf(source_dim_point, mean=ground_truth, cov=0.5*np.eye(len(ground_truth)))
 
 def diffuser(point):
 	while True:
@@ -69,9 +70,9 @@ while True:
 	ax.set_zlim(z_min, z_max)
 	ax.view_init(30, 285)
 	ax.scatter(manifold_particles[:,0], manifold_particles[:,1], manifold_particles[:,2], cmap=plt.cm.cool, c=pf.weights, s=8**2)
-	ax.scatter([manifold_mle[0]], [manifold_mle[1]], [manifold_mle[2]], color="black", marker="*", s=8**2)
-	ax.scatter([manifold_mean[0]], [manifold_mean[1]], [manifold_mean[2]], color="black", marker="x", s=8**2)
-	ax.scatter([ground_truth[0]], [ground_truth[1]], [ground_truth[2]], color="green", marker="+", s=8**2)
+	ax.scatter([manifold_mle[0]], [manifold_mle[1]], [manifold_mle[2]], color="black", marker="*", s=20**2)
+	ax.scatter([manifold_mean[0]], [manifold_mean[1]], [manifold_mean[2]], color="black", marker="x", s=20**2)
+	ax.scatter([ground_truth[0]], [ground_truth[1]], [ground_truth[2]], color="green", marker="+", s=20**2)
 	plt.draw()
 	plt.pause(0.1)
 
