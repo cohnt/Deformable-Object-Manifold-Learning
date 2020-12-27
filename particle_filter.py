@@ -5,7 +5,7 @@ class ParticleFilter():
 		# Particles will simply be stored as numpy arrays (of size "dimension").
 		# exploration_factor is the fraction (between 0 and 1) of particles which are randomly sampled at each iteration.
 		# keep_best is a boolean that determines whether or not the best particle is kept without any diffusion noise.
-		# RandomSampler is a function which returns a random valid particle.
+		# RandomSampler is a function which returns a list of n random valid particles.
 		# Likelihood is a function which takes in a particle, and returns the likelihood that the particle is the ground truth.
 		# Diffuser is a function which takes in a particle, and returns a new particle with added noise.
 		self.dimension = dimension
@@ -13,6 +13,7 @@ class ParticleFilter():
 		self.exploration_factor = exploration_factor
 		self.keep_best = keep_best
 		self.RandomSampler = RandomSampler
+		self.SingleSample = lambda : self.RandomSampler(1)[0]
 		self.Likelihood = Likelihood
 		self.Diffuser = Diffuser
 
@@ -20,7 +21,7 @@ class ParticleFilter():
 
 	def init_particles(self):
 		# Create random initial particles.
-		self.particles = np.array([self.RandomSampler() for _ in range(self.n_particles)])
+		self.particles = self.RandomSampler(self.n_particles)
 		self.weights = np.zeros(self.n_particles)
 		self.max_weight_ind = -1
 
@@ -66,7 +67,7 @@ class ParticleFilter():
 
 		# Exploration particles
 		while(len(new_particles) < self.n_particles):
-			new_particles.append(self.RandomSampler())
+			new_particles.append(self.SingleSample())
 
 		self.particles = np.array(new_particles)
 
@@ -79,8 +80,8 @@ def test_particle_filter():
 	n_particles = 25
 	exploration_factor = 0.1
 	keep_best = True
-	def RS():
-		return (np.random.rand(2) * 2) - 1
+	def RS(n):
+		return (np.random.rand(n,2) * 2) - 1
 	def L(x):
 		return 1 / (1 + np.linalg.norm(x))
 	eps = 0.05
