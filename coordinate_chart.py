@@ -61,7 +61,7 @@ class CoordinateChart():
 					break
 		return points
 
-def test():
+def test_coordinate_chart():
 	n = 200
 	higher_dim = 3
 	source_dim = 2
@@ -100,4 +100,4 @@ def test():
 	plt.show()
 
 if __name__ == "__main__":
-	test()
+	test_coordinate_chart()
