@@ -21,13 +21,13 @@ class ParticleFilter():
 	def init_particles(self):
 		# Create random initial particles.
 		self.particles = np.array([self.RandomSampler() for _ in range(self.n_particles)])
-		self.weights = np.zeros(n_particles)
+		self.weights = np.zeros(self.n_particles)
 		self.max_weight_ind = -1
 
 	def weight(self):
 		# Compute weights for all particles, and normalize weights so their sum is 1.
 		# Determine the highest weight particle.
-		for i in range(n_particles):
+		for i in range(self.n_particles):
 			self.weights[i] = self.Likelihood(self.particles[i])
 		normalizaion_factor = np.sum(self.weights)
 		self.weights = self.weights / normalizaion_factor
@@ -47,21 +47,21 @@ class ParticleFilter():
 		new_particles = []
 
 		# Determine step size
-		n_importance_resampling = self.n_particles * (1-exploration_factor)
+		n_importance_resampling = self.n_particles * (1-self.exploration_factor)
 		if self.keep_best:
 			n_importance_resampling = n_importance_resampling - 1
 			new_particles.append(self.particles[self.max_weight_ind].copy())
 		step_size = 1/float(n_importance_resampling)
 
 		# Importance resampling
-		chkVal = step
+		chkVal = step_size
 		chkIdx = 0
 		cs = np.cumsum(self.weights)
-		for i in range(n_importance_resampling):
+		for i in range(int(n_importance_resampling)):
 			# Find the next sample
 			while cs[chkIdx] < chkVal:
 				chkIdx = chkIdx + 1
-			chkVal = chkVal + step
+			chkVal = chkVal + step_size
 			new_particles.append(self.particles[chkIdx].copy())
 
 		# Exploration particles
@@ -72,4 +72,36 @@ class ParticleFilter():
 
 	def diffuse(self):
 		for i in range(self.n_particles):
-			self.particles[i] = Diffuser(self.particles[i])
+			self.particles[i] = self.Diffuser(self.particles[i])
+
+def test_particle_filter():
+	dimension = 2
+	n_particles = 25
+	exploration_factor = 0.1
+	keep_best = True
+	def RS():
+		return (np.random.rand(2) * 2) - 1
+	def L(x):
+		return 1 / (1 + np.linalg.norm(x))
+	eps = 0.05
+	def D(x):
+		return x + ((np.random.rand(2) * 2 * eps) - eps)
+	pf = ParticleFilter(dimension, n_particles, exploration_factor, keep_best, RS, L, D)
+
+	import matplotlib.pyplot as plt
+	while True:
+		pf.weight()
+		mle = pf.predict_mle()
+		mean = pf.predict_mean()
+		plt.scatter(pf.particles[:,0], pf.particles[:,1], c=pf.weights)
+		plt.scatter([mle[0]], [mle[1]], marker="D", color="black")
+		plt.scatter([mean[0]], [mean[1]], marker="X", color="black")
+		plt.scatter([0], [0], marker="*", color="red")
+		plt.xlim(-1, 1)
+		plt.ylim(-1, 1)
+		plt.show()
+		pf.resample()
+		pf.diffuse()
+
+if __name__ == "__main__":
+	test_particle_filter()
