@@ -22,29 +22,32 @@ class CoordinateChart():
 		# This function will return a numpy array of shape [*,source_dim]
 		mapped_points = np.zeros((len(points), self.source_dim))
 		for i in range(len(points)):
-			# Simplex lookup
-			point = points[i]
-			simplex_num = self.tri.find_simplex(point)
-			if simplex_num == -1:
-				print "Error: coordinate outside of convex hull!"
-				print point
-				raise ValueError
-			simplex_indices = self.tri.simplices[simplex_num]
-			simplex = self.tri.points[simplex_indices]
-
-			# Write as convex combination of simplex vertices
-			A = np.vstack((simplex.T, np.ones((1, self.target_dim+1))))
-			b = np.vstack((point.reshape(-1, 1), np.ones((1, 1))))
-			convex_comb = np.linalg.solve(A, b)
-			convex_comb = np.asarray(convex_comb).flatten()
-
-			# Interpolate to the higher dimensional space
-			factors = np.zeros(len(self.train_data))
-			factors[simplex_indices] = convex_comb
-			factors_mat = np.diag(factors)
-			mapped_point = np.sum(np.matmul(factors_mat, self.train_data), axis=0).flatten()
-			mapped_points[i,:] = mapped_point
+			mapped_points[i,:] = self.single_inverse_mapping(points[i])
 		return mapped_points
+
+	def single_inverse_mapping(self, point):
+		# Simplex lookup
+		simplex_num = self.tri.find_simplex(point)
+		if simplex_num == -1:
+			print "Error: coordinate outside of convex hull!"
+			print point
+			raise ValueError
+		simplex_indices = self.tri.simplices[simplex_num]
+		simplex = self.tri.points[simplex_indices]
+
+		# Write as convex combination of simplex vertices
+		A = np.vstack((simplex.T, np.ones((1, self.target_dim+1))))
+		b = np.vstack((point.reshape(-1, 1), np.ones((1, 1))))
+		convex_comb = np.linalg.solve(A, b)
+		convex_comb = np.asarray(convex_comb).flatten()
+
+		# Interpolate to the higher dimensional space
+		factors = np.zeros(len(self.train_data))
+		factors[simplex_indices] = convex_comb
+		factors_mat = np.diag(factors)
+		mapped_point = np.sum(np.matmul(factors_mat, self.train_data), axis=0).flatten()
+
+		return mapped_point
 
 	def check_domain(self, points):
 		simplex_nums = self.tri.find_simplex(points)
