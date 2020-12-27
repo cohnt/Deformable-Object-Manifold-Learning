@@ -12,7 +12,7 @@ target_dim = 2
 neighbors_k = 5
 n_particles = 200
 exploration_factor = 0.1
-pos_var = 0.005
+pos_var = 0.001
 
 # Create the swiss roll dataset
 # Note that we're not using random sampling, but rather evenly distributing points along the manifold
@@ -54,6 +54,7 @@ ax.view_init(30, 285)
 plt.draw()
 plt.pause(0.1)
 
+iter_num = 0
 while True:
 	pf.weight()
 	mle = pf.predict_mle()
@@ -62,6 +63,7 @@ while True:
 	manifold_particles = cc.inverse_mapping(pf.particles)
 	manifold_mle = cc.single_inverse_mapping(mle)
 	manifold_mean = cc.single_inverse_mapping(mean)
+	print "Iteraton %d: predicted" % iter_num, manifold_mle, "\t\tGround truth:", ground_truth, "\t\tError:", np.linalg.norm(manifold_mle - ground_truth)
 
 	# Display
 	ax.clear()
@@ -78,3 +80,5 @@ while True:
 
 	pf.resample()
 	pf.diffuse()
+
+	iter_num = iter_num + 1
