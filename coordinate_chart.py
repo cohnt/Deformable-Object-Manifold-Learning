@@ -20,7 +20,7 @@ class CoordinateChart():
 	def inverse_mapping(self, points):
 		# points should be a numpy array of shape [*,target_dim]
 		# This function will return a numpy array of shape [*,source_dim]
-		mapped_points = np.zeros(len(points), self.source_dim)
+		mapped_points = np.zeros((len(points), self.source_dim))
 		for i in range(len(points)):
 			# Simplex lookup
 			point = points[i]
@@ -39,7 +39,7 @@ class CoordinateChart():
 			convex_comb = np.asarray(convex_comb).flatten()
 
 			# Interpolate to the higher dimensional space
-			factors = np.zeros(self.train_data.length)
+			factors = np.zeros(len(self.train_data))
 			factors[simplex_indices] = convex_comb
 			factors_mat = np.diag(factors)
 			mapped_point = np.sum(np.matmul(factors_mat, self.train_data), axis=0).flatten()
@@ -51,11 +51,53 @@ class CoordinateChart():
 		return simplex_nums != -1
 
 	def uniform_sample(self, n):
-		points = np.zeros((n,target_dim))
+		points = np.zeros((n,self.target_dim))
 		for i in range(n):
 			while True:
-				start = np.random.rand(target_dim)
-				point = np.matmul(start, np.diag(self.p2p)) + np.mins
-				if self.check_domain([point]) != [-1]:
+				start = np.random.rand(self.target_dim)
+				point = np.matmul(start, np.diag(self.p2p)) + self.mins
+				if self.check_domain([point])[0]:
 					points[i] = point
 					break
+		return points
+
+def test():
+	n = 200
+	higher_dim = 3
+	source_dim = 2
+	k = 8
+	initial_data = np.random.rand(n,source_dim)
+
+	from scipy.stats import special_ortho_group
+	random_transform = special_ortho_group.rvs(higher_dim)[:,:source_dim]
+	train_data = np.matmul(random_transform, initial_data.T).T
+
+	cc = CoordinateChart(train_data, source_dim, k)
+
+	# Embedding plot
+	import matplotlib.pyplot as plt
+	fig, axes = plt.subplots(1,2)
+	axes[0].scatter(initial_data[:,0], initial_data[:,1], c=initial_data[:,0])
+	axes[1].scatter(cc.embedding[:,0], cc.embedding[:,1], c=initial_data[:,0])
+	plt.show()
+
+	# Check inverse mapping
+	import mpl_toolkits.mplot3d.axes3d
+	fig = plt.figure()
+	ax1 = fig.add_subplot(1, 2, 1, projection="3d")
+	ax2 = fig.add_subplot(1, 2, 2, projection="3d")
+	ax1.scatter(train_data[:,0], train_data[:,1], train_data[:,2], c=initial_data[:,0]);
+	transformed_data = cc.inverse_mapping(cc.embedding)
+	ax2.scatter(transformed_data[:,0], transformed_data[:,1], transformed_data[:,2], c=initial_data[:,0])
+	plt.show()
+
+	# Check random sampling
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	ax.scatter(cc.embedding[:,0], cc.embedding[:,1], color="red")
+	rand_sample = cc.uniform_sample(100)
+	ax.scatter(rand_sample[:,0], rand_sample[:,1], color="blue")
+	plt.show()
+
+if __name__ == "__main__":
+	test()
