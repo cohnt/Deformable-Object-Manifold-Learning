@@ -51,5 +51,11 @@ class CoordinateChart():
 		return simplex_nums != -1
 
 	def uniform_sample(self, n):
-		start = np.random.rand(n,target_dim)
-		return np.matmul(start, np.diag(self.p2p)) + np.mins
+		points = np.zeros((n,target_dim))
+		for i in range(n):
+			while True:
+				start = np.random.rand(target_dim)
+				point = np.matmul(start, np.diag(self.p2p)) + np.mins
+				if self.check_domain([point]) != [-1]:
+					points[i] = point
+					break
