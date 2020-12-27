@@ -13,12 +13,17 @@ class CoordinateChart():
 		self.embedding = self.ism.fit_transform(train_data)
 		self.tri = Delaunay(self.embedding, qhull_options="QJ")
 
+		self.mins = np.min(self.embedding, axis=0)
+		self.maxs = np.max(self.embedding, axis=0)
+		self.p2p = self.maxs - self.mins
+
 	def inverse_mapping(self, points):
 		# points should be a numpy array of shape [*,target_dim]
 		# This function will return a numpy array of shape [*,source_dim]
 		mapped_points = np.zeros(len(points), self.source_dim)
 		for i in range(len(points)):
 			# Simplex lookup
+			point = points[i]
 			simplex_num = self.tri.find_simplex(point)
 			if simplex_num == -1:
 				print "Error: coordinate outside of convex hull!"
@@ -40,3 +45,11 @@ class CoordinateChart():
 			mapped_point = np.sum(np.matmul(factors_mat, self.train_data), axis=0).flatten()
 			mapped_points[i,:] = mapped_point
 		return mapped_points
+
+	def check_domain(self, points):
+		simplex_nums = self.tri.find_simplex(points)
+		return simplex_nums != -1
+
+	def uniform_sample(self, n):
+		start = np.random.rand(n,target_dim)
+		return np.matmul(start, np.diag(self.p2p)) + np.mins
