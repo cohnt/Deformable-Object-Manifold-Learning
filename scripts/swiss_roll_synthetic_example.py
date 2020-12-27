@@ -7,12 +7,14 @@ import coordinate_chart
 import particle_filter
 
 # Parameters
-train_resolution = 0.15
+train_resolution = 0.15 # Distance between each point in the training dataset
 target_dim = 2
 neighbors_k = 5
-n_particles = 200
+n_particles = 25
 exploration_factor = 0.1
-pos_var = 0.001
+pos_var = 0.001 # Variance of the diffusion noise
+pause_length = 1 # How long to pause between each iteration (so we can look at results)
+keep_best = True
 
 # Create the swiss roll dataset
 # Note that we're not using random sampling, but rather evenly distributing points along the manifold
@@ -40,19 +42,20 @@ def diffuser(point):
 		if cc.check_domain([point + delta])[0]:
 			return point + delta
 
-pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, True, cc.uniform_sample, likelihood, diffuser)
+pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, cc.uniform_sample, likelihood, diffuser)
 
 # Create 3D axes for display
 x_min = y_min = z_min = -1
 x_max = y_max = z_max = 1
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
+# Set the perspective
 ax.set_xlim(x_min, x_max)
 ax.set_ylim(y_min, y_max)
 ax.set_zlim(z_min, z_max)
 ax.view_init(30, 285)
 plt.draw()
-plt.pause(0.1)
+plt.pause(pause_length)
 
 iter_num = 0
 while True:
@@ -67,6 +70,7 @@ while True:
 
 	# Display
 	ax.clear()
+	# Set the perspective
 	ax.set_xlim(x_min, x_max)
 	ax.set_ylim(y_min, y_max)
 	ax.set_zlim(z_min, z_max)
@@ -76,7 +80,7 @@ while True:
 	ax.scatter([manifold_mean[0]], [manifold_mean[1]], [manifold_mean[2]], color="black", marker="x", s=20**2)
 	ax.scatter([ground_truth[0]], [ground_truth[1]], [ground_truth[2]], color="green", marker="+", s=20**2)
 	plt.draw()
-	plt.pause(0.1)
+	plt.pause(pause_length)
 
 	pf.resample()
 	pf.diffuse()
