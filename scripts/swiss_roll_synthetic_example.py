@@ -30,6 +30,7 @@ ground_truth = np.array([0.05 * 4 * np.pi, 0.5, 0.0])
 
 # Coordinate chart setup
 cc = coordinate_chart.CoordinateChart(data, target_dim, neighbors_k)
+ground_truth_params = cc.ism.transform(ground_truth.reshape(1,-1))[0]
 
 # Particle filter setup
 def likelihood(point):
@@ -48,12 +49,13 @@ pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor,
 x_min = y_min = z_min = -1
 x_max = y_max = z_max = 1
 fig = plt.figure()
-ax = fig.add_subplot(111, projection="3d")
+ax1 = fig.add_subplot(121, projection="3d")
+ax2 = fig.add_subplot(122)
 # Set the perspective
-ax.set_xlim(x_min, x_max)
-ax.set_ylim(y_min, y_max)
-ax.set_zlim(z_min, z_max)
-ax.view_init(30, 285)
+ax1.set_xlim(x_min, x_max)
+ax1.set_ylim(y_min, y_max)
+ax1.set_zlim(z_min, z_max)
+ax1.view_init(30, 285)
 plt.draw()
 plt.pause(pause_length)
 
@@ -69,16 +71,25 @@ while True:
 	print "Iteraton %d: predicted" % iter_num, manifold_mle, "\t\tGround truth:", ground_truth, "\t\tError:", np.linalg.norm(manifold_mle - ground_truth)
 
 	# Display
-	ax.clear()
+	ax1.clear()
 	# Set the perspective
-	ax.set_xlim(x_min, x_max)
-	ax.set_ylim(y_min, y_max)
-	ax.set_zlim(z_min, z_max)
-	ax.view_init(30, 285)
-	ax.scatter(manifold_particles[:,0], manifold_particles[:,1], manifold_particles[:,2], cmap=plt.cm.cool, c=pf.weights, s=8**2)
-	ax.scatter([manifold_mle[0]], [manifold_mle[1]], [manifold_mle[2]], color="black", marker="*", s=20**2)
-	ax.scatter([manifold_mean[0]], [manifold_mean[1]], [manifold_mean[2]], color="black", marker="x", s=20**2)
-	ax.scatter([ground_truth[0]], [ground_truth[1]], [ground_truth[2]], color="green", marker="+", s=20**2)
+	ax1.set_xlim(x_min, x_max)
+	ax1.set_ylim(y_min, y_max)
+	ax1.set_zlim(z_min, z_max)
+	ax1.view_init(30, 285)
+
+	ax1.scatter(manifold_particles[:,0], manifold_particles[:,1], manifold_particles[:,2], cmap=plt.cm.cool, c=pf.weights, s=8**2)
+	ax1.scatter([manifold_mle[0]], [manifold_mle[1]], [manifold_mle[2]], color="black", marker="*", s=20**2)
+	ax1.scatter([manifold_mean[0]], [manifold_mean[1]], [manifold_mean[2]], color="black", marker="x", s=20**2)
+	ax1.scatter([ground_truth[0]], [ground_truth[1]], [ground_truth[2]], color="green", marker="+", s=20**2)
+
+	ax2.clear()
+	ax2.scatter(cc.embedding[:,0], cc.embedding[:,1], color="grey", s=8**2, marker="s")
+	ax2.scatter(pf.particles[:,0], pf.particles[:,1], cmap=plt.cm.cool, c=pf.weights, s=8**2)
+	ax2.scatter([mle[0]], [mle[1]], color="black", marker="*", s=20**2)
+	ax2.scatter([mean[0]], [mean[1]], color="black", marker="x", s=20**2)
+	ax2.scatter([ground_truth_params[0]], [ground_truth_params[1]], color="green", marker="+", s=20**2)
+
 	plt.draw()
 	plt.pause(pause_length)
 
