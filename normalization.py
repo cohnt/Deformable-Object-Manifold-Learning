@@ -67,6 +67,3 @@ def center_pointcloud(data, centering_idx=0):
 	offset = data[:,[centering_idx],:] # Shape (n_clouds, 1, n_dimension)
 	offset_cloud = np.tile(offset, (1, data.shape[1], 1)) # Shape (n_clouds, n_points, n_dimensions)
 	return data - offset_cloud
-
-data = np.random.rand(6,4,3)
-print normalize_pointcloud_3d(data)
