@@ -18,7 +18,6 @@ def random_small_rotation(dimension, variance=None):
 def rad2deg(r):
 	return r * 180 / np.pi
 
-def plt_show_fullsize():
+def plt_maximize_window():
 	mng = plt.get_current_fig_manager()
 	mng.resize(*mng.window.maxsize())
-	plt.show()
