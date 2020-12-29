@@ -9,7 +9,7 @@ def normalize_pointcloud_2d(data, centering_idx=0, orientation_idx=1):
 	# centering_idx is the index of the point which is centered at 0
 	# orientation_idx is the index of the point used for uniform rotating
 	# These indices must be distinct
-	
+
 	# First, center the data
 	centered_data = center_pointcloud(data, centering_idx)
 
@@ -36,7 +36,27 @@ def normalize_pointcloud_3d(data, centering_idx=0, orientation_idx_1=1, orientat
 	# centering_idx is the index of the point which is centered at 0
 	# orientation_idx_1, orientation_idx_2 are the indices of the points used for uniform rotating
 	# These indices must be distinct, and should be chosen so that they aren't collinear
-	pass
+
+	# Reference: https://math.stackexchange.com/questions/856666/how-can-i-transform-a-3d-triangle-to-xy-plane
+
+	# First, center the data
+	centered_data = center_pointcloud(data, centering_idx)
+
+	# Next, create rotation matrices for each cloud
+	us = centered_data[:,orientation_idx_1]
+	Us = us / np.linalg.norm(us, axis=1).reshape(-1,1)
+	ws = np.cross(us, centered_data[:,orientation_idx_2])
+	Ws = ws / np.linalg.norm(ws, axis=1).reshape(-1,1)
+	Vs = np.cross(Us,Ws)
+	mats = np.swapaxes(np.array([Us, Vs, Ws]).T, 0, 1)
+
+	# Finally, apply the rotation matrices to each cloud
+	# TODO: find a way to vectorize this
+	normalized_data = np.zeros(centered_data.shape)
+	for i in range(centered_data.shape[0]):
+		normalized_data[i,:] = np.matmul(centered_data[i,:], mats[i])
+
+	return normalized_data
 
 def center_pointcloud(data, centering_idx=0):
 	# The data should be of shape (n_clouds, n_points, n_dimensions)
@@ -47,3 +67,6 @@ def center_pointcloud(data, centering_idx=0):
 	offset = data[:,[centering_idx],:] # Shape (n_clouds, 1, n_dimension)
 	offset_cloud = np.tile(offset, (1, data.shape[1], 1)) # Shape (n_clouds, n_points, n_dimensions)
 	return data - offset_cloud
+
+data = np.random.rand(6,4,3)
+print normalize_pointcloud_3d(data)
