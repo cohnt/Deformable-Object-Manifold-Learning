@@ -9,7 +9,25 @@ def normalize_pointcloud_2d(data, centering_idx=0, orientation_idx=1):
 	# centering_idx is the index of the point which is centered at 0
 	# orientation_idx is the index of the point used for uniform rotating
 	# These indices must be distinct
-	pass
+	
+	# First, center the data
+	centered_data = center_pointcloud(data, centering_idx)
+
+	# Next, compute the angle for each point cloud (from the x-axis to orientation_idx)
+	angs = np.arctan2(centered_data[:,orientation_idx,1], centered_data[:,orientation_idx,0])
+
+	# Next, create rotation matrices for each cloud
+	cos = np.cos(-angs)
+	sin = np.sin(-angs)
+	mats = np.swapaxes(np.array([[cos, -sin], [sin, cos]]), 0, 2)
+
+	# Finally, apply the rotation matrices to each cloud
+	# TODO: find a way to vectorize this
+	normalized_data = np.zeros(centered_data.shape)
+	for i in range(centered_data.shape[0]):
+		normalized_data[i,:] = np.matmul(centered_data[i,:], mats[i])
+
+	return normalized_data
 
 def normalize_pointcloud_3d(data, centering_idx=0, orientation_idx_1=1, orientation_idx_2=2):
 	# The data should be of shape (n_clouds, n_points, 3)
