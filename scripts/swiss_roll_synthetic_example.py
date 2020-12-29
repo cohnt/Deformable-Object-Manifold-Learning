@@ -5,6 +5,7 @@ from scipy.stats import multivariate_normal
 
 import coordinate_chart
 import particle_filter
+import utility
 
 # Parameters
 train_resolution = 0.15 # Distance between each point in the training dataset
@@ -56,6 +57,7 @@ ax1.set_xlim(x_min, x_max)
 ax1.set_ylim(y_min, y_max)
 ax1.set_zlim(z_min, z_max)
 ax1.view_init(30, 285)
+utility.plt_maximize_window()
 plt.draw()
 plt.pause(pause_length)
 
