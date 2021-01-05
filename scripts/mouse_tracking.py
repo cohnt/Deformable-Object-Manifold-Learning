@@ -105,3 +105,5 @@ def diffuser(particle):
 			break
 
 	return pack_particle(xy, theta, deform)
+
+pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, trivial_likelihood, diffuser)
