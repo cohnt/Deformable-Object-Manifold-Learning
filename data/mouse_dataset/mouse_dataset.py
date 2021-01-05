@@ -48,5 +48,5 @@ def load_test(n=n_test):
 	print "Loading test data..."
 	for i in tqdm(range(n)):
 		test_images.append(np.array(PIL.Image.open("%s%05i.png" % (test_filepath, i+1))))
-		test_clouds.append(np.array(np.where(train_images[i] != d2)).T)
+		test_clouds.append(np.array(np.where(test_images[i] != d2)).T)
 		test_poses.append(xyz2uvd(np.loadtxt("%s%05i.txt" % (test_filepath, i+1))))
