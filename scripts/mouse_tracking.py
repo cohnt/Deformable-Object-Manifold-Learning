@@ -65,3 +65,10 @@ def pack_particle(xy,theta,deform):
 
 def unpack_particle(p):
 	return p[:2], p[2], p[3:]
+
+def compute_pose(xy,theta,transformed_point):
+	point_cloud = transformed_point.reshape(-1,2)
+	c,s = np.cos(theta), np.sin(theta)
+	rot_mat = np.array([[c, -s], [s, c]])
+	point_cloud = np.matmul(point_cloud, rot_mat.T) + xy
+	return point_cloud
