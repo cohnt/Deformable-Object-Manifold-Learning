@@ -64,8 +64,8 @@ visualization.create_interactive_embedding_visulization(cc, 2)
 def pack_particle(xy,theta,deform):
 	return np.concatenate((xy,[theta],deform))
 
-def unpack_particle(p):
-	return p[:2], p[2], p[3:]
+def unpack_particle(particle):
+	return particle[:2], particle[2], particle[3:]
 
 def compute_pose(xy,theta,transformed_point):
 	point_cloud = transformed_point.reshape(-1,2)
@@ -89,3 +89,19 @@ def rand_sampler(n):
 	points[:,2] = theta
 	points[:,3:] = deform
 	return points
+
+def trivial_likelihood(particle):
+	return 1
+
+def diffuser(particle):
+	xy, theta, deform = unpack_particle(particle)
+	xy = xy + np.random.multivariate_normal(np.zeros(2), xy_var * np.eye(2))
+	theta = (theta + np.random.normal(0, theta_var)) % (2 * np.pi)
+
+	while True:
+		delta = np.random.multivariate_normal(np.zeros(2), deformation_var * np.eye(2))
+		if cc.tri.check_domain([deform + delta])[0]:
+			deform = deform + delta
+			break
+
+	return pack_particle(xy, theta, deform)
