@@ -46,4 +46,4 @@ else:
 	train_inds = np.arange(n_train)
 mouse_dataset.load_test()
 
-train_data = np.array([mouse_dataset.train_poses[i] for i in train_inds])
+train_data = np.array([mouse_dataset.train_poses[i] for i in train_inds])[:,:,:2]
