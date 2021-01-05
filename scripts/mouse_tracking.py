@@ -54,3 +54,4 @@ normalized_train_data = normalization.normalize_pointcloud_2d(train_data)
 ####################
 
 cc = coordinate_chart.CoordinateChart(normalized_train_data.reshape(n_train,-1), target_dim, neighbors_k)
+visualization.create_interactive_embedding_visulization(cc, 2)
