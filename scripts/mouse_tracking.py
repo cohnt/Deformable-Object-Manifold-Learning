@@ -47,3 +47,10 @@ else:
 mouse_dataset.load_test()
 
 train_data = np.array([mouse_dataset.train_poses[i] for i in train_inds])[:,:,:2]
+normalized_train_data = normalization.normalize_pointcloud_2d(train_data)
+
+####################
+# Coordinate Chart #
+####################
+
+cc = coordinate_chart.CoordinateChart(normalized_train_data.reshape(n_train,-1), target_dim, neighbors_k)
