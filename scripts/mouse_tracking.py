@@ -33,3 +33,17 @@ xy_var = 100              # Variance of diffusion noise added to particles' posi
 theta_var = np.pi/32      # Variance of diffusion noise added to particles' orientation component
 deformation_var = 250     # Variance of diffusion noise added to particles' deformation component
 keep_best = True          # Keep the best guess unchanged
+
+###########
+# Dataset #
+###########
+
+if random_train:
+	mouse_dataset.load_train()
+	train_inds = np.random.choice(mouse_dataset.n_train, n_train, replace=False)
+else:
+	mouse_dataset.load_train(n_train)
+	train_inds = np.arange(n_train)
+mouse_dataset.load_test()
+
+train_data = np.array([mouse_dataset.train_poses[i] for i in train_inds])
