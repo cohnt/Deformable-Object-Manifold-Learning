@@ -21,6 +21,7 @@ track = False  # If true, track normally. If false, don't increase the frame num
 n_train = 500        # Number of training samples to use
 random_train = False # Optionally randomly select the training images from the whole dataset
 test_start_ind = 0   # Can start the test sequence at a different index if desired
+camera_size = 2 * np.array([mouse_dataset.cx, mouse_dataset.cy])
 
 # Manifold learning
 target_dim = 2   # The target dimension for ISOMAP.
@@ -72,3 +73,19 @@ def compute_pose(xy,theta,transformed_point):
 	rot_mat = np.array([[c, -s], [s, c]])
 	point_cloud = np.matmul(point_cloud, rot_mat.T) + xy
 	return point_cloud
+
+def rand_sampler(n):
+	xy = np.zeros((n,2))
+	theta = np.zeros(n)
+	deform = np.zeros((n,cc.target_dim))
+	points = np.zeros((n,2+1+cc.target_dim))
+
+	xy[:,0] = np.random.uniform(low=0, high=camera_size[0], size=n)
+	xy[:,1] = np.random.uniform(low=0, high=camera_size[1], size=n)
+	theta = np.random.uniform(low=0, high=2*np.pi, size=n)
+	deform = cc.uniform_sample(n)
+
+	points[:,0:2] = xy
+	points[:,2] = theta
+	points[:,3:] = deform
+	return points
