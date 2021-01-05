@@ -10,7 +10,7 @@ def combine_images_to_video(fname_format="iteration\%03d.png"):
 	# For example, iteration\%03d.png expects images with filenames ieration001.png, iteration002.png, etc.
 	os.system('ffmpeg -f image2 -r 1/0.1 -i %s -c:v libx264 -pix_fmt yuv420p out.mp4' % fname_format)
 
-def create_interactive_embedding_visulization(cc):
+def create_interactive_embedding_visulization(cc, point_cloud_dim):
 	fig = plt.figure()
 	ax0 = fig.add_subplot(1, 2, 1)
 	ax1 = fig.add_subplot(1, 2, 2)
@@ -20,8 +20,9 @@ def create_interactive_embedding_visulization(cc):
 	xlim = axes[0].get_xlim()
 	ylim = axes[0].get_ylim()
 
-	mfd_xlims = (np.min(cc.train_data[:,:,0]), np.max(cc.train_data[:,:,0]))
-	mfd_ylims = (np.min(cc.train_data[:,:,1]), np.max(cc.train_data[:,:,1]))
+
+	mfd_xlims = (np.min(cc.train_data.reshape(len(cc.train_data),-1,point_cloud_dim)[:,:,0]), np.max(cc.train_data.reshape(len(cc.train_data),-1,point_cloud_dim)[:,:,0]))
+	mfd_ylims = (np.min(cc.train_data.reshape(len(cc.train_data),-1,point_cloud_dim)[:,:,1]), np.max(cc.train_data.reshape(len(cc.train_data),-1,point_cloud_dim)[:,:,1]))
 
 	def hover(event):
 		xy = np.array([event.xdata, event.ydata])
@@ -45,11 +46,11 @@ def create_interactive_embedding_visulization(cc):
 
 		# Transform the selected point
 		point = cc.single_inverse_mapping(xy)
-		point_cloud = point.reshape(-1, cc.source_dim)
+		point_cloud = point.reshape(-1, point_cloud_dim)
 
 		# Draw the original point cloud
 		axes[1].clear()
-		axes[1].scatter(point_cloud[:,0], point_cloud[:,1])
+		axes[1].scatter(point_cloud[:,0], point_cloud[:,1], s=20**2)
 		axes[1].set_xlim(mfd_xlims)
 		axes[1].set_ylim(mfd_ylims)
 
