@@ -55,3 +55,13 @@ normalized_train_data = normalization.normalize_pointcloud_2d(train_data)
 
 cc = coordinate_chart.CoordinateChart(normalized_train_data.reshape(n_train,-1), target_dim, neighbors_k)
 visualization.create_interactive_embedding_visulization(cc, 2)
+
+#########################
+# Particle Filter Setup #
+#########################
+
+def pack_particle(xy,theta,deform):
+	return np.concatenate((xy,[theta],deform))
+
+def unpack_particle(p):
+	return p[:2], p[2], p[3:]
