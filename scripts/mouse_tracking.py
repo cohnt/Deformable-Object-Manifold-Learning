@@ -121,6 +121,33 @@ def likelihood_old(particle):
 			total = total + 1
 	return total
 
+def likelihood_iou(particle):
+	xy, theta, deformation = unpack_particle(particle)
+	simplex_num = cc.tri.find_simplex(deformation)
+	simplex_indices = cc.tri.simplices[simplex_num]
+	simplex = cc.tri.points[simplex_indices]
+	simplex_clouds = []
+	for i in simplex_indices:
+		simplex_clouds.append(normalized_train_clouds[i])
+
+	A = np.vstack((simplex.T, np.ones((1, cc.target_dim+1))))
+	b = np.vstack((deformation.reshape(-1, 1), np.ones((1, 1))))
+	convex_comb = np.linalg.solve(A, b)
+	weights = np.asarray(convex_comb).flatten()
+
+	total = 0
+	for i in range(len(weights)):
+		cloud = np.asarray(compute_pose(xy, theta, simplex_clouds[i]), dtype=int)
+		weight = weights[i]
+		this_total = 0
+		for j in range(cloud.shape[0]):
+			if cloud[j,0] < 0 or cloud[j,1] < 0 or cloud[j,0] >= camera_size[0] or cloud[j,1] >= camera_size[1]:
+				continue
+			elif mouse_dataset.test_images[test_ind][cloud[j,1], cloud[j,0]] < mouse_dataset.d2:
+				this_total = this_total + 1
+		total = total + (this_total * weight / len(cloud))
+	return total
+
 def diffuser(particle):
 	xy, theta, deform = unpack_particle(particle)
 	xy = xy + np.random.multivariate_normal(np.zeros(2), xy_var * np.eye(2))
@@ -136,7 +163,8 @@ def diffuser(particle):
 
 # pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, trivial_likelihood, diffuser)
 # pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_one_zero, diffuser)
-pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_old, diffuser)
+# pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_old, diffuser)
+pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou, diffuser)
 
 ########################
 # Particle Filter Loop #
