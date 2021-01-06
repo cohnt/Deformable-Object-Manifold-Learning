@@ -229,8 +229,11 @@ while True:
 	manifold_poses = [compute_pose(unpacked_particles[i][0], unpacked_particles[i][1], manifold_deformations[i]) for i in range(n_particles)]
 
 	mean_xy, mean_theta, mean_deformation = unpack_particle(mean)
-	mean_manifold_deformation = cc.single_inverse_mapping(mean_deformation)
-	mean_pose = compute_pose(mean_xy, mean_theta, mean_manifold_deformation)
+	if cc.check_domain([mean_deformation])[0]:
+		mean_manifold_deformation = cc.single_inverse_mapping(mean_deformation)
+		mean_pose = compute_pose(mean_xy, mean_theta, mean_manifold_deformation)
+	else:
+		mean_pose = np.array([[0, 0]])
 
 	# Display
 	ax1.clear()
