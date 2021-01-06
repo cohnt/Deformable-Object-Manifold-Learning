@@ -28,12 +28,13 @@ target_dim = 2   # The target dimension for ISOMAP.
 neighbors_k = 12 # The number of neighbors used for ISOMAP.
 
 # Particle filter
-n_particles = 200         # Number of particles
-exploration_factor = 0.25 # Fraction of particles used to explore
-xy_var = 100              # Variance of diffusion noise added to particles' position component
-theta_var = np.pi/16      # Variance of diffusion noise added to particles' orientation component
-deformation_var = 250     # Variance of diffusion noise added to particles' deformation component
-keep_best = True          # Keep the best guess unchanged
+n_particles = 200           # Number of particles
+exploration_factor = 0.25   # Fraction of particles used to explore
+xy_var = 100                # Variance of diffusion noise added to particles' position component
+theta_var = np.pi/16        # Variance of diffusion noise added to particles' orientation component
+deformation_var = 250       # Variance of diffusion noise added to particles' deformation component
+keep_best = True            # Keep the best guess unchanged
+approximate_iou_frac = 0.05 # The fraction of points in the point cloud to use for computing iou likelihood
 
 ###########
 # Dataset #
@@ -141,6 +142,34 @@ def likelihood_iou(particle):
 		weight = weights[i]
 		this_total = 0
 		for j in range(cloud.shape[0]):
+			if cloud[j,0] < 0 or cloud[j,1] < 0 or cloud[j,0] >= camera_size[0] or cloud[j,1] >= camera_size[1]:
+				continue
+			elif mouse_dataset.test_images[test_ind][cloud[j,1], cloud[j,0]] < mouse_dataset.d2:
+				this_total = this_total + 1
+		total = total + (this_total * weight / len(cloud))
+	return total
+
+def likelihood_iou_approximate(particle):
+	xy, theta, deformation = unpack_particle(particle)
+	simplex_num = cc.tri.find_simplex(deformation)
+	simplex_indices = cc.tri.simplices[simplex_num]
+	simplex = cc.tri.points[simplex_indices]
+	simplex_clouds = []
+	for i in simplex_indices:
+		simplex_clouds.append(normalized_train_clouds[i])
+
+	A = np.vstack((simplex.T, np.ones((1, cc.target_dim+1))))
+	b = np.vstack((deformation.reshape(-1, 1), np.ones((1, 1))))
+	convex_comb = np.linalg.solve(A, b)
+	weights = np.asarray(convex_comb).flatten()
+
+	total = 0
+	for i in range(len(weights)):
+		cloud = np.asarray(compute_pose(xy, theta, simplex_clouds[i]), dtype=int)
+		weight = weights[i]
+		this_total = 0
+		indices = np.random.choice(cloud.shape[0], int(approximate_iou_frac * cloud.shape[0]), replace=False)
+		for j in indices:
 			if cloud[j,0] < 0 or cloud[j,1] < 0 or cloud[j,0] >= camera_size[0] or cloud[j,1] >= camera_size[1]:
 				continue
 			elif mouse_dataset.test_images[test_ind][cloud[j,1], cloud[j,0]] < mouse_dataset.d2:
