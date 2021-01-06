@@ -105,6 +105,19 @@ def likelihood_one_zero(particle):
 			return 1
 	return 0
 
+def likelihood_old(particle):
+	xy, theta, deformation = unpack_particle(particle)
+	manifold_deformation = cc.single_inverse_mapping(deformation)
+	pose = compute_pose(xy, theta, manifold_deformation)
+	pose = np.asarray(pose, dtype=int)
+	total = 0
+	for i in range(pose.shape[0]):
+		if pose[i,0] < 0 or pose[i,1] < 0 or pose[i][0] >= camera_size[0] or pose[i][1] >= camera_size[1]:
+			return 0
+		elif mouse_dataset.test_images[test_ind][pose[i,1], pose[i,0]] < mouse_dataset.d2:
+			total = total + 1
+	return total
+
 def diffuser(particle):
 	xy, theta, deform = unpack_particle(particle)
 	xy = xy + np.random.multivariate_normal(np.zeros(2), xy_var * np.eye(2))
@@ -119,7 +132,8 @@ def diffuser(particle):
 	return pack_particle(xy, theta, deform)
 
 # pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, trivial_likelihood, diffuser)
-pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_one_zero, diffuser)
+# pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_one_zero, diffuser)
+pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_old, diffuser)
 
 ########################
 # Particle Filter Loop #
