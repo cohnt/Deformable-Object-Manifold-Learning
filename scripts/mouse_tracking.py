@@ -31,7 +31,7 @@ neighbors_k = 12 # The number of neighbors used for ISOMAP.
 # Particle filter
 n_particles = 200           # Number of particles
 exploration_factor = 0.25   # Fraction of particles used to explore
-xy_var = 25                # Variance of diffusion noise added to particles' position component
+xy_var = 5                # Variance of diffusion noise added to particles' position component
 theta_var = np.pi/32        # Variance of diffusion noise added to particles' orientation component
 deformation_var = 3       # Variance of diffusion noise added to particles' deformation component
 keep_best = True            # Keep the best guess unchanged
