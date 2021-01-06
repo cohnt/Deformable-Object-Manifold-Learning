@@ -11,7 +11,7 @@ def normalize_pointcloud_2d(data, centering_idx=0, orientation_idx=1):
 	# These indices must be distinct
 
 	# First, center the data
-	centered_data = center_pointcloud(data, centering_idx)
+	centered_data, translation = center_pointcloud(data, centering_idx)
 
 	# Next, compute the angle for each point cloud (from the x-axis to orientation_idx)
 	angs = np.arctan2(centered_data[:,orientation_idx,1], centered_data[:,orientation_idx,0])
@@ -27,7 +27,7 @@ def normalize_pointcloud_2d(data, centering_idx=0, orientation_idx=1):
 	for i in range(centered_data.shape[0]):
 		normalized_data[i,:] = np.matmul(centered_data[i,:], mats[i])
 
-	return normalized_data
+	return normalized_data, translation, mats
 
 def normalize_pointcloud_3d(data, centering_idx=0, orientation_idx_1=1, orientation_idx_2=2):
 	# The data should be of shape (n_clouds, n_points, 3)
@@ -40,7 +40,7 @@ def normalize_pointcloud_3d(data, centering_idx=0, orientation_idx_1=1, orientat
 	# Reference: https://math.stackexchange.com/questions/856666/how-can-i-transform-a-3d-triangle-to-xy-plane
 
 	# First, center the data
-	centered_data = center_pointcloud(data, centering_idx)
+	centered_data, translation = center_pointcloud(data, centering_idx)
 
 	# Next, create rotation matrices for each cloud
 	us = centered_data[:,orientation_idx_1]
@@ -56,7 +56,7 @@ def normalize_pointcloud_3d(data, centering_idx=0, orientation_idx_1=1, orientat
 	for i in range(centered_data.shape[0]):
 		normalized_data[i,:] = np.matmul(centered_data[i,:], mats[i])
 
-	return normalized_data
+	return normalized_data, translation, mats
 
 def center_pointcloud(data, centering_idx=0):
 	# The data should be of shape (n_clouds, n_points, n_dimensions)
@@ -66,4 +66,4 @@ def center_pointcloud(data, centering_idx=0):
 	# centering_idx is the index of the point which is centered at 0
 	offset = data[:,[centering_idx],:] # Shape (n_clouds, 1, n_dimension)
 	offset_cloud = np.tile(offset, (1, data.shape[1], 1)) # Shape (n_clouds, n_points, n_dimensions)
-	return data - offset_cloud
+	return data - offset_cloud, offset
