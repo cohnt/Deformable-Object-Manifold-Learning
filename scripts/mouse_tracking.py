@@ -142,7 +142,7 @@ while True:
 
 	mean_xy, mean_theta, mean_deformation = unpack_particle(mean)
 	mean_manifold_deformation = cc.single_inverse_mapping(mean_deformation)
-	mean_pose = compute_pose(mean_xy, mean_theta, mean_deformation)
+	mean_pose = compute_pose(mean_xy, mean_theta, mean_manifold_deformation)
 
 	# Display
 	ax1.clear()
