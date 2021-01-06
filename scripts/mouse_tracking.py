@@ -14,8 +14,9 @@ import data.mouse_dataset.mouse_dataset as mouse_dataset
 #########################
 
 # General parameters
-track = False  # If true, track normally. If false, don't increase the frame number with each iteration.
-               # False allows us to test only localizing in a single frame.
+track = False        # If true, track normally. If false, don't increase the frame number with each iteration.
+                     # False allows us to test only localizing in a single frame.
+zoom_on_mouse = True # If True, the plots are focused on the mouse.
 
 # Dataset parameters
 n_train = 500        # Number of training samples to use
@@ -234,6 +235,10 @@ while True:
 		mean_pose = compute_pose(mean_xy, mean_theta, mean_manifold_deformation)
 	else:
 		mean_pose = np.array([[0, 0]])
+
+	if zoom_on_mouse:
+		y_min, x_min = np.min(mouse_dataset.test_clouds[test_ind], axis=0) - 5
+		y_max, x_max = np.max(mouse_dataset.test_clouds[test_ind], axis=0) + 5
 
 	# Display
 	ax1.clear()
