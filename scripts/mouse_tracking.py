@@ -80,8 +80,8 @@ def rand_sampler(n):
 	deform = np.zeros((n,cc.target_dim))
 	points = np.zeros((n,2+1+cc.target_dim))
 
-	xy[:,0] = np.random.uniform(low=0, high=camera_size[1], size=n)
-	xy[:,1] = np.random.uniform(low=0, high=camera_size[0], size=n)
+	xy[:,0] = np.random.uniform(low=0, high=camera_size[0], size=n)
+	xy[:,1] = np.random.uniform(low=0, high=camera_size[1], size=n)
 	theta = np.random.uniform(low=0, high=2*np.pi, size=n)
 	deform = cc.uniform_sample(n)
 
@@ -99,9 +99,9 @@ def likelihood_one_zero(particle):
 	pose = compute_pose(xy, theta, manifold_deformation)
 	pose = np.asarray(pose, dtype=int)
 	for i in range(pose.shape[0]):
-		if pose[i,0] < 0 or pose[i,1] < 0 or pose[i][0] >= camera_size[1] or pose[i][1] >= camera_size[0]:
+		if pose[i,0] < 0 or pose[i,1] < 0 or pose[i][0] >= camera_size[0] or pose[i][1] >= camera_size[1]:
 			return 0
-		elif mouse_dataset.test_images[test_ind][pose[i,0], pose[i,1]] < mouse_dataset.d2:
+		elif mouse_dataset.test_images[test_ind][pose[i,1], pose[i,0]] < mouse_dataset.d2:
 			return 1
 	return 0
 
