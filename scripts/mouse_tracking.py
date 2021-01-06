@@ -247,8 +247,8 @@ while True:
 		ax1.plot(manifold_poses[i][:,0], manifold_poses[i][:,1], c=plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]))
 	ax2.plot(manifold_poses[pf.max_weight_ind][:,0], manifold_poses[pf.max_weight_ind][:,1], c="blue", label="MLE Particle")
 	ax2.plot(mean_pose[:,0], mean_pose[:,1], c="green", label="Mean Particle")
-	ax1.plot(mouse_dataset.test_poses[test_ind][:,0], mouse_dataset.test_poses[test_ind][:,1], c="red")
-	ax2.plot(mouse_dataset.test_poses[test_ind][:,0], mouse_dataset.test_poses[test_ind][:,1], c="red", label="Ground Truth")
+	ax1.plot(mouse_dataset.test_poses[test_ind][:,0], mouse_dataset.test_poses[test_ind][:,1], c="black")
+	ax2.plot(mouse_dataset.test_poses[test_ind][:,0], mouse_dataset.test_poses[test_ind][:,1], c="black", label="Ground Truth")
 	ax2.legend()
 
 	plt.draw()
