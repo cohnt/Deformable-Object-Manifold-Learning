@@ -168,4 +168,5 @@ while True:
 	pf.diffuse()
 
 	iter_num = iter_num + 1
-	test_ind = test_ind + 1
+	if track:
+		test_ind = test_ind + 1
