@@ -107,3 +107,24 @@ def diffuser(particle):
 	return pack_particle(xy, theta, deform)
 
 pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, trivial_likelihood, diffuser)
+
+########################
+# Particle Filter Loop #
+########################
+
+# Create axes for display
+x_min = y_min = 0
+x_max = camera_size[0]
+y_max = camera_size[1]
+
+fig = plt.figure()
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+# Set the perspective
+ax1.set_xlim(x_min, x_max)
+ax1.set_ylim(y_min, y_max)
+ax2.set_xlim(x_min, x_max)
+ax2.set_ylim(y_min, y_max)
+visualization.maximize_window()
+plt.draw()
+plt.pause(0.001)
