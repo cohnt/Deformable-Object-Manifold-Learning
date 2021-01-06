@@ -146,7 +146,7 @@ def likelihood_iou(particle):
 				continue
 			elif mouse_dataset.test_images[test_ind][cloud[j,1], cloud[j,0]] < mouse_dataset.d2:
 				this_total = this_total + 1
-		total = total + (weight * (this_total / (len(cloud) + len(mouse_dataset.test_clouds[test_ind]) + this_total)))
+		total = total + (weight * (this_total / (len(cloud) + len(mouse_dataset.test_clouds[test_ind]) - this_total)))
 	return total
 
 def likelihood_iou_approximate(particle):
@@ -174,7 +174,7 @@ def likelihood_iou_approximate(particle):
 				continue
 			elif mouse_dataset.test_images[test_ind][cloud[j,1], cloud[j,0]] < mouse_dataset.d2:
 				this_total = this_total + 1
-		total = total + (weight * (this_total / (len(cloud) + len(mouse_dataset.test_clouds[test_ind]) + this_total)))
+		total = total + (weight * (this_total / (len(cloud) + len(mouse_dataset.test_clouds[test_ind]) - this_total)))
 	return total
 
 def diffuser(particle):
