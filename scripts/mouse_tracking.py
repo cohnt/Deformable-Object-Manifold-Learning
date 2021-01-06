@@ -30,9 +30,9 @@ neighbors_k = 12 # The number of neighbors used for ISOMAP.
 # Particle filter
 n_particles = 200           # Number of particles
 exploration_factor = 0.25   # Fraction of particles used to explore
-xy_var = 100                # Variance of diffusion noise added to particles' position component
-theta_var = np.pi/16        # Variance of diffusion noise added to particles' orientation component
-deformation_var = 250       # Variance of diffusion noise added to particles' deformation component
+xy_var = 25                # Variance of diffusion noise added to particles' position component
+theta_var = np.pi/32        # Variance of diffusion noise added to particles' orientation component
+deformation_var = 3       # Variance of diffusion noise added to particles' deformation component
 keep_best = True            # Keep the best guess unchanged
 approximate_iou_frac = 0.05 # The fraction of points in the point cloud to use for computing iou likelihood
 
@@ -193,8 +193,8 @@ def diffuser(particle):
 # pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, trivial_likelihood, diffuser)
 # pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_one_zero, diffuser)
 # pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_old, diffuser)
-# pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou, diffuser)
-pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou_approximate, diffuser)
+pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou, diffuser)
+# pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou_approximate, diffuser)
 
 ########################
 # Particle Filter Loop #
