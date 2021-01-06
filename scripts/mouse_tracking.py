@@ -146,6 +146,7 @@ while True:
 
 	# Display
 	ax1.clear()
+	ax2.clear()
 	ax1.set_xlim(x_min, x_max)
 	ax1.set_ylim(y_min, y_max)
 	ax2.set_xlim(x_min, x_max)
