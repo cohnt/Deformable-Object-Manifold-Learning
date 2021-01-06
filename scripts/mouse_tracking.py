@@ -193,7 +193,8 @@ def diffuser(particle):
 # pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, trivial_likelihood, diffuser)
 # pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_one_zero, diffuser)
 # pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_old, diffuser)
-pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou, diffuser)
+# pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou, diffuser)
+pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou_approximate, diffuser)
 
 ########################
 # Particle Filter Loop #
