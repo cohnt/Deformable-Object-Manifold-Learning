@@ -50,6 +50,9 @@ mouse_dataset.load_test()
 train_data = np.array([mouse_dataset.train_poses[i] for i in train_inds])[:,:,:2]
 normalized_train_data, translations, rotations = normalization.normalize_pointcloud_2d(train_data)
 
+train_clouds = [mouse_dataset.train_clouds[i][:,[1,0]] for i in train_inds]
+normalized_train_clouds = [np.matmul(train_clouds[i] - translations[i], rotations[i]) for i in range(n_train)]
+
 ####################
 # Coordinate Chart #
 ####################
