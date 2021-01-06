@@ -183,7 +183,7 @@ while True:
 	ax2.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
 
 	for i in range(n_particles):
-		ax1.plot(manifold_poses[i][:,0], manifold_poses[i][:,1], c=plt.cm.cool(pf.weights[i]))
+		ax1.plot(manifold_poses[i][:,0], manifold_poses[i][:,1], c=plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]))
 	ax2.plot(manifold_poses[pf.max_weight_ind][:,0], manifold_poses[pf.max_weight_ind][:,1], c="blue", label="MLE Particle")
 	ax2.plot(mean_pose[:,0], mean_pose[:,1], c="green", label="Mean Particle")
 	ax1.plot(mouse_dataset.test_poses[test_ind][:,0], mouse_dataset.test_poses[test_ind][:,1], c="red")
