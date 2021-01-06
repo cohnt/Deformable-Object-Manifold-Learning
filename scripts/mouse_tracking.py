@@ -100,7 +100,7 @@ def diffuser(particle):
 
 	while True:
 		delta = np.random.multivariate_normal(np.zeros(2), deformation_var * np.eye(2))
-		if cc.tri.check_domain([deform + delta])[0]:
+		if cc.check_domain([deform + delta])[0]:
 			deform = deform + delta
 			break
 
