@@ -55,7 +55,7 @@ normalized_train_data = normalization.normalize_pointcloud_2d(train_data)
 ####################
 
 cc = coordinate_chart.CoordinateChart(normalized_train_data.reshape(n_train,-1), target_dim, neighbors_k)
-visualization.create_interactive_embedding_visulization(cc, 2)
+# visualization.create_interactive_embedding_visulization(cc, 2)
 
 #########################
 # Particle Filter Setup #
@@ -128,3 +128,44 @@ ax2.set_ylim(y_min, y_max)
 visualization.maximize_window()
 plt.draw()
 plt.pause(0.001)
+
+iter_num = 0
+test_ind = test_start_ind
+while True:
+	pf.weight()
+	mle = pf.predict_mle()
+	mean = pf.predict_mean()
+
+	unpacked_particles = [unpack_particle(p) for p in pf.particles]
+	manifold_deformations = [cc.single_inverse_mapping(p[2]) for p in unpacked_particles]
+	manifold_poses = [compute_pose(unpacked_particles[i][0], unpacked_particles[i][1], manifold_deformations[i]) for i in range(n_particles)]
+
+	mean_xy, mean_theta, mean_deformation = unpack_particle(mean)
+	mean_manifold_deformation = cc.single_inverse_mapping(mean_deformation)
+	mean_pose = compute_pose(mean_xy, mean_theta, mean_deformation)
+
+	# Display
+	ax1.clear()
+	ax1.set_xlim(x_min, x_max)
+	ax1.set_ylim(y_min, y_max)
+	ax2.set_xlim(x_min, x_max)
+	ax2.set_ylim(y_min, y_max)
+
+	ax1.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
+	ax2.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
+
+	for i in range(n_particles):
+		ax1.plot(manifold_poses[i][:,0], manifold_poses[i][:,1], c=plt.cm.cool(pf.weights[i]))
+	ax2.plot(manifold_poses[pf.max_weight_ind][:,0], manifold_poses[pf.max_weight_ind][:,1], c="blue")
+	ax2.plot(mean_pose[:,0], mean_pose[:,1], c="green")
+	ax1.plot(mouse_dataset.test_poses[test_ind][:,0], mouse_dataset.test_poses[test_ind][:,1], c="red")
+	ax2.plot(mouse_dataset.test_poses[test_ind][:,0], mouse_dataset.test_poses[test_ind][:,1], c="red")
+
+	plt.draw()
+	plt.pause(0.001)
+
+	pf.resample()
+	pf.diffuse()
+
+	iter_num = iter_num + 1
+	test_ind = test_ind + 1
