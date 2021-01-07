@@ -272,7 +272,9 @@ try:
 		draw_pose(ax2, mean_pose, "green", "Mean Particle")
 		draw_pose(ax1, mouse_dataset.test_poses[test_ind], "black")
 		draw_pose(ax2, mouse_dataset.test_poses[test_ind], "black", "Ground Truth")
+
 		ax2.legend()
+		fig.suptitle("Iteration %04d" % iter_num)
 
 		plt.draw()
 		plt.pause(0.001)
