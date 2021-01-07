@@ -276,6 +276,8 @@ while True:
 	plt.draw()
 	plt.pause(0.001)
 
+	plt.savefig("iter%04d.svg" % iter_num)
+
 	pf.resample()
 	pf.diffuse()
 
