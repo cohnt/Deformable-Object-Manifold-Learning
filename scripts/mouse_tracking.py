@@ -278,6 +278,7 @@ try:
 		plt.pause(0.001)
 
 		plt.savefig("iter%04d.svg" % iter_num)
+		plt.savefig("iter%04d.png" % iter_num)
 
 		pf.resample()
 		pf.diffuse()
