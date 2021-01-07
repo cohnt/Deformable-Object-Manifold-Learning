@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 
 import coordinate_chart
 import particle_filter
@@ -206,6 +207,8 @@ x_min = y_min = 0
 x_max = camera_size[0]
 y_max = camera_size[1]
 
+matplotlib.rcParams.update({'font.size': 22})
+
 fig = plt.figure()
 ax1 = fig.add_subplot(121)
 ax2 = fig.add_subplot(122)
@@ -253,10 +256,15 @@ while True:
 
 	for i in range(n_particles):
 		ax1.plot(manifold_poses[i][:,0], manifold_poses[i][:,1], c=plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]))
+		ax1.scatter([manifold_poses[i][0,0]], [manifold_poses[i][0,1]], c=plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]), s=5**2)
 	ax2.plot(manifold_poses[pf.max_weight_ind][:,0], manifold_poses[pf.max_weight_ind][:,1], c="red", label="MLE Particle")
+	ax2.scatter([manifold_poses[pf.max_weight_ind][0,0]], [manifold_poses[pf.max_weight_ind][0,1]], c="red", s=5**2)
 	ax2.plot(mean_pose[:,0], mean_pose[:,1], c="green", label="Mean Particle")
+	ax2.scatter([mean_pose[0,0]], [mean_pose[0,1]], c="green", s=5**2)
 	ax1.plot(mouse_dataset.test_poses[test_ind][:,0], mouse_dataset.test_poses[test_ind][:,1], c="black")
+	ax1.scatter([mouse_dataset.test_poses[test_ind][0,0]], [mouse_dataset.test_poses[test_ind][0,1]], c="black", s=5**2)
 	ax2.plot(mouse_dataset.test_poses[test_ind][:,0], mouse_dataset.test_poses[test_ind][:,1], c="black", label="Ground Truth")
+	ax2.scatter([mouse_dataset.test_poses[test_ind][0,0]], [mouse_dataset.test_poses[test_ind][0,1]], c="black", s=5**2)
 	ax2.legend()
 
 	plt.draw()
