@@ -198,6 +198,17 @@ def diffuser(particle):
 pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou, diffuser)
 # pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou_approximate, diffuser)
 
+###########################
+# Visualization Functions #
+###########################
+
+def draw_pose(ax, pose, color, label=None):
+	if label is None:
+		ax.plot(pose[:,0], pose[:,1], c=color)
+	else:
+		ax.plot(pose[:,0], pose[:,1], c=color, label=label)
+	ax.scatter([pose[0,0]], [pose[0,1]], c=color, s=8**2)
+
 ########################
 # Particle Filter Loop #
 ########################
@@ -255,16 +266,11 @@ while True:
 	ax2.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
 
 	for i in range(n_particles):
-		ax1.plot(manifold_poses[i][:,0], manifold_poses[i][:,1], c=plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]))
-		ax1.scatter([manifold_poses[i][0,0]], [manifold_poses[i][0,1]], c=plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]), s=5**2)
-	ax2.plot(manifold_poses[pf.max_weight_ind][:,0], manifold_poses[pf.max_weight_ind][:,1], c="red", label="MLE Particle")
-	ax2.scatter([manifold_poses[pf.max_weight_ind][0,0]], [manifold_poses[pf.max_weight_ind][0,1]], c="red", s=5**2)
-	ax2.plot(mean_pose[:,0], mean_pose[:,1], c="green", label="Mean Particle")
-	ax2.scatter([mean_pose[0,0]], [mean_pose[0,1]], c="green", s=5**2)
-	ax1.plot(mouse_dataset.test_poses[test_ind][:,0], mouse_dataset.test_poses[test_ind][:,1], c="black")
-	ax1.scatter([mouse_dataset.test_poses[test_ind][0,0]], [mouse_dataset.test_poses[test_ind][0,1]], c="black", s=5**2)
-	ax2.plot(mouse_dataset.test_poses[test_ind][:,0], mouse_dataset.test_poses[test_ind][:,1], c="black", label="Ground Truth")
-	ax2.scatter([mouse_dataset.test_poses[test_ind][0,0]], [mouse_dataset.test_poses[test_ind][0,1]], c="black", s=5**2)
+		draw_pose(ax1, manifold_poses[i], plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]))
+	draw_pose(ax2, manifold_poses[pf.max_weight_ind], "red", "MLE Particle")
+	draw_pose(ax2, mean_pose, "green", "Mean Particle")
+	draw_pose(ax1, mouse_dataset.test_poses[test_ind], "black")
+	draw_pose(ax2, mouse_dataset.test_poses[test_ind], "black", "Ground Truth")
 	ax2.legend()
 
 	plt.draw()
