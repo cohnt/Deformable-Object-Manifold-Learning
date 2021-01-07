@@ -234,53 +234,58 @@ plt.pause(0.001)
 
 iter_num = 0
 test_ind = test_start_ind
-while True:
-	pf.weight()
-	mle = pf.predict_mle()
-	mean = pf.predict_mean()
+try:
+	while True:
+		pf.weight()
+		mle = pf.predict_mle()
+		mean = pf.predict_mean()
 
-	unpacked_particles = [unpack_particle(p) for p in pf.particles]
-	manifold_deformations = [cc.single_inverse_mapping(p[2]) for p in unpacked_particles]
-	manifold_poses = [compute_pose(unpacked_particles[i][0], unpacked_particles[i][1], manifold_deformations[i]) for i in range(n_particles)]
+		unpacked_particles = [unpack_particle(p) for p in pf.particles]
+		manifold_deformations = [cc.single_inverse_mapping(p[2]) for p in unpacked_particles]
+		manifold_poses = [compute_pose(unpacked_particles[i][0], unpacked_particles[i][1], manifold_deformations[i]) for i in range(n_particles)]
 
-	mean_xy, mean_theta, mean_deformation = unpack_particle(mean)
-	if cc.check_domain([mean_deformation])[0]:
-		mean_manifold_deformation = cc.single_inverse_mapping(mean_deformation)
-		mean_pose = compute_pose(mean_xy, mean_theta, mean_manifold_deformation)
-	else:
-		mean_pose = np.array([[0, 0]])
+		mean_xy, mean_theta, mean_deformation = unpack_particle(mean)
+		if cc.check_domain([mean_deformation])[0]:
+			mean_manifold_deformation = cc.single_inverse_mapping(mean_deformation)
+			mean_pose = compute_pose(mean_xy, mean_theta, mean_manifold_deformation)
+		else:
+			mean_pose = np.array([[0, 0]])
 
-	if zoom_on_mouse:
-		y_min, x_min = np.min(mouse_dataset.test_clouds[test_ind], axis=0) - 5
-		y_max, x_max = np.max(mouse_dataset.test_clouds[test_ind], axis=0) + 5
+		if zoom_on_mouse:
+			y_min, x_min = np.min(mouse_dataset.test_clouds[test_ind], axis=0) - 5
+			y_max, x_max = np.max(mouse_dataset.test_clouds[test_ind], axis=0) + 5
 
-	# Display
-	ax1.clear()
-	ax2.clear()
-	ax1.set_xlim(x_min, x_max)
-	ax1.set_ylim(y_min, y_max)
-	ax2.set_xlim(x_min, x_max)
-	ax2.set_ylim(y_min, y_max)
+		# Display
+		ax1.clear()
+		ax2.clear()
+		ax1.set_xlim(x_min, x_max)
+		ax1.set_ylim(y_min, y_max)
+		ax2.set_xlim(x_min, x_max)
+		ax2.set_ylim(y_min, y_max)
 
-	ax1.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
-	ax2.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
+		ax1.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
+		ax2.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
 
-	for i in range(n_particles):
-		draw_pose(ax1, manifold_poses[i], plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]))
-	draw_pose(ax2, manifold_poses[pf.max_weight_ind], "red", "MLE Particle")
-	draw_pose(ax2, mean_pose, "green", "Mean Particle")
-	draw_pose(ax1, mouse_dataset.test_poses[test_ind], "black")
-	draw_pose(ax2, mouse_dataset.test_poses[test_ind], "black", "Ground Truth")
-	ax2.legend()
+		for i in range(n_particles):
+			draw_pose(ax1, manifold_poses[i], plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]))
+		draw_pose(ax2, manifold_poses[pf.max_weight_ind], "red", "MLE Particle")
+		draw_pose(ax2, mean_pose, "green", "Mean Particle")
+		draw_pose(ax1, mouse_dataset.test_poses[test_ind], "black")
+		draw_pose(ax2, mouse_dataset.test_poses[test_ind], "black", "Ground Truth")
+		ax2.legend()
 
-	plt.draw()
-	plt.pause(0.001)
+		plt.draw()
+		plt.pause(0.001)
 
-	plt.savefig("iter%04d.svg" % iter_num)
+		plt.savefig("iter%04d.svg" % iter_num)
 
-	pf.resample()
-	pf.diffuse()
+		pf.resample()
+		pf.diffuse()
 
-	iter_num = iter_num + 1
-	if track:
-		test_ind = test_ind + 1
+		iter_num = iter_num + 1
+		if track:
+			test_ind = test_ind + 1
+except KeyboardInterrupt:
+	pass
+
+visualization.combine_images_to_video("iter\%04d.png")
