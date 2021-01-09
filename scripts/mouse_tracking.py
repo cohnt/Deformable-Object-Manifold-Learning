@@ -288,6 +288,8 @@ try:
 		iter_num = iter_num + 1
 		if track:
 			test_ind = test_ind + 1
+			if test_ind >= mouse_dataset.n_test:
+				break
 except KeyboardInterrupt:
 	pass
 
