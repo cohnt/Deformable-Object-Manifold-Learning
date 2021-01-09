@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+from sklearn.decomposition import PCA
 
 import coordinate_chart
 import particle_filter
@@ -30,7 +31,7 @@ target_dim = 2   # The target dimension for ISOMAP.
 neighbors_k = 12 # The number of neighbors used for ISOMAP.
 
 # Particle filter
-n_particles = 100           # Number of particles
+n_particles = 200           # Number of particles
 exploration_factor = 0.1   # Fraction of particles used to explore
 xy_var = 10                # Variance of diffusion noise added to particles' position component
 theta_var = np.pi/16        # Variance of diffusion noise added to particles' orientation component
@@ -238,6 +239,11 @@ iter_num = 0
 test_ind = test_start_ind
 try:
 	while True:
+		if iter_num == 0:
+			centroid = np.mean(test_clouds[test_ind], axis=0)
+			axis = PCA(n_components=1).fit(cloud).components_[0]
+			angle = np.arctan2(axis[1], axis[0])
+
 		pf.weight()
 		mle = pf.predict_mle()
 		mean = pf.predict_mean()
@@ -292,6 +298,17 @@ try:
 			test_ind = test_ind + 1
 			if test_ind >= mouse_dataset.n_test:
 				break
+			# Dynamics update
+			last_centroid = centroid
+			last_angle = angle
+			centroid = np.mean(test_clouds[test_ind], axis=0)
+			axis = PCA(n_components=1).fit(cloud).components_[0]
+			angle = np.arctan2(axis[1], axis[0])
+			dxy = centroid - last_centroid
+			dtheta = angle - last_angle
+			for i in range(pf.n_particles):
+				pf.particles[i][0:2] = pf.particles[i][0:2] + dxy
+				pf.particles[i][2] = pf.particles[i][2] + dtheta
 except KeyboardInterrupt:
 	pass
 
