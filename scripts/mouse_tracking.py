@@ -56,6 +56,8 @@ normalized_train_data, translations, rotations = normalization.normalize_pointcl
 train_clouds = [mouse_dataset.train_clouds[i][:,[1,0]] for i in train_inds]
 normalized_train_clouds = [np.matmul(train_clouds[i] - translations[i], rotations[i]) for i in range(n_train)]
 
+test_clouds = [cloud[:,[1,0]] for cloud in mouse_dataset.test_clouds]
+
 ####################
 # Coordinate Chart #
 ####################
