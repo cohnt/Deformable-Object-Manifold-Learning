@@ -293,7 +293,7 @@ try:
 		draw_pose(ax2, mouse_dataset.test_poses[test_ind], "black", "Ground Truth")
 
 		ax2.legend()
-		fig.suptitle("Iteration %04d" % iter_num)
+		fig.suptitle("Iteration %04d\n Image %04d" % (iter_num, test_ind))
 
 		plt.draw()
 		plt.pause(0.001)
