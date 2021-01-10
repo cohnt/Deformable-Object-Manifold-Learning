@@ -197,7 +197,7 @@ def diffuser(particle):
 	theta = (theta + np.random.normal(0, theta_var)) % (2 * np.pi)
 
 	while True:
-		delta = np.random.multivariate_normal(np.zeros(2), deformation_var * np.eye(2))
+		delta = np.random.multivariate_normal(np.zeros(target_dim), deformation_var * np.eye(target_dim))
 		if cc.check_domain([deform + delta])[0]:
 			deform = deform + delta
 			break
