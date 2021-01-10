@@ -16,9 +16,9 @@ import data.mouse_dataset.mouse_dataset as mouse_dataset
 #########################
 
 # General parameters
-track = True        # If true, track normally. If false, don't increase the frame number with each iteration.
+track = False        # If true, track normally. If false, don't increase the frame number with each iteration.
                      # False allows us to test only localizing in a single frame.
-zoom_on_mouse = False # If True, the plots are focused on the mouse.
+zoom_on_mouse = True # If True, the plots are focused on the mouse.
 
 # Dataset parameters
 n_train = 500        # Number of training samples to use
@@ -33,9 +33,9 @@ neighbors_k = 12 # The number of neighbors used for ISOMAP.
 # Particle filter
 n_particles = 200           # Number of particles
 exploration_factor = 0.1   # Fraction of particles used to explore
-xy_var = 5                # Variance of diffusion noise added to particles' position component
+xy_var = 1                # Variance of diffusion noise added to particles' position component
 theta_var = np.pi/16        # Variance of diffusion noise added to particles' orientation component
-deformation_var = 5       # Variance of diffusion noise added to particles' deformation component
+deformation_var = 10       # Variance of diffusion noise added to particles' deformation component
 keep_best = True            # Keep the best guess unchanged
 approximate_iou_frac = 0.05 # The fraction of points in the point cloud to use for computing iou likelihood
 
