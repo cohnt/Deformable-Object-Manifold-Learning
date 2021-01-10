@@ -16,11 +16,13 @@ import data.mouse_dataset.mouse_dataset as mouse_dataset
 #########################
 
 # General parameters
-track = False        # If true, track normally. If false, don't increase the frame number with each iteration.
+track = True        # If true, track normally. If false, don't increase the frame number with each iteration.
                      # False allows us to test only localizing in a single frame.
-zoom_on_mouse = True # If True, the plots are focused on the mouse.
+zoom_on_mouse = False # If True, the plots are focused on the mouse.
 focused_initial_samples = True # If True, uniform random guesses are centered around the mouse point cloud
                                # Only works when track is False or exploration_factor is 0
+iters_per_frame = 3 # If tracking, the number of iterations before updating to the next image
+
 # Dataset parameters
 n_train = 500        # Number of training samples to use
 random_train = False # Optionally randomly select the training images from the whole dataset
@@ -303,7 +305,7 @@ try:
 		pf.diffuse()
 
 		iter_num = iter_num + 1
-		if track:
+		if track and (iter_num % iters_per_frame == 0):
 			test_ind = test_ind + 1
 			if test_ind >= mouse_dataset.n_test:
 				break
