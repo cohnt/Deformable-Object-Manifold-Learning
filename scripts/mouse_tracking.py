@@ -19,6 +19,7 @@ import data.mouse_dataset.mouse_dataset as mouse_dataset
 track = False        # If true, track normally. If false, don't increase the frame number with each iteration.
                      # False allows us to test only localizing in a single frame.
 zoom_on_mouse = True # If True, the plots are focused on the mouse.
+focused_initial_samples = True # If True, uniform random guesses are centered around the mouse point cloud
 
 # Dataset parameters
 n_train = 500        # Number of training samples to use
@@ -32,7 +33,7 @@ neighbors_k = 12 # The number of neighbors used for ISOMAP.
 
 # Particle filter
 n_particles = 200           # Number of particles
-exploration_factor = 0.1   # Fraction of particles used to explore
+exploration_factor = 0   # Fraction of particles used to explore
 xy_var = 1                # Variance of diffusion noise added to particles' position component
 theta_var = np.pi/16        # Variance of diffusion noise added to particles' orientation component
 deformation_var = 10       # Variance of diffusion noise added to particles' deformation component
@@ -84,13 +85,21 @@ def compute_pose(xy,theta,transformed_point):
 	return point_cloud
 
 def rand_sampler(n):
+	if focused_initial_samples:
+		y_min, x_min = np.min(mouse_dataset.test_clouds[0], axis=0) - 5
+		y_max, x_max = np.max(mouse_dataset.test_clouds[0], axis=0) + 5
+	else:
+		x_min = y_min = 0
+		x_max = camera_size[0]
+		y_max = camera_size[1]
+
 	xy = np.zeros((n,2))
 	theta = np.zeros(n)
 	deform = np.zeros((n,cc.target_dim))
 	points = np.zeros((n,2+1+cc.target_dim))
 
-	xy[:,0] = np.random.uniform(low=0, high=camera_size[0], size=n)
-	xy[:,1] = np.random.uniform(low=0, high=camera_size[1], size=n)
+	xy[:,0] = np.random.uniform(low=x_min, high=x_max, size=n)
+	xy[:,1] = np.random.uniform(low=y_min, high=y_max, size=n)
 	theta = np.random.uniform(low=0, high=2*np.pi, size=n)
 	deform = cc.uniform_sample(n)
 
