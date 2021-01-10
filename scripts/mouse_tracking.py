@@ -22,6 +22,7 @@ zoom_on_mouse = False # If True, the plots are focused on the mouse.
 focused_initial_samples = True # If True, uniform random guesses are centered around the mouse point cloud
                                # Only works when track is False or exploration_factor is 0
 iters_per_frame = 3 # If tracking, the number of iterations before updating to the next image
+draw_intermediate_frames = False # If True, draw all iterations, otherwise, only draw the final iteration for each frame
 
 # Dataset parameters
 n_train = 500        # Number of training samples to use
@@ -275,31 +276,32 @@ try:
 			y_max, x_max = np.max(mouse_dataset.test_clouds[test_ind], axis=0) + 5
 
 		# Display
-		ax1.clear()
-		ax2.clear()
-		ax1.set_xlim(x_min, x_max)
-		ax1.set_ylim(y_min, y_max)
-		ax2.set_xlim(x_min, x_max)
-		ax2.set_ylim(y_min, y_max)
+		if (not track) or draw_intermediate_frames or (iter_num % iters_per_frame == -1 % iters_per_frame):
+			ax1.clear()
+			ax2.clear()
+			ax1.set_xlim(x_min, x_max)
+			ax1.set_ylim(y_min, y_max)
+			ax2.set_xlim(x_min, x_max)
+			ax2.set_ylim(y_min, y_max)
 
-		ax1.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
-		ax2.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
+			ax1.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
+			ax2.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
 
-		for i in range(n_particles):
-			draw_pose(ax1, manifold_poses[i], plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]))
-		draw_pose(ax2, manifold_poses[pf.max_weight_ind], "red", "MLE Particle")
-		draw_pose(ax2, mean_pose, "green", "Mean Particle")
-		draw_pose(ax1, mouse_dataset.test_poses[test_ind], "black")
-		draw_pose(ax2, mouse_dataset.test_poses[test_ind], "black", "Ground Truth")
+			for i in range(n_particles):
+				draw_pose(ax1, manifold_poses[i], plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]))
+			draw_pose(ax2, manifold_poses[pf.max_weight_ind], "red", "MLE Particle")
+			draw_pose(ax2, mean_pose, "green", "Mean Particle")
+			draw_pose(ax1, mouse_dataset.test_poses[test_ind], "black")
+			draw_pose(ax2, mouse_dataset.test_poses[test_ind], "black", "Ground Truth")
 
-		ax2.legend()
-		fig.suptitle("Iteration %04d\n Image %04d" % (iter_num, test_ind))
+			ax2.legend()
+			fig.suptitle("Iteration %04d\n Image %04d" % (iter_num, test_ind))
 
-		plt.draw()
-		plt.pause(0.001)
+			plt.draw()
+			plt.pause(0.001)
 
-		plt.savefig("iter%04d.svg" % iter_num)
-		plt.savefig("iter%04d.png" % iter_num)
+			plt.savefig("iter%04d.svg" % iter_num)
+			plt.savefig("iter%04d.png" % iter_num)
 
 		pf.resample()
 		pf.diffuse()
@@ -321,6 +323,6 @@ try:
 				pf.particles[i][0:2] = pf.particles[i][0:2] + dxy
 				pf.particles[i][2] = pf.particles[i][2] + dtheta
 except KeyboardInterrupt:
-	fig.close()
+	plt.close(fig)
 
 visualization.combine_images_to_video("iter\%04d.png")
