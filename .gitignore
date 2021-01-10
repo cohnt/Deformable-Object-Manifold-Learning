@@ -1,6 +1,7 @@
 *.mp4
 test_history/*
 iteration*
+iter*
 actual*
 data/mouse_dataset/*
 data/nyu_hand_dataset/*
