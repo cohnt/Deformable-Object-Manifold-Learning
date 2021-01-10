@@ -75,12 +75,13 @@ def create_interactive_embedding_visulization(cc, point_cloud_dim):
 		axes[0].set_ylim(ylim)
 
 		# Transform the selected point
-		point = cc.single_inverse_mapping(xy)
-		point_cloud = point.reshape(-1, point_cloud_dim)
+		point_cloud = normalized_train_data[simplex_indices[0]]
+		mouse_cloud = normalized_train_clouds[simplex_indices[0]]
 
 		# Draw the original point cloud
 		axes[1].clear()
 		axes[1].scatter(point_cloud[:,0], point_cloud[:,1], s=20**2)
+		axes[1].scatter(mouse_cloud[:,0], mouse_cloud[:,1], s=10**2, c="grey")
 		axes[1].set_xlim(mfd_xlims)
 		axes[1].set_ylim(mfd_ylims)
 
