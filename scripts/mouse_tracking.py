@@ -321,6 +321,6 @@ try:
 				pf.particles[i][0:2] = pf.particles[i][0:2] + dxy
 				pf.particles[i][2] = pf.particles[i][2] + dtheta
 except KeyboardInterrupt:
-	pass
+	fig.close()
 
 visualization.combine_images_to_video("iter\%04d.png")
