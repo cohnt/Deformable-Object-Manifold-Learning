@@ -25,7 +25,7 @@ iters_per_frame = 3 # If tracking, the number of iterations before updating to t
 
 # Dataset parameters
 n_train = 500        # Number of training samples to use
-random_train = False # Optionally randomly select the training images from the whole dataset
+random_train = True # Optionally randomly select the training images from the whole dataset
 test_start_ind = 0   # Can start the test sequence at a different index if desired
 camera_size = 2 * np.array([mouse_dataset.cx, mouse_dataset.cy])
 
