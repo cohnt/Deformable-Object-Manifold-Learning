@@ -53,9 +53,9 @@ def create_interactive_embedding_visulization(cc, point_cloud_dim):
 	xlim = axes[0].get_xlim()
 	ylim = axes[0].get_ylim()
 
-
-	mfd_xlims = (np.min(cc.train_data.reshape(len(cc.train_data),-1,point_cloud_dim)[:,:,0]), np.max(cc.train_data.reshape(len(cc.train_data),-1,point_cloud_dim)[:,:,0]))
-	mfd_ylims = (np.min(cc.train_data.reshape(len(cc.train_data),-1,point_cloud_dim)[:,:,1]), np.max(cc.train_data.reshape(len(cc.train_data),-1,point_cloud_dim)[:,:,1]))
+	every_possible_point = np.concatenate(normalized_train_clouds)
+	mfd_xlims = (np.min(every_possible_point[:,0]), np.max(every_possible_point[:,0]))
+	mfd_ylims = (np.min(every_possible_point[:,1]), np.max(every_possible_point[:,1]))
 
 	def hover(event):
 		xy = np.array([event.xdata, event.ydata])
