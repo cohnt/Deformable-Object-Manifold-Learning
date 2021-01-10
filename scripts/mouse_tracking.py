@@ -300,8 +300,12 @@ try:
 			plt.draw()
 			plt.pause(0.001)
 
-			plt.savefig("iter%04d.svg" % iter_num)
-			plt.savefig("iter%04d.png" % iter_num)
+			if (not track) or draw_intermediate_frames:
+				plt.savefig("iter%04d.svg" % iter_num)
+				plt.savefig("iter%04d.png" % iter_num)
+			else:
+				plt.savefig("iter%04d.svg" % test_ind)
+				plt.savefig("iter%04d.png" % test_ind)
 
 		pf.resample()
 		pf.diffuse()
