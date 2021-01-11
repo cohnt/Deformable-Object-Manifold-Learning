@@ -79,7 +79,7 @@ class Delaunay1D():
 		idx = np.searchsorted(self.sorted_points, point)
 		if idx == 0 or idx == len(self.points):
 			return -1
-		simplex_idx = self.inds[idx]
+		simplex_idx = self.inds[idx][0]
 		return simplex_idx
 
 def test_coordinate_chart():
@@ -122,3 +122,8 @@ def test_coordinate_chart():
 
 if __name__ == "__main__":
 	test_coordinate_chart()
+	data = np.array([1, 2, 3, 4, 6, 5])
+	data = np.array([data, data]).T
+	cc = CoordinateChart(data, 1, 3)
+	print cc.embedding
+	print cc.single_inverse_mapping(np.array([0]))
