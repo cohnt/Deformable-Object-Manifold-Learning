@@ -11,7 +11,10 @@ class CoordinateChart():
 
 		self.ism = Isomap(n_neighbors=self.neighbors_k, n_components=self.target_dim, n_jobs=-1)
 		self.embedding = self.ism.fit_transform(train_data)
-		self.tri = Delaunay(self.embedding, qhull_options="QJ")
+		if self.target_dim > 1:
+			self.tri = Delaunay(self.embedding, qhull_options="QJ")
+		else:
+			self.tri = Delaunay1D(self.embedding)
 
 		self.mins = np.min(self.embedding, axis=0)
 		self.maxs = np.max(self.embedding, axis=0)
@@ -64,6 +67,21 @@ class CoordinateChart():
 					break
 		return points
 
+class Delaunay1D():
+	def __init__(self, data):
+		self.points = data
+		self.points_flat = self.points.flatten()
+		self.inds = np.argsort(self.points_flat)
+		self.sorted_points = self.points_flat[self.inds]
+		self.simplices = np.array([self.inds[:-1], self.inds[1:]]).T
+
+	def find_simplex(self, point):
+		idx = np.searchsorted(self.sorted_points, point)
+		if idx == 0 or idx == len(self.points):
+			return -1
+		simplex_idx = self.inds[idx][0]
+		return simplex_idx
+
 def test_coordinate_chart():
 	n = 200
 	higher_dim = 3
@@ -104,3 +122,8 @@ def test_coordinate_chart():
 
 if __name__ == "__main__":
 	test_coordinate_chart()
+	data = np.array([1, 2, 3, 4, 6, 5])
+	data = np.array([data, data]).T
+	cc = CoordinateChart(data, 1, 3)
+	print cc.embedding
+	print cc.single_inverse_mapping(np.array([0]))
