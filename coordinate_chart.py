@@ -64,6 +64,21 @@ class CoordinateChart():
 					break
 		return points
 
+class Delaunay1D():
+	def __init__(self, data):
+		self.points = data
+		self.points_flat = self.points.flatten()
+		self.inds = np.argsort(self.points_flat)
+		self.sorted_points = self.points_flat[self.inds]
+		self.simplices = np.array([self.inds[:-1], self.inds[1:]]).T
+
+	def find_simplex(self, point):
+		idx = np.searchsorted(self.sorted_points, point)
+		if idx == 0 or idx == len(self.points):
+			return -1
+		simplex_idx = self.inds[idx]
+		return simplex_idx
+
 def test_coordinate_chart():
 	n = 200
 	higher_dim = 3
