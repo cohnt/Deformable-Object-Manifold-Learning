@@ -11,7 +11,10 @@ class CoordinateChart():
 
 		self.ism = Isomap(n_neighbors=self.neighbors_k, n_components=self.target_dim, n_jobs=-1)
 		self.embedding = self.ism.fit_transform(train_data)
-		self.tri = Delaunay(self.embedding, qhull_options="QJ")
+		if self.target_dim > 1:
+			self.tri = Delaunay(self.embedding, qhull_options="QJ")
+		else:
+			self.tri = Delaunay1D(self.embedding)
 
 		self.mins = np.min(self.embedding, axis=0)
 		self.maxs = np.max(self.embedding, axis=0)
