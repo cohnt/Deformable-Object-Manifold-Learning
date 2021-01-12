@@ -230,8 +230,8 @@ my_err_bars = [my_means - np.min(my_data, axis=1), np.max(my_data, axis=1) - my_
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.errorbar(dim_list, orig_means, yerr=orig_err_bars, label="Regular PF", capsize=5)
-ax.errorbar(dim_list, my_means, yerr=my_err_bars, label="Coordinate Chart PF", capsize=5)
+ax.errorbar(np.array(dim_list, dtype=int)+3, orig_means, yerr=orig_err_bars, label="Regular PF", capsize=5)
+ax.errorbar(np.array(dim_list, dtype=int)+3, my_means, yerr=my_err_bars, label="Coordinate Chart PF", capsize=5)
 ax.set_xlabel("Data Dimension")
 ax.set_ylabel("Average Number of Iterations to Converge")
 ax.legend()
