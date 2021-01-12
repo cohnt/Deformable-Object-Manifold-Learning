@@ -59,6 +59,8 @@ def create_interactive_embedding_visulization(cc, point_cloud_dim):
 
 	def hover(event):
 		xy = np.array([event.xdata, event.ydata])
+		if xy[0] is None or xy[1] is None:
+			return
 
 		# Find the nearest embedding point
 		nearest_idx = -1
