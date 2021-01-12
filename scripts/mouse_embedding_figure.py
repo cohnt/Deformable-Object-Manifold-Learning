@@ -60,23 +60,24 @@ def create_interactive_embedding_visulization(cc, point_cloud_dim):
 	def hover(event):
 		xy = np.array([event.xdata, event.ydata])
 
-		# Check if xy is in the convex hull, and get simplex indices
-		simplex_num = cc.tri.find_simplex(xy)
-		if simplex_num == -1:
-			return
-		simplex_indices = cc.tri.simplices[simplex_num]
-		simplex = cc.tri.points[simplex_indices]
+		# Find the nearest embedding point
+		nearest_idx = -1
+		nearest_dist = np.inf
+		for i in range(len(cc.embedding)):
+			if np.linalg.norm(cc.embedding[i] - xy) < nearest_dist:
+				nearest_dist = np.linalg.norm(cc.embedding[i] - xy)
+				nearest_idx = i
 
-		# Display the simplex vertices
+		# Display the embedding and highlighted point
 		axes[0].clear()
 		axes[0].scatter(cc.embedding[:,0], cc.embedding[:,1], c="grey", s=20**2) # Draw the embedding points
-		axes[0].scatter([cc.embedding[simplex_indices[0],0]], [cc.embedding[simplex_indices[0],1]], c="blue", s=20**2) # Highlight the first simplex point
+		axes[0].scatter([cc.embedding[nearest_idx,0]], [cc.embedding[nearest_idx,1]], c="blue", s=20**2) # Draw the nearest point
 		axes[0].set_xlim(xlim) # Fix axes limits
 		axes[0].set_ylim(ylim)
 
 		# Transform the selected point
-		point_cloud = normalized_train_data[simplex_indices[0]]
-		mouse_cloud = normalized_train_clouds[simplex_indices[0]]
+		point_cloud = normalized_train_data[nearest_idx]
+		mouse_cloud = normalized_train_clouds[nearest_idx]
 
 		# Draw the original point cloud
 		axes[1].clear()
