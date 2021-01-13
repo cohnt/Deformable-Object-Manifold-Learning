@@ -1,5 +1,5 @@
 *.mp4
-test_history/*
+testing_history/*
 iteration*
 iter*
 actual*
