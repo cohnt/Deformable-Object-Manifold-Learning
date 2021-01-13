@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 
 class ParticleFilter():
 	def __init__(self, dimension, n_particles, exploration_factor, keep_best, RandomSampler, Likelihood, Diffuser):
@@ -28,7 +29,7 @@ class ParticleFilter():
 	def weight(self):
 		# Compute weights for all particles, and normalize weights so their sum is 1.
 		# Determine the highest weight particle.
-		for i in range(self.n_particles):
+		for i in tqdm(range(self.n_particles)):
 			self.weights[i] = self.Likelihood(self.particles[i])
 		normalizaion_factor = np.sum(self.weights)
 		self.weights = self.weights / normalizaion_factor
