@@ -11,7 +11,7 @@ import visualization
 train_resolution = 0.15 # Distance between each point in the training dataset
 target_dim = 2
 neighbors_k = 5
-n_particles = 25
+n_particles = 100
 exploration_factor = 0.1
 pos_var = 0.001 # Variance of the diffusion noise
 pause_length = 1 # How long to pause between each iteration (so we can look at results)
@@ -80,7 +80,11 @@ while True:
 	ax1.set_zlim(z_min, z_max)
 	ax1.view_init(30, 285)
 
-	ax1.scatter(manifold_particles[:,0], manifold_particles[:,1], manifold_particles[:,2], cmap=plt.cm.cool, c=pf.weights, s=8**2)
+	mask1 = manifold_particles[:,1] > 0.2
+	mask2 = manifold_particles[:,1] < 0.8
+	mask = np.logical_and(mask1, mask2)
+
+	ax1.scatter(manifold_particles[mask,0], manifold_particles[mask,1], manifold_particles[mask,2], cmap=plt.cm.cool, c=pf.weights[mask], s=8**2)
 	ax1.scatter([manifold_mle[0]], [manifold_mle[1]], [manifold_mle[2]], color="black", marker="*", s=20**2)
 	ax1.scatter([manifold_mean[0]], [manifold_mean[1]], [manifold_mean[2]], color="black", marker="x", s=20**2)
 	ax1.scatter([ground_truth[0]], [ground_truth[1]], [ground_truth[2]], color="green", marker="+", s=20**2)
