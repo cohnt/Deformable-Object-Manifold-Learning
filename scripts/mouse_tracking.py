@@ -16,13 +16,14 @@ import data.mouse_dataset.mouse_dataset as mouse_dataset
 #########################
 
 # General parameters
-track = True        # If true, track normally. If false, don't increase the frame number with each iteration.
+track = False        # If true, track normally. If false, don't increase the frame number with each iteration.
                      # False allows us to test only localizing in a single frame.
-zoom_on_mouse = False # If True, the plots are focused on the mouse.
+zoom_on_mouse = True # If True, the plots are focused on the mouse.
 focused_initial_samples = True # If True, uniform random guesses are centered around the mouse point cloud
                                # Only works when track is False or exploration_factor is 0
 iters_per_frame = 3 # If tracking, the number of iterations before updating to the next image
 draw_intermediate_frames = False # If True, draw all iterations, otherwise, only draw the final iteration for each frame
+output_dir = "results/"
 
 # Dataset parameters
 n_train = 500        # Number of training samples to use
@@ -35,7 +36,7 @@ target_dim = 2   # The target dimension for ISOMAP.
 neighbors_k = 12 # The number of neighbors used for ISOMAP.
 
 # Particle filter
-n_particles = 200           # Number of particles
+n_particles = 100           # Number of particles
 exploration_factor = 0   # Fraction of particles used to explore
 xy_var = 0.5                # Variance of diffusion noise added to particles' position component
 theta_var = np.pi/32        # Variance of diffusion noise added to particles' orientation component
@@ -249,6 +250,8 @@ plt.pause(0.001)
 
 iter_num = 0
 test_ind = test_start_ind
+mle_errs = []
+mean_errs = []
 try:
 	while True:
 		if iter_num == 0:
@@ -270,6 +273,12 @@ try:
 			mean_pose = compute_pose(mean_xy, mean_theta, mean_manifold_deformation)
 		else:
 			mean_pose = np.array([[0, 0]])
+
+		mle_error = np.sum(np.linalg.norm(manifold_poses[pf.max_weight_ind] - mouse_dataset.test_poses[test_ind][:,:2], axis=1))
+		mean_error = np.sum(np.linalg.norm(mean_pose - mouse_dataset.test_poses[test_ind][:,:2], axis=1))
+		mle_errs.append(mle_error)
+		mean_errs.append(mean_error)
+		print "Iteration %004d Image %004d MLE Error: %f Mean Error: %f" % (iter_num, test_ind, mle_error, mean_error)
 
 		if zoom_on_mouse:
 			y_min, x_min = np.min(mouse_dataset.test_clouds[test_ind], axis=0) - 5
@@ -300,8 +309,12 @@ try:
 			plt.draw()
 			plt.pause(0.001)
 
-			plt.savefig("iter%04d.svg" % iter_num)
-			plt.savefig("iter%04d.png" % iter_num)
+			if (not track) or draw_intermediate_frames:
+				plt.savefig(output_dir + ("iter%04d.svg" % iter_num))
+				plt.savefig(output_dir + ("iter%04d.png" % iter_num))
+			else:
+				plt.savefig(output_dir + ("iter%04d.svg" % test_ind))
+				plt.savefig(output_dir + ("iter%04d.png" % test_ind))
 
 		pf.resample()
 		pf.diffuse()
@@ -325,4 +338,17 @@ try:
 except KeyboardInterrupt:
 	plt.close(fig)
 
-visualization.combine_images_to_video("iter\%04d.png")
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.plot(range(len(mle_errs)), mle_errs, c="red", label="MLE")
+ax.plot(range(len(mean_errs)), mean_errs, c="green", label="Mean")
+ax.set_xlabel("Iteration Number")
+ax.set_ylabel("Error")
+ax.legend()
+visualization.maximize_window()
+plt.draw()
+plt.pause(0.001)
+plt.savefig(output_dir + "error_graph.svg")
+plt.savefig(output_dir + "error_graph.png")
+plt.close(fig)
+visualization.combine_images_to_video(output_dir + "iter\%04d.png", output_dir + "out.mp4")
