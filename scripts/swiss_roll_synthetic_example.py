@@ -41,7 +41,7 @@ def likelihood(point):
 def diffuser(point):
 	while True:
 		delta = np.random.multivariate_normal(np.zeros(target_dim), pos_var*np.eye(target_dim))
-		if cc.check_domain([point + delta])[0]:
+		if cc.check_domain(point + delta):
 			return point + delta
 
 pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, cc.uniform_sample, likelihood, diffuser)
