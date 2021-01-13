@@ -1,13 +1,16 @@
 import numpy as np
+from tqdm import tqdm
+from joblib import Parallel, delayed
 
 class ParticleFilter():
-	def __init__(self, dimension, n_particles, exploration_factor, keep_best, RandomSampler, Likelihood, Diffuser):
+	def __init__(self, dimension, n_particles, exploration_factor, keep_best, RandomSampler, Likelihood, Diffuser, n_jobs=-1, joblib_backend="loky"):
 		# Particles will simply be stored as numpy arrays (of size "dimension").
 		# exploration_factor is the fraction (between 0 and 1) of particles which are randomly sampled at each iteration.
 		# keep_best is a boolean that determines whether or not the best particle is kept without any diffusion noise.
 		# RandomSampler is a function which returns a list of n random valid particles.
 		# Likelihood is a function which takes in a particle, and returns the likelihood that the particle is the ground truth.
 		# Diffuser is a function which takes in a particle, and returns a new particle with added noise.
+		# n_jobs is the number of processors to use for multithreaded components. -1 means use all processors.
 		self.dimension = dimension
 		self.n_particles = n_particles
 		self.exploration_factor = exploration_factor
@@ -16,6 +19,7 @@ class ParticleFilter():
 		self.SingleSample = lambda : self.RandomSampler(1)[0]
 		self.Likelihood = Likelihood
 		self.Diffuser = Diffuser
+		self.parallel = Parallel(n_jobs=n_jobs, verbose=0, backend=joblib_backend)
 
 		self.init_particles()
 
@@ -28,8 +32,7 @@ class ParticleFilter():
 	def weight(self):
 		# Compute weights for all particles, and normalize weights so their sum is 1.
 		# Determine the highest weight particle.
-		for i in range(self.n_particles):
-			self.weights[i] = self.Likelihood(self.particles[i])
+		self.weights = np.asarray(self.parallel(delayed(self.Likelihood)(self.particles[i]) for i in tqdm(range(self.n_particles))))
 		normalizaion_factor = np.sum(self.weights)
 		self.weights = self.weights / normalizaion_factor
 		self.max_weight_ind = np.argmax(self.weights)
@@ -76,8 +79,8 @@ class ParticleFilter():
 			start = 1
 		else:
 			start = 0
-		for i in range(start, self.n_particles):
-			self.particles[i] = self.Diffuser(self.particles[i])
+		old_particles = self.particles.copy()
+		self.particles = np.asarray(self.parallel(delayed(self.Diffuser)(old_particles[i]) for i in range(self.n_particles)))
 
 def test_particle_filter():
 	dimension = 2
@@ -98,13 +101,15 @@ def test_particle_filter():
 		pf.weight()
 		mle = pf.predict_mle()
 		mean = pf.predict_mean()
+		plt.cla()
 		plt.scatter(pf.particles[:,0], pf.particles[:,1], c=pf.weights)
 		plt.scatter([mle[0]], [mle[1]], marker="D", color="black")
 		plt.scatter([mean[0]], [mean[1]], marker="X", color="black")
 		plt.scatter([0], [0], marker="*", color="red")
 		plt.xlim(-1, 1)
 		plt.ylim(-1, 1)
-		plt.show()
+		plt.draw()
+		plt.pause(1)
 		pf.resample()
 		pf.diffuse()
 
