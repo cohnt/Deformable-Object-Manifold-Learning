@@ -249,6 +249,7 @@ plt.pause(0.001)
 
 iter_num = 0
 test_ind = test_start_ind
+errs = []
 try:
 	while True:
 		if iter_num == 0:
@@ -265,6 +266,7 @@ try:
 		manifold_poses = [compute_pose(unpacked_particles[i][0], unpacked_particles[i][1], manifold_deformations[i]) for i in range(n_particles)]
 
 		mle_error = np.sum(np.linalg.norm(manifold_poses[pf.max_weight_ind] - mouse_dataset.test_poses[test_ind][:,:2], axis=1))
+		errs.append(mle_error)
 		print "Iteration %004d Image %004d MLE Error: %f" % (iter_num, test_ind, mle_error)
 
 		mean_xy, mean_theta, mean_deformation = unpack_particle(mean)
@@ -332,4 +334,10 @@ try:
 except KeyboardInterrupt:
 	plt.close(fig)
 
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.plot(range(len(errs)), errs)
+ax.set_xlabel("Iteration Number")
+ax.set_ylabel("MLE Error")
+plt.show()
 visualization.combine_images_to_video("iter\%04d.png")
