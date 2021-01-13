@@ -21,12 +21,15 @@ class CoordinateChart():
 		self.p2p = self.maxs - self.mins
 
 	def inverse_mapping(self, points):
-		# points should be a numpy array of shape [*,target_dim]
-		# This function will return a numpy array of shape [*,source_dim]
-		mapped_points = np.zeros((len(points), self.source_dim))
-		for i in range(len(points)):
-			mapped_points[i,:] = self.single_inverse_mapping(points[i])
-		return mapped_points
+		# points should be a numpy array of shape [target_dim] or [*,target_dim]
+		# This function will return a numpy array of shape [source_dim] or [*,source_dim]
+		if points.ndim == 1:
+			return self.single_inverse_mapping(points)
+		elif points.ndim == 2:
+			mapped_points = np.zeros((len(points), self.source_dim))
+			for i in range(len(points)):
+				mapped_points[i,:] = self.single_inverse_mapping(points[i])
+			return mapped_points
 
 	def single_inverse_mapping(self, point):
 		# Simplex lookup
@@ -53,8 +56,11 @@ class CoordinateChart():
 		return mapped_point
 
 	def check_domain(self, points):
-		simplex_nums = self.tri.find_simplex(points)
-		return simplex_nums != -1
+		if points.ndim == 1:
+			return (self.tri.find_simplex(points) != -1)
+		elif points.ndim == 2:
+			simplex_nums = self.tri.find_simplex(points)
+			return simplex_nums != -1
 
 	def uniform_sample(self, n):
 		points = np.zeros((n,self.target_dim))
@@ -62,7 +68,7 @@ class CoordinateChart():
 			while True:
 				start = np.random.rand(self.target_dim)
 				point = np.matmul(start, np.diag(self.p2p)) + self.mins
-				if self.check_domain([point])[0]:
+				if self.check_domain(point):
 					points[i] = point
 					break
 		return points
