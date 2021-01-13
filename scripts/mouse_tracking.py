@@ -23,6 +23,7 @@ focused_initial_samples = True # If True, uniform random guesses are centered ar
                                # Only works when track is False or exploration_factor is 0
 iters_per_frame = 3 # If tracking, the number of iterations before updating to the next image
 draw_intermediate_frames = False # If True, draw all iterations, otherwise, only draw the final iteration for each frame
+output_dir = "results/"
 
 # Dataset parameters
 n_train = 500        # Number of training samples to use
@@ -35,7 +36,7 @@ target_dim = 2   # The target dimension for ISOMAP.
 neighbors_k = 12 # The number of neighbors used for ISOMAP.
 
 # Particle filter
-n_particles = 200           # Number of particles
+n_particles = 100           # Number of particles
 exploration_factor = 0   # Fraction of particles used to explore
 xy_var = 0.5                # Variance of diffusion noise added to particles' position component
 theta_var = np.pi/32        # Variance of diffusion noise added to particles' orientation component
@@ -309,11 +310,11 @@ try:
 			plt.pause(0.001)
 
 			if (not track) or draw_intermediate_frames:
-				plt.savefig("iter%04d.svg" % iter_num)
-				plt.savefig("iter%04d.png" % iter_num)
+				plt.savefig(output_dir + ("iter%04d.svg" % iter_num))
+				plt.savefig(output_dir + ("iter%04d.png" % iter_num))
 			else:
-				plt.savefig("iter%04d.svg" % test_ind)
-				plt.savefig("iter%04d.png" % test_ind)
+				plt.savefig(output_dir + ("iter%04d.svg" % test_ind))
+				plt.savefig(output_dir + ("iter%04d.png" % test_ind))
 
 		pf.resample()
 		pf.diffuse()
@@ -344,5 +345,6 @@ ax.plot(range(len(mean_errs)), mean_errs, c="green", label="Mean")
 ax.set_xlabel("Iteration Number")
 ax.set_ylabel("Error")
 ax.legend()
-plt.show()
+plt.savefig(output_dir + "error_graph.svg")
+plt.savefig(output_dir + "error_graph.png")
 visualization.combine_images_to_video("iter\%04d.png")
