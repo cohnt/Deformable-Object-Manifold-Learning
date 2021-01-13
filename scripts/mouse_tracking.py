@@ -264,6 +264,9 @@ try:
 		manifold_deformations = [cc.single_inverse_mapping(p[2]) for p in unpacked_particles]
 		manifold_poses = [compute_pose(unpacked_particles[i][0], unpacked_particles[i][1], manifold_deformations[i]) for i in range(n_particles)]
 
+		mle_error = np.sum(np.linalg.norm(manifold_poses[pf.max_weight_ind] - mouse_dataset.test_poses[test_ind][:,:2], axis=1))
+		print "Iteration %004d Image %004d MLE Error: %f" % (iter_num, test_ind, mle_error)
+
 		mean_xy, mean_theta, mean_deformation = unpack_particle(mean)
 		if cc.check_domain([mean_deformation])[0]:
 			mean_manifold_deformation = cc.single_inverse_mapping(mean_deformation)
