@@ -79,8 +79,8 @@ class ParticleFilter():
 			start = 1
 		else:
 			start = 0
-		for i in range(start, self.n_particles):
-			self.particles[i] = self.Diffuser(self.particles[i])
+		old_particles = self.particles.copy()
+		self.particles = np.asarray(self.parallel(delayed(self.Diffuser)(old_particles[i]) for i in range(self.n_particles)))
 
 def test_particle_filter():
 	dimension = 2
