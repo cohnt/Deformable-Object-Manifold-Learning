@@ -6,3 +6,4 @@ actual*
 data/mouse_dataset/*
 data/nyu_hand_dataset/*
 *.pyc
+results/*
