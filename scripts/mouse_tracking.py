@@ -44,6 +44,7 @@ deformation_var = 10       # Variance of diffusion noise added to particles' def
 keep_best = True            # Keep the best guess unchanged
 approximate_iou_frac = 0.05 # The fraction of points in the point cloud to use for computing iou likelihood
 add_noise_individually = False # Only add noise to xy, theta, or deformation.
+use_median_angle = False # Use median instead of mean for the angle (i.e. L1 minimizer instead of L2)
 
 ###########
 # Dataset #
@@ -279,8 +280,12 @@ try:
 		pf.weight()
 		mle = pf.predict_mle()
 		mean = pf.predict_mean()
-		mean_angle = utility.mean_angle(pf.particles[:,2])
-		mean[2] = mean_angle
+		if use_median_angle:
+			median_angle = utility.weighted_median(pf.particles[:,2], pf.weights)
+			mean[2] = median_angle
+		else:
+			mean_angle = utility.mean_angle(pf.particles[:,2])
+			mean[2] = mean_angle
 
 		unpacked_particles = [unpack_particle(p) for p in pf.particles]
 		manifold_deformations = [cc.single_inverse_mapping(p[2]) for p in unpacked_particles]
