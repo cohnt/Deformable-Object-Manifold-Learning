@@ -23,3 +23,9 @@ def mean_angle(angles):
 	c = np.cos(angles)
 	s = np.sin(angles)
 	return np.arctan2(np.sum(s)/len(angles), np.sum(c)/len(angles))
+
+def weighted_median(arr, weights):
+	# Returns the weighted median of a list of values
+	cs = np.cumsum(weights)
+	idx = np.searchsorted(cs, cs[-1] / 2.0)
+	return arr[idx]
