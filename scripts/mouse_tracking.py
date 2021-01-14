@@ -16,9 +16,9 @@ import data.mouse_dataset.mouse_dataset as mouse_dataset
 #########################
 
 # General parameters
-track = False        # If true, track normally. If false, don't increase the frame number with each iteration.
+track = True        # If true, track normally. If false, don't increase the frame number with each iteration.
                      # False allows us to test only localizing in a single frame.
-zoom_on_mouse = True # If True, the plots are focused on the mouse.
+zoom_on_mouse = False # If True, the plots are focused on the mouse.
 focused_initial_samples = True # If True, uniform random guesses are centered around the mouse point cloud
                                # Only works when track is False or exploration_factor is 0
 iters_per_frame = 3 # If tracking, the number of iterations before updating to the next image
@@ -197,16 +197,23 @@ def likelihood_iou_approximate(particle):
 
 def diffuser(particle):
 	xy, theta, deform = unpack_particle(particle)
-	xy = xy + np.random.multivariate_normal(np.zeros(2), xy_var * np.eye(2))
-	theta = (theta + np.random.normal(0, theta_var)) % (2 * np.pi)
-
-	while True:
-		delta = np.random.multivariate_normal(np.zeros(target_dim), deformation_var * np.eye(target_dim))
-		if cc.check_domain(deform + delta):
-			deform = deform + delta
-			break
+	xy = noise_xy(xy)
+	theta = noise_theta(theta)
+	deform = noise_deformation(deform)
 
 	return pack_particle(xy, theta, deform)
+
+def noise_xy(xy):
+	return xy + np.random.multivariate_normal(np.zeros(2), xy_var * np.eye(2))
+
+def noise_theta(theta):
+	return theta + np.random.normal(0, theta_var) % (2 * np.pi)
+
+def noise_deformation(deformation):
+	while True:
+		delta = np.random.multivariate_normal(np.zeros(target_dim), deformation_var * np.eye(target_dim))
+		if cc.check_domain(deformation + delta):
+			return deformation + delta
 
 # pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, trivial_likelihood, diffuser, -1, "threading")
 # pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_one_zero, diffuser, -1, "threading")
