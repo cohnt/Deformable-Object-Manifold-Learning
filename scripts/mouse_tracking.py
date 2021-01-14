@@ -45,6 +45,8 @@ keep_best = True            # Keep the best guess unchanged
 approximate_iou_frac = 0.05 # The fraction of points in the point cloud to use for computing iou likelihood
 add_noise_individually = False # Only add noise to xy, theta, or deformation.
 use_median_angle = False # Use median instead of mean for the angle (i.e. L1 minimizer instead of L2)
+mean_change_convergence_thresh = 1.0 # Threshold for stopping the particle filter in terms of the change in the mean estimate
+mean_change_convergence_num_iters = 3 # Number of iterations below the convergence threshold to halt
 
 ###########
 # Dataset #
@@ -270,6 +272,8 @@ iter_num = 0
 test_ind = test_start_ind
 mle_errs = []
 mean_errs = []
+mean_pose = np.zeros((5,2))
+convergence_count = 0
 try:
 	while True:
 		if iter_num == 0:
@@ -291,12 +295,13 @@ try:
 		manifold_deformations = [cc.single_inverse_mapping(p[2]) for p in unpacked_particles]
 		manifold_poses = [compute_pose(unpacked_particles[i][0], unpacked_particles[i][1], manifold_deformations[i]) for i in range(n_particles)]
 
+		last_mean_pose = mean_pose
 		mean_xy, mean_theta, mean_deformation = unpack_particle(mean)
 		if cc.check_domain(mean_deformation):
 			mean_manifold_deformation = cc.single_inverse_mapping(mean_deformation)
 			mean_pose = compute_pose(mean_xy, mean_theta, mean_manifold_deformation)
 		else:
-			mean_pose = np.array([[0, 0]])
+			mean_pose = np.zeros((5,2))
 
 		mle_error = np.sum(np.linalg.norm(manifold_poses[pf.max_weight_ind] - mouse_dataset.test_poses[test_ind][:,:2], axis=1))
 		mean_error = np.sum(np.linalg.norm(mean_pose - mouse_dataset.test_poses[test_ind][:,:2], axis=1))
@@ -339,6 +344,15 @@ try:
 			else:
 				plt.savefig(output_dir + ("iter%04d.svg" % test_ind))
 				plt.savefig(output_dir + ("iter%04d.png" % test_ind))
+
+		# Check for convergence
+		mean_change = np.sum(np.linalg.norm(mean_pose - last_mean_pose, axis=1))
+		if mean_change < mean_change_convergence_thresh:
+			convergence_count = convergence_count + 1
+		else:
+			convergence_count = 0
+		if convergence_count >= mean_change_convergence_num_iters:
+			break
 
 		pf.resample()
 		pf.diffuse()
