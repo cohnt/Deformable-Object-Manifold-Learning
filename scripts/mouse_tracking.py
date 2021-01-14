@@ -16,9 +16,9 @@ import data.mouse_dataset.mouse_dataset as mouse_dataset
 #########################
 
 # General parameters
-track = True        # If true, track normally. If false, don't increase the frame number with each iteration.
+track = False        # If true, track normally. If false, don't increase the frame number with each iteration.
                      # False allows us to test only localizing in a single frame.
-zoom_on_mouse = False # If True, the plots are focused on the mouse.
+zoom_on_mouse = True # If True, the plots are focused on the mouse.
 focused_initial_samples = True # If True, uniform random guesses are centered around the mouse point cloud
                                # Only works when track is False or exploration_factor is 0
 iters_per_frame = 1 # If tracking, the number of iterations before updating to the next image
@@ -38,12 +38,12 @@ neighbors_k = 12 # The number of neighbors used for ISOMAP.
 # Particle filter
 n_particles = 100           # Number of particles
 exploration_factor = 0   # Fraction of particles used to explore
-xy_var = 0.5                # Variance of diffusion noise added to particles' position component
+xy_var = 1.0                # Variance of diffusion noise added to particles' position component
 theta_var = np.pi/32        # Variance of diffusion noise added to particles' orientation component
 deformation_var = 10       # Variance of diffusion noise added to particles' deformation component
 keep_best = True            # Keep the best guess unchanged
 approximate_iou_frac = 0.05 # The fraction of points in the point cloud to use for computing iou likelihood
-add_noise_individually = True # Only add noise to xy, theta, or deformation.
+add_noise_individually = False # Only add noise to xy, theta, or deformation.
 
 ###########
 # Dataset #
@@ -279,6 +279,8 @@ try:
 		pf.weight()
 		mle = pf.predict_mle()
 		mean = pf.predict_mean()
+		mean_angle = utility.mean_angle(pf.particles[:,2])
+		mean[2] = mean_angle
 
 		unpacked_particles = [unpack_particle(p) for p in pf.particles]
 		manifold_deformations = [cc.single_inverse_mapping(p[2]) for p in unpacked_particles]
