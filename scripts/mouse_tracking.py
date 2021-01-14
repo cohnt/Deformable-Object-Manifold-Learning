@@ -29,6 +29,7 @@ output_dir = "results/"
 n_train = 500        # Number of training samples to use
 random_train = True # Optionally randomly select the training images from the whole dataset
 test_start_ind = 0   # Can start the test sequence at a different index if desired
+random_test = True # If not tracking, select a random test index
 camera_size = 2 * np.array([mouse_dataset.cx, mouse_dataset.cy])
 
 # Manifold learning
@@ -38,9 +39,9 @@ neighbors_k = 12 # The number of neighbors used for ISOMAP.
 # Particle filter
 n_particles = 100           # Number of particles
 exploration_factor = 0   # Fraction of particles used to explore
-xy_var = 1.0                # Variance of diffusion noise added to particles' position component
+xy_var = 0.5                # Variance of diffusion noise added to particles' position component
 theta_var = np.pi/32        # Variance of diffusion noise added to particles' orientation component
-deformation_var = 10       # Variance of diffusion noise added to particles' deformation component
+deformation_var = 5       # Variance of diffusion noise added to particles' deformation component
 keep_best = True            # Keep the best guess unchanged
 approximate_iou_frac = 0.05 # The fraction of points in the point cloud to use for computing iou likelihood
 add_noise_individually = False # Only add noise to xy, theta, or deformation.
@@ -68,6 +69,10 @@ normalized_train_clouds = [np.matmul(train_clouds[i] - translations[i], rotation
 
 test_clouds = [cloud[:,[1,0]] for cloud in mouse_dataset.test_clouds]
 
+if random_test and not track:
+	test_start_ind = np.random.randint(mouse_dataset.n_test)
+	print "Test index %d" % test_start_ind
+
 ####################
 # Coordinate Chart #
 ####################
@@ -94,8 +99,8 @@ def compute_pose(xy,theta,transformed_point):
 
 def rand_sampler(n):
 	if focused_initial_samples:
-		y_min, x_min = np.min(mouse_dataset.test_clouds[0], axis=0) - 5
-		y_max, x_max = np.max(mouse_dataset.test_clouds[0], axis=0) + 5
+		y_min, x_min = np.min(mouse_dataset.test_clouds[test_start_ind], axis=0) - 5
+		y_max, x_max = np.max(mouse_dataset.test_clouds[test_start_ind], axis=0) + 5
 	else:
 		x_min = y_min = 0
 		x_max = camera_size[0]
