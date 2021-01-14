@@ -17,3 +17,9 @@ def random_small_rotation(dimension, variance=None):
 
 def rad2deg(r):
 	return r * 180 / np.pi
+
+def mean_angle(angles):
+	# See: https://rosettacode.org/wiki/Averages/Mean_angle
+	c = np.cos(angles)
+	s = np.sin(angles)
+	return np.arctan2(np.sum(s)/len(angles), np.sum(c)/len(angles))
