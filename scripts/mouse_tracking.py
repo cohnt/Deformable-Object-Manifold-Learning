@@ -21,7 +21,7 @@ track = True        # If true, track normally. If false, don't increase the fram
 zoom_on_mouse = False # If True, the plots are focused on the mouse.
 focused_initial_samples = True # If True, uniform random guesses are centered around the mouse point cloud
                                # Only works when track is False or exploration_factor is 0
-iters_per_frame = 3 # If tracking, the number of iterations before updating to the next image
+iters_per_frame = 1 # If tracking, the number of iterations before updating to the next image
 draw_intermediate_frames = False # If True, draw all iterations, otherwise, only draw the final iteration for each frame
 output_dir = "results/"
 
@@ -43,6 +43,7 @@ theta_var = np.pi/32        # Variance of diffusion noise added to particles' or
 deformation_var = 10       # Variance of diffusion noise added to particles' deformation component
 keep_best = True            # Keep the best guess unchanged
 approximate_iou_frac = 0.05 # The fraction of points in the point cloud to use for computing iou likelihood
+add_noise_individually = True # Only add noise to xy, theta, or deformation.
 
 ###########
 # Dataset #
@@ -197,9 +198,18 @@ def likelihood_iou_approximate(particle):
 
 def diffuser(particle):
 	xy, theta, deform = unpack_particle(particle)
-	xy = noise_xy(xy)
-	theta = noise_theta(theta)
-	deform = noise_deformation(deform)
+	if add_noise_individually:
+		choice = np.random.randint(3)
+		if choice == 0:
+			xy = noise_xy(xy)
+		elif choice == 1:
+			theta = noise_theta(theta)
+		elif choice == 2:
+			deform = noise_deformation(deform)
+	else:
+		xy = noise_xy(xy)
+		theta = noise_theta(theta)
+		deform = noise_deformation(deform)
 
 	return pack_particle(xy, theta, deform)
 
