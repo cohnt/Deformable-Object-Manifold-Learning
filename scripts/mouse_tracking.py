@@ -21,7 +21,7 @@ track = False        # If true, track normally. If false, don't increase the fra
 zoom_on_mouse = True # If True, the plots are focused on the mouse.
 focused_initial_samples = True # If True, uniform random guesses are centered around the mouse point cloud
                                # Only works when track is False or exploration_factor is 0
-iters_per_frame = 3 # If tracking, the number of iterations before updating to the next image
+iters_per_frame = 1 # If tracking, the number of iterations before updating to the next image
 draw_intermediate_frames = False # If True, draw all iterations, otherwise, only draw the final iteration for each frame
 output_dir = "results/"
 
@@ -29,6 +29,7 @@ output_dir = "results/"
 n_train = 500        # Number of training samples to use
 random_train = True # Optionally randomly select the training images from the whole dataset
 test_start_ind = 0   # Can start the test sequence at a different index if desired
+random_test = True # If not tracking, select a random test index
 camera_size = 2 * np.array([mouse_dataset.cx, mouse_dataset.cy])
 
 # Manifold learning
@@ -40,9 +41,13 @@ n_particles = 100           # Number of particles
 exploration_factor = 0   # Fraction of particles used to explore
 xy_var = 0.5                # Variance of diffusion noise added to particles' position component
 theta_var = np.pi/32        # Variance of diffusion noise added to particles' orientation component
-deformation_var = 10       # Variance of diffusion noise added to particles' deformation component
+deformation_var = 5       # Variance of diffusion noise added to particles' deformation component
 keep_best = True            # Keep the best guess unchanged
 approximate_iou_frac = 0.05 # The fraction of points in the point cloud to use for computing iou likelihood
+add_noise_individually = False # Only add noise to xy, theta, or deformation.
+use_median_angle = False # Use median instead of mean for the angle (i.e. L1 minimizer instead of L2)
+mean_change_convergence_thresh = 1.0 # Threshold for stopping the particle filter in terms of the change in the mean estimate
+mean_change_convergence_num_iters = 3 # Number of iterations below the convergence threshold to halt
 
 ###########
 # Dataset #
@@ -63,6 +68,10 @@ train_clouds = [mouse_dataset.train_clouds[i][:,[1,0]] for i in train_inds]
 normalized_train_clouds = [np.matmul(train_clouds[i] - translations[i], rotations[i]) for i in range(n_train)]
 
 test_clouds = [cloud[:,[1,0]] for cloud in mouse_dataset.test_clouds]
+
+if random_test and not track:
+	test_start_ind = np.random.randint(mouse_dataset.n_test)
+	print "Test index %d" % test_start_ind
 
 ####################
 # Coordinate Chart #
@@ -90,8 +99,8 @@ def compute_pose(xy,theta,transformed_point):
 
 def rand_sampler(n):
 	if focused_initial_samples:
-		y_min, x_min = np.min(mouse_dataset.test_clouds[0], axis=0) - 5
-		y_max, x_max = np.max(mouse_dataset.test_clouds[0], axis=0) + 5
+		y_min, x_min = np.min(mouse_dataset.test_clouds[test_start_ind], axis=0) - 5
+		y_max, x_max = np.max(mouse_dataset.test_clouds[test_start_ind], axis=0) + 5
 	else:
 		x_min = y_min = 0
 		x_max = camera_size[0]
@@ -197,22 +206,38 @@ def likelihood_iou_approximate(particle):
 
 def diffuser(particle):
 	xy, theta, deform = unpack_particle(particle)
-	xy = xy + np.random.multivariate_normal(np.zeros(2), xy_var * np.eye(2))
-	theta = (theta + np.random.normal(0, theta_var)) % (2 * np.pi)
-
-	while True:
-		delta = np.random.multivariate_normal(np.zeros(target_dim), deformation_var * np.eye(target_dim))
-		if cc.check_domain([deform + delta])[0]:
-			deform = deform + delta
-			break
+	if add_noise_individually:
+		choice = np.random.randint(3)
+		if choice == 0:
+			xy = noise_xy(xy)
+		elif choice == 1:
+			theta = noise_theta(theta)
+		elif choice == 2:
+			deform = noise_deformation(deform)
+	else:
+		xy = noise_xy(xy)
+		theta = noise_theta(theta)
+		deform = noise_deformation(deform)
 
 	return pack_particle(xy, theta, deform)
 
-# pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, trivial_likelihood, diffuser)
-# pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_one_zero, diffuser)
-# pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_old, diffuser)
-pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou, diffuser)
-# pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou_approximate, diffuser)
+def noise_xy(xy):
+	return xy + np.random.multivariate_normal(np.zeros(2), xy_var * np.eye(2))
+
+def noise_theta(theta):
+	return theta + np.random.normal(0, theta_var) % (2 * np.pi)
+
+def noise_deformation(deformation):
+	while True:
+		delta = np.random.multivariate_normal(np.zeros(target_dim), deformation_var * np.eye(target_dim))
+		if cc.check_domain(deformation + delta):
+			return deformation + delta
+
+# pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, trivial_likelihood, diffuser, -1, "threading")
+# pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_one_zero, diffuser, -1, "threading")
+# pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_old, diffuser, -1, "threading")
+pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou, diffuser, -1, "threading")
+# pf = particle_filter.ParticleFilter(target_dim, n_particles, exploration_factor, keep_best, rand_sampler, likelihood_iou_approximate, diffuser, -1, "threading")
 
 ###########################
 # Visualization Functions #
@@ -252,6 +277,8 @@ iter_num = 0
 test_ind = test_start_ind
 mle_errs = []
 mean_errs = []
+mean_pose = np.zeros((5,2))
+convergence_count = 0
 try:
 	while True:
 		if iter_num == 0:
@@ -262,17 +289,24 @@ try:
 		pf.weight()
 		mle = pf.predict_mle()
 		mean = pf.predict_mean()
+		if use_median_angle:
+			median_angle = utility.weighted_median(pf.particles[:,2], pf.weights)
+			mean[2] = median_angle
+		else:
+			mean_angle = utility.mean_angle(pf.particles[:,2])
+			mean[2] = mean_angle
 
 		unpacked_particles = [unpack_particle(p) for p in pf.particles]
 		manifold_deformations = [cc.single_inverse_mapping(p[2]) for p in unpacked_particles]
 		manifold_poses = [compute_pose(unpacked_particles[i][0], unpacked_particles[i][1], manifold_deformations[i]) for i in range(n_particles)]
 
+		last_mean_pose = mean_pose
 		mean_xy, mean_theta, mean_deformation = unpack_particle(mean)
-		if cc.check_domain([mean_deformation])[0]:
+		if cc.check_domain(mean_deformation):
 			mean_manifold_deformation = cc.single_inverse_mapping(mean_deformation)
 			mean_pose = compute_pose(mean_xy, mean_theta, mean_manifold_deformation)
 		else:
-			mean_pose = np.array([[0, 0]])
+			mean_pose = np.zeros((5,2))
 
 		mle_error = np.sum(np.linalg.norm(manifold_poses[pf.max_weight_ind] - mouse_dataset.test_poses[test_ind][:,:2], axis=1))
 		mean_error = np.sum(np.linalg.norm(mean_pose - mouse_dataset.test_poses[test_ind][:,:2], axis=1))
@@ -315,6 +349,15 @@ try:
 			else:
 				plt.savefig(output_dir + ("iter%04d.svg" % test_ind))
 				plt.savefig(output_dir + ("iter%04d.png" % test_ind))
+
+		# Check for convergence
+		mean_change = np.sum(np.linalg.norm(mean_pose - last_mean_pose, axis=1))
+		if mean_change < mean_change_convergence_thresh:
+			convergence_count = convergence_count + 1
+		else:
+			convergence_count = 0
+		if convergence_count >= mean_change_convergence_num_iters:
+			break
 
 		pf.resample()
 		pf.diffuse()

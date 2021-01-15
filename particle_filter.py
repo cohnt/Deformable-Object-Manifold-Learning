@@ -33,8 +33,8 @@ class ParticleFilter():
 		# Compute weights for all particles, and normalize weights so their sum is 1.
 		# Determine the highest weight particle.
 		self.weights = np.asarray(self.parallel(delayed(self.Likelihood)(self.particles[i]) for i in tqdm(range(self.n_particles))))
-		normalizaion_factor = np.sum(self.weights)
-		self.weights = self.weights / normalizaion_factor
+		self.normalizaion_factor = np.sum(self.weights)
+		self.weights = self.weights / self.normalizaion_factor
 		self.max_weight_ind = np.argmax(self.weights)
 
 	def predict_mle(self):
