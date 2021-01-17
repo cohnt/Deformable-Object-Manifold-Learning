@@ -16,9 +16,9 @@ import data.mouse_dataset.mouse_dataset as mouse_dataset
 #########################
 
 # General parameters
-track = False        # If true, track normally. If false, don't increase the frame number with each iteration.
+track = True        # If true, track normally. If false, don't increase the frame number with each iteration.
                      # False allows us to test only localizing in a single frame.
-zoom_on_mouse = True # If True, the plots are focused on the mouse.
+zoom_on_mouse = False # If True, the plots are focused on the mouse.
 focused_initial_samples = True # If True, uniform random guesses are centered around the mouse point cloud
                                # Only works when track is False or exploration_factor is 0
 iters_per_frame = 1 # If tracking, the number of iterations before updating to the next image
@@ -351,13 +351,14 @@ try:
 				plt.savefig(output_dir + ("iter%04d.png" % test_ind))
 
 		# Check for convergence
-		mean_change = np.sum(np.linalg.norm(mean_pose - last_mean_pose, axis=1))
-		if mean_change < mean_change_convergence_thresh:
-			convergence_count = convergence_count + 1
-		else:
-			convergence_count = 0
-		if convergence_count >= mean_change_convergence_num_iters:
-			break
+		if not track:
+			mean_change = np.sum(np.linalg.norm(mean_pose - last_mean_pose, axis=1))
+			if mean_change < mean_change_convergence_thresh:
+				convergence_count = convergence_count + 1
+			else:
+				convergence_count = 0
+			if convergence_count >= mean_change_convergence_num_iters:
+				break
 
 		pf.resample()
 		pf.diffuse()
