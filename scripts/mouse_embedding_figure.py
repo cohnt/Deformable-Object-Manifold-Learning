@@ -16,6 +16,11 @@ camera_size = 2 * np.array([mouse_dataset.cx, mouse_dataset.cy])
 target_dim = 2   # The target dimension for ISOMAP.
 neighbors_k = 12 # The number of neighbors used for ISOMAP.
 
+# Visualization
+embedding_point_radius = 20
+vis_point_radius = 20
+vis_pc_radius = 20
+
 ###########
 # Dataset #
 ###########
@@ -72,8 +77,8 @@ def create_interactive_embedding_visulization(cc, point_cloud_dim):
 
 		# Display the embedding and highlighted point
 		axes[0].clear()
-		axes[0].scatter(cc.embedding[:,0], cc.embedding[:,1], c="grey", s=20**2) # Draw the embedding points
-		axes[0].scatter([cc.embedding[nearest_idx,0]], [cc.embedding[nearest_idx,1]], c="blue", s=20**2) # Draw the nearest point
+		axes[0].scatter(cc.embedding[:,0], cc.embedding[:,1], c="grey", s=embedding_point_radius**2) # Draw the embedding points
+		axes[0].scatter([cc.embedding[nearest_idx,0]], [cc.embedding[nearest_idx,1]], c="blue", s=embedding_point_radius**2) # Draw the nearest point
 		axes[0].set_xlim(xlim) # Fix axes limits
 		axes[0].set_ylim(ylim)
 
@@ -83,8 +88,8 @@ def create_interactive_embedding_visulization(cc, point_cloud_dim):
 
 		# Draw the original point cloud
 		axes[1].clear()
-		axes[1].scatter(mouse_cloud[:,0], mouse_cloud[:,1], s=20**2, c="grey")
-		axes[1].scatter(point_cloud[:,0], point_cloud[:,1], s=20**2, c="blue")
+		axes[1].scatter(mouse_cloud[:,0], mouse_cloud[:,1], s=vis_pc_radius**2, c="grey")
+		axes[1].scatter(point_cloud[:,0], point_cloud[:,1], s=vis_point_radius**2, c="blue")
 		axes[1].plot(point_cloud[:,0], point_cloud[:,1], c="blue")
 		axes[1].set_xlim(mfd_xlims)
 		axes[1].set_ylim(mfd_ylims)
