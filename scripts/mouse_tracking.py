@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+import time
 from sklearn.decomposition import PCA
 
 import coordinate_chart
@@ -21,7 +22,7 @@ track = True        # If true, track normally. If false, don't increase the fram
 zoom_on_mouse = False # If True, the plots are focused on the mouse.
 focused_initial_samples = True # If True, uniform random guesses are centered around the mouse point cloud
                                # Only works when track is False or exploration_factor is 0
-iters_per_frame = 1 # If tracking, the number of iterations before updating to the next image
+iters_per_frame = 3 # If tracking, the number of iterations before updating to the next image
 draw_intermediate_frames = False # If True, draw all iterations, otherwise, only draw the final iteration for each frame
 output_dir = "results/"
 
@@ -281,6 +282,7 @@ mean_pose = np.zeros((5,2))
 convergence_count = 0
 try:
 	while True:
+		t0 = time.time()
 		if iter_num == 0:
 			centroid = np.mean(test_clouds[test_ind], axis=0)
 			axis = PCA(n_components=1).fit(cloud).components_[0]
@@ -312,11 +314,12 @@ try:
 		mean_error = np.sum(np.linalg.norm(mean_pose - mouse_dataset.test_poses[test_ind][:,:2], axis=1))
 		mle_errs.append(mle_error)
 		mean_errs.append(mean_error)
-		print "Iteration %004d Image %004d MLE Error: %f Mean Error: %f" % (iter_num, test_ind, mle_error, mean_error)
 
 		if zoom_on_mouse:
 			y_min, x_min = np.min(mouse_dataset.test_clouds[test_ind], axis=0) - 5
 			y_max, x_max = np.max(mouse_dataset.test_clouds[test_ind], axis=0) + 5
+
+		t1 = time.time()
 
 		# Display
 		if (not track) or draw_intermediate_frames or (iter_num % iters_per_frame == -1 % iters_per_frame):
@@ -350,6 +353,8 @@ try:
 				plt.savefig(output_dir + ("iter%04d.svg" % test_ind))
 				plt.savefig(output_dir + ("iter%04d.png" % test_ind))
 
+		t2 = time.time()
+
 		# Check for convergence
 		if not track:
 			mean_change = np.sum(np.linalg.norm(mean_pose - last_mean_pose, axis=1))
@@ -379,6 +384,9 @@ try:
 			for i in range(pf.n_particles):
 				pf.particles[i][0:2] = pf.particles[i][0:2] + dxy
 				pf.particles[i][2] = pf.particles[i][2] + dtheta
+		t3 = time.time()
+		iter_time = (t3 - t2) + (t1 - t0)
+		print "Iteration %004d Image %004d MLE Error: %f Mean Error: %f Iter Time %f" % (iter_num, test_ind, mle_error, mean_error, iter_time)
 except KeyboardInterrupt:
 	plt.close(fig)
 
