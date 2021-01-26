@@ -54,7 +54,7 @@ mean_change_convergence_thresh = 1.0 # Threshold for stopping the particle filte
 mean_change_convergence_num_iters = 3 # Number of iterations below the convergence threshold to halt
 
 # Occlusions
-occlusion = ((205, 270),(225, 300))
+occlusion = ((205, 285),(250, 300)) # ((x1, y1), (x2, y2))
 
 ###########
 # Dataset #
