@@ -66,7 +66,11 @@ if random_train:
 else:
 	mouse_dataset.load_train(n_train)
 	train_inds = np.arange(n_train)
-mouse_dataset.load_test()
+
+if (not random_train) and (not track):
+	mouse_dataset.load_test(1)
+else:
+	mouse_dataset.load_test()
 
 train_data = np.array([mouse_dataset.train_poses[i] for i in train_inds])[:,:,:2]
 normalized_train_data, translations, rotations = normalization.normalize_pointcloud_2d(train_data)
