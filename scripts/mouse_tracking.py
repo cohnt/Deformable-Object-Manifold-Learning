@@ -94,7 +94,8 @@ if use_occlusion:
 					coord_list.append(cloud[i])
 		test_clouds[cloud_idx] = np.delete(cloud, idx_list, axis=0)
 		coord_list = np.array(coord_list)
-		mouse_dataset.test_images[cloud_idx][(coord_list[:,1], coord_list[:,0])] = mouse_dataset.d2
+		if len(coord_list) > 0:
+			mouse_dataset.test_images[cloud_idx][(coord_list[:,1], coord_list[:,0])] = mouse_dataset.d2
 
 ####################
 # Coordinate Chart #
