@@ -2,7 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 import time
+
 from sklearn.decomposition import PCA
+from tqdm import tqdm
 
 import coordinate_chart
 import particle_filter
@@ -17,20 +19,21 @@ import data.mouse_dataset.mouse_dataset as mouse_dataset
 #########################
 
 # General parameters
-track = True        # If true, track normally. If false, don't increase the frame number with each iteration.
+track = False        # If true, track normally. If false, don't increase the frame number with each iteration.
                      # False allows us to test only localizing in a single frame.
-zoom_on_mouse = False # If True, the plots are focused on the mouse.
+zoom_on_mouse = True # If True, the plots are focused on the mouse.
 focused_initial_samples = True # If True, uniform random guesses are centered around the mouse point cloud
                                # Only works when track is False or exploration_factor is 0
 iters_per_frame = 3 # If tracking, the number of iterations before updating to the next image
 draw_intermediate_frames = False # If True, draw all iterations, otherwise, only draw the final iteration for each frame
 output_dir = "results/"
+use_occlusion = True
 
 # Dataset parameters
 n_train = 500        # Number of training samples to use
 random_train = True # Optionally randomly select the training images from the whole dataset
 test_start_ind = 0   # Can start the test sequence at a different index if desired
-random_test = True # If not tracking, select a random test index
+random_test = False # If not tracking, select a random test index
 camera_size = 2 * np.array([mouse_dataset.cx, mouse_dataset.cy])
 
 # Manifold learning
@@ -49,6 +52,9 @@ add_noise_individually = False # Only add noise to xy, theta, or deformation.
 use_median_angle = False # Use median instead of mean for the angle (i.e. L1 minimizer instead of L2)
 mean_change_convergence_thresh = 1.0 # Threshold for stopping the particle filter in terms of the change in the mean estimate
 mean_change_convergence_num_iters = 3 # Number of iterations below the convergence threshold to halt
+
+# Occlusions
+occlusion = ((205, 270),(225, 300))
 
 ###########
 # Dataset #
@@ -73,6 +79,18 @@ test_clouds = [cloud[:,[1,0]] for cloud in mouse_dataset.test_clouds]
 if random_test and not track:
 	test_start_ind = np.random.randint(mouse_dataset.n_test)
 	print "Test index %d" % test_start_ind
+
+# Add occlusions to test dataset
+if use_occlusion:
+	print "Adding occlusion to test clouds"
+	for cloud_idx in tqdm(range(len(test_clouds))):
+		cloud = test_clouds[cloud_idx]
+		idx_list = []
+		for i in range(len(cloud)):
+			if cloud[i][0] >= occlusion[0][0] and cloud[i][0] <= occlusion[1][0]:
+				if cloud[i][1] >= occlusion[0][1] and cloud[i][1] <= occlusion[1][1]:
+					idx_list.append(i)
+		test_clouds[cloud_idx] = np.delete(cloud, idx_list, axis=0)
 
 ####################
 # Coordinate Chart #
@@ -332,6 +350,10 @@ try:
 
 			ax1.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
 			ax2.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
+
+			# Draw the test point cloud, for analyzing occlusion setup
+			ax1.scatter(test_clouds[test_ind][:,0], test_clouds[test_ind][:,1], c="black", s=3**2)
+			ax2.scatter(test_clouds[test_ind][:,0], test_clouds[test_ind][:,1], c="black", s=3**2)
 
 			for i in range(n_particles):
 				draw_pose(ax1, manifold_poses[i], plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]))
