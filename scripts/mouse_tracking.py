@@ -19,9 +19,9 @@ import data.mouse_dataset.mouse_dataset as mouse_dataset
 #########################
 
 # General parameters
-track = False        # If true, track normally. If false, don't increase the frame number with each iteration.
+track = True        # If true, track normally. If false, don't increase the frame number with each iteration.
                      # False allows us to test only localizing in a single frame.
-zoom_on_mouse = True # If True, the plots are focused on the mouse.
+zoom_on_mouse = False # If True, the plots are focused on the mouse.
 focused_initial_samples = True # If True, uniform random guesses are centered around the mouse point cloud
                                # Only works when track is False or exploration_factor is 0
 iters_per_frame = 3 # If tracking, the number of iterations before updating to the next image
@@ -54,7 +54,7 @@ mean_change_convergence_thresh = 1.0 # Threshold for stopping the particle filte
 mean_change_convergence_num_iters = 3 # Number of iterations below the convergence threshold to halt
 
 # Occlusions
-occlusion = ((210, 285),(235, 310)) # ((x1, y1), (x2, y2))
+occlusion = ((300, 200),(325, 400)) # ((x1, y1), (x2, y2))
 
 ###########
 # Dataset #
@@ -362,8 +362,9 @@ try:
 
 			# Draw the test point cloud, for analyzing occlusion setup
 			if use_occlusion:
-				ax1.scatter(test_clouds[test_ind][:,0], test_clouds[test_ind][:,1], c="black", s=3**2)
-				ax2.scatter(test_clouds[test_ind][:,0], test_clouds[test_ind][:,1], c="black", s=3**2)
+				if zoom_on_mouse:
+					ax1.scatter(test_clouds[test_ind][:,0], test_clouds[test_ind][:,1], c="black", s=3**2)
+					ax2.scatter(test_clouds[test_ind][:,0], test_clouds[test_ind][:,1], c="black", s=3**2)
 				xy = np.array(occlusion[0]) - 0.5
 				w = occlusion[1][0] - occlusion[0][0] + 1
 				h = occlusion[1][1] - occlusion[0][1] + 1
