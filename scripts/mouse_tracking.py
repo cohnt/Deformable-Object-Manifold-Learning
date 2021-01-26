@@ -54,7 +54,7 @@ mean_change_convergence_thresh = 1.0 # Threshold for stopping the particle filte
 mean_change_convergence_num_iters = 3 # Number of iterations below the convergence threshold to halt
 
 # Occlusions
-occlusion = ((205, 285),(250, 310)) # ((x1, y1), (x2, y2))
+occlusion = ((210, 285),(235, 310)) # ((x1, y1), (x2, y2))
 
 ###########
 # Dataset #
@@ -361,8 +361,16 @@ try:
 			ax2.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
 
 			# Draw the test point cloud, for analyzing occlusion setup
-			ax1.scatter(test_clouds[test_ind][:,0], test_clouds[test_ind][:,1], c="black", s=3**2)
-			ax2.scatter(test_clouds[test_ind][:,0], test_clouds[test_ind][:,1], c="black", s=3**2)
+			if use_occlusion:
+				ax1.scatter(test_clouds[test_ind][:,0], test_clouds[test_ind][:,1], c="black", s=3**2)
+				ax2.scatter(test_clouds[test_ind][:,0], test_clouds[test_ind][:,1], c="black", s=3**2)
+				xy = np.array(occlusion[0]) - 0.5
+				w = occlusion[1][0] - occlusion[0][0] + 1
+				h = occlusion[1][1] - occlusion[0][1] + 1
+				poly1 = matplotlib.patches.Rectangle(xy, w, h, hatch="/", color="brown", fill=False)
+				poly2 = matplotlib.patches.Rectangle(xy, w, h, hatch="/", color="brown", fill=False)
+				ax1.add_patch(poly1)
+				ax2.add_patch(poly2)
 
 			for i in range(n_particles):
 				draw_pose(ax1, manifold_poses[i], plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]))
