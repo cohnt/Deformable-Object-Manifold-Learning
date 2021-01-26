@@ -1,7 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+import time
+
 from sklearn.decomposition import PCA
+from tqdm import tqdm
 
 import coordinate_chart
 import particle_filter
@@ -16,20 +19,21 @@ import data.mouse_dataset.mouse_dataset as mouse_dataset
 #########################
 
 # General parameters
-track = False        # If true, track normally. If false, don't increase the frame number with each iteration.
+track = True        # If true, track normally. If false, don't increase the frame number with each iteration.
                      # False allows us to test only localizing in a single frame.
-zoom_on_mouse = True # If True, the plots are focused on the mouse.
+zoom_on_mouse = False # If True, the plots are focused on the mouse.
 focused_initial_samples = True # If True, uniform random guesses are centered around the mouse point cloud
                                # Only works when track is False or exploration_factor is 0
 iters_per_frame = 1 # If tracking, the number of iterations before updating to the next image
 draw_intermediate_frames = False # If True, draw all iterations, otherwise, only draw the final iteration for each frame
 output_dir = "results/"
+use_occlusion = True
 
 # Dataset parameters
 n_train = 500        # Number of training samples to use
 random_train = True # Optionally randomly select the training images from the whole dataset
 test_start_ind = 0   # Can start the test sequence at a different index if desired
-random_test = True # If not tracking, select a random test index
+random_test = False # If not tracking, select a random test index
 camera_size = 2 * np.array([mouse_dataset.cx, mouse_dataset.cy])
 
 # Manifold learning
@@ -49,6 +53,9 @@ use_median_angle = False # Use median instead of mean for the angle (i.e. L1 min
 mean_change_convergence_thresh = 1.0 # Threshold for stopping the particle filter in terms of the change in the mean estimate
 mean_change_convergence_num_iters = 3 # Number of iterations below the convergence threshold to halt
 
+# Occlusions
+occlusion = ((300, 200),(325, 400)) # ((x1, y1), (x2, y2))
+
 ###########
 # Dataset #
 ###########
@@ -59,7 +66,11 @@ if random_train:
 else:
 	mouse_dataset.load_train(n_train)
 	train_inds = np.arange(n_train)
-mouse_dataset.load_test()
+
+if (not random_train) and (not track):
+	mouse_dataset.load_test(1)
+else:
+	mouse_dataset.load_test()
 
 train_data = np.array([mouse_dataset.train_poses[i] for i in train_inds])[:,:,:2]
 normalized_train_data, translations, rotations = normalization.normalize_pointcloud_2d(train_data)
@@ -72,6 +83,23 @@ test_clouds = [cloud[:,[1,0]] for cloud in mouse_dataset.test_clouds]
 if random_test and not track:
 	test_start_ind = np.random.randint(mouse_dataset.n_test)
 	print "Test index %d" % test_start_ind
+
+# Add occlusions to test dataset
+if use_occlusion:
+	print "Adding occlusion to test clouds"
+	for cloud_idx in tqdm(range(len(test_clouds))):
+		cloud = test_clouds[cloud_idx]
+		idx_list = []
+		coord_list = []
+		for i in range(len(cloud)):
+			if cloud[i][0] >= occlusion[0][0] and cloud[i][0] <= occlusion[1][0]:
+				if cloud[i][1] >= occlusion[0][1] and cloud[i][1] <= occlusion[1][1]:
+					idx_list.append(i)
+					coord_list.append(cloud[i])
+		test_clouds[cloud_idx] = np.delete(cloud, idx_list, axis=0)
+		coord_list = np.array(coord_list)
+		if len(coord_list) > 0:
+			mouse_dataset.test_images[cloud_idx][(coord_list[:,1], coord_list[:,0])] = mouse_dataset.d2
 
 ####################
 # Coordinate Chart #
@@ -281,6 +309,7 @@ mean_pose = np.zeros((5,2))
 convergence_count = 0
 try:
 	while True:
+		t0 = time.time()
 		if iter_num == 0:
 			centroid = np.mean(test_clouds[test_ind], axis=0)
 			axis = PCA(n_components=1).fit(cloud).components_[0]
@@ -312,11 +341,12 @@ try:
 		mean_error = np.sum(np.linalg.norm(mean_pose - mouse_dataset.test_poses[test_ind][:,:2], axis=1))
 		mle_errs.append(mle_error)
 		mean_errs.append(mean_error)
-		print "Iteration %004d Image %004d MLE Error: %f Mean Error: %f" % (iter_num, test_ind, mle_error, mean_error)
 
 		if zoom_on_mouse:
 			y_min, x_min = np.min(mouse_dataset.test_clouds[test_ind], axis=0) - 5
 			y_max, x_max = np.max(mouse_dataset.test_clouds[test_ind], axis=0) + 5
+
+		t1 = time.time()
 
 		# Display
 		if (not track) or draw_intermediate_frames or (iter_num % iters_per_frame == -1 % iters_per_frame):
@@ -329,6 +359,19 @@ try:
 
 			ax1.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
 			ax2.imshow(mouse_dataset.test_images[test_ind], cmap=plt.get_cmap('gray'), vmin=mouse_dataset.d1, vmax=mouse_dataset.d2)
+
+			# Draw the test point cloud, for analyzing occlusion setup
+			if use_occlusion:
+				if zoom_on_mouse:
+					ax1.scatter(test_clouds[test_ind][:,0], test_clouds[test_ind][:,1], c="black", s=3**2)
+					ax2.scatter(test_clouds[test_ind][:,0], test_clouds[test_ind][:,1], c="black", s=3**2)
+				xy = np.array(occlusion[0]) - 0.5
+				w = occlusion[1][0] - occlusion[0][0] + 1
+				h = occlusion[1][1] - occlusion[0][1] + 1
+				poly1 = matplotlib.patches.Rectangle(xy, w, h, hatch="/", color="brown", fill=False)
+				poly2 = matplotlib.patches.Rectangle(xy, w, h, hatch="/", color="brown", fill=False)
+				ax1.add_patch(poly1)
+				ax2.add_patch(poly2)
 
 			for i in range(n_particles):
 				draw_pose(ax1, manifold_poses[i], plt.cm.cool(pf.weights[i] / pf.weights[pf.max_weight_ind]))
@@ -350,14 +393,17 @@ try:
 				plt.savefig(output_dir + ("iter%04d.svg" % test_ind))
 				plt.savefig(output_dir + ("iter%04d.png" % test_ind))
 
+		t2 = time.time()
+
 		# Check for convergence
-		mean_change = np.sum(np.linalg.norm(mean_pose - last_mean_pose, axis=1))
-		if mean_change < mean_change_convergence_thresh:
-			convergence_count = convergence_count + 1
-		else:
-			convergence_count = 0
-		if convergence_count >= mean_change_convergence_num_iters:
-			break
+		if not track:
+			mean_change = np.sum(np.linalg.norm(mean_pose - last_mean_pose, axis=1))
+			if mean_change < mean_change_convergence_thresh:
+				convergence_count = convergence_count + 1
+			else:
+				convergence_count = 0
+			if convergence_count >= mean_change_convergence_num_iters:
+				break
 
 		pf.resample()
 		pf.diffuse()
@@ -378,6 +424,9 @@ try:
 			for i in range(pf.n_particles):
 				pf.particles[i][0:2] = pf.particles[i][0:2] + dxy
 				pf.particles[i][2] = pf.particles[i][2] + dtheta
+		t3 = time.time()
+		iter_time = (t3 - t2) + (t1 - t0)
+		print "Iteration %004d Image %004d MLE Error: %f Mean Error: %f Iter Time %f" % (iter_num, test_ind, mle_error, mean_error, iter_time)
 except KeyboardInterrupt:
 	plt.close(fig)
 
