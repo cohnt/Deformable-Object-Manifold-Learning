@@ -416,7 +416,7 @@ try:
 			# Dynamics update
 			last_centroid = centroid
 			last_angle = angle
-			if len(test_clouds[test_ind] == 0):
+			if len(test_clouds[test_ind]) == 0:
 				centroid = last_centroid
 				angle = last_angle
 			else:
