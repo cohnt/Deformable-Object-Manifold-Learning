@@ -54,7 +54,7 @@ mean_change_convergence_thresh = 1.0 # Threshold for stopping the particle filte
 mean_change_convergence_num_iters = 3 # Number of iterations below the convergence threshold to halt
 
 # Occlusions
-occlusion = ((300, 200),(325, 400)) # ((x1, y1), (x2, y2))
+occlusion = ((300, 200),(375, 400)) # ((x1, y1), (x2, y2))
 
 ###########
 # Dataset #
@@ -416,14 +416,18 @@ try:
 			# Dynamics update
 			last_centroid = centroid
 			last_angle = angle
-			centroid = np.mean(test_clouds[test_ind], axis=0)
-			axis = PCA(n_components=1).fit(cloud).components_[0]
-			angle = np.arctan2(axis[1], axis[0])
-			dxy = centroid - last_centroid
-			dtheta = angle - last_angle
-			for i in range(pf.n_particles):
-				pf.particles[i][0:2] = pf.particles[i][0:2] + dxy
-				pf.particles[i][2] = pf.particles[i][2] + dtheta
+			if len(test_clouds[test_ind]) == 0:
+				centroid = last_centroid
+				angle = last_angle
+			else:
+				centroid = np.mean(test_clouds[test_ind], axis=0)
+				axis = PCA(n_components=1).fit(cloud).components_[0]
+				angle = np.arctan2(axis[1], axis[0])
+				dxy = centroid - last_centroid
+				dtheta = angle - last_angle
+				for i in range(pf.n_particles):
+					pf.particles[i][0:2] = pf.particles[i][0:2] + dxy
+					pf.particles[i][2] = pf.particles[i][2] + dtheta
 		t3 = time.time()
 		iter_time = (t3 - t2) + (t1 - t0)
 		print "Iteration %004d Image %004d MLE Error: %f Mean Error: %f Iter Time %f" % (iter_num, test_ind, mle_error, mean_error, iter_time)
