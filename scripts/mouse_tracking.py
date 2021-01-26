@@ -86,11 +86,15 @@ if use_occlusion:
 	for cloud_idx in tqdm(range(len(test_clouds))):
 		cloud = test_clouds[cloud_idx]
 		idx_list = []
+		coord_list = []
 		for i in range(len(cloud)):
 			if cloud[i][0] >= occlusion[0][0] and cloud[i][0] <= occlusion[1][0]:
 				if cloud[i][1] >= occlusion[0][1] and cloud[i][1] <= occlusion[1][1]:
 					idx_list.append(i)
+					coord_list.append(cloud[i])
 		test_clouds[cloud_idx] = np.delete(cloud, idx_list, axis=0)
+		coord_list = np.array(coord_list)
+		mouse_dataset.test_images[cloud_idx][(coord_list[:,1], coord_list[:,0])] = mouse_dataset.d2
 
 ####################
 # Coordinate Chart #
