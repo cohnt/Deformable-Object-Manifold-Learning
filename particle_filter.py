@@ -34,6 +34,9 @@ class ParticleFilter():
 		# Determine the highest weight particle.
 		self.weights = np.asarray(self.parallel(delayed(self.Likelihood)(self.particles[i]) for i in tqdm(range(self.n_particles))))
 		self.normalizaion_factor = np.sum(self.weights)
+		if self.normalizaion_factor == 0:
+			self.weights = np.ones(self.n_particles)
+			self.normalizaion_factor = 1.0 / self.n_particles
 		self.weights = self.weights / self.normalizaion_factor
 		self.max_weight_ind = np.argmax(self.weights)
 
